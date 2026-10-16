@@ -285,7 +285,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.18 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.19 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main>
@@ -293,6 +293,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
 <section class="view" id="view-home">
   <h2 class="page">学习看板</h2>
   <div class="sub" id="homeDate">-</div>
+  <div class="card" id="duePlan" style="display:none;padding:10px 14px;margin:0 0 12px"></div>
   <div class="grid stats6">
     <div class="card stat"><span class="stat-ic" data-ic="book"></span><b id="stWords">0</b><span>生词总数</span></div>
     <div class="card stat"><span class="stat-ic" data-ic="check"></span><b id="stDone">0</b><span>今日已默写</span></div>
@@ -340,6 +341,23 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
     <button class="btn" id="btnVocabListen"><span data-ic="headphone"></span> 听写</button>
     <div class="grow"></div>
     <input id="vocabSearch" placeholder="搜索…" style="width:150px">
+  </div>
+  <div class="row mt8">
+    <span class="small muted">排序</span>
+    <select id="vocabSort" style="width:auto;min-width:120px">
+      <option value="new">最近添加</option>
+      <option value="wrong">错得最多</option>
+      <option value="due">待复习优先</option>
+      <option value="alpha">字母序</option>
+    </select>
+    <span class="small muted">筛选</span>
+    <select id="vocabFilter" style="width:auto;min-width:120px">
+      <option value="all">全部</option>
+      <option value="due">待复习</option>
+      <option value="wrong">有错题</option>
+      <option value="new">新词（未答过）</option>
+      <option value="mastered">已掌握</option>
+    </select>
   </div>
   <div class="card" id="vocabList"></div>
 </section>
@@ -441,7 +459,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.18 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.19 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1482,6 +1500,7 @@ function renderHome(){
   var wa = (DB.stats.wrongAdded||0);
   $('#stClear').textContent = wa ? Math.round((DB.stats.wrongCleared||0) / wa * 100) + '%' : '—';
   $('#goalInput').value = DB.settings.goal || 20;
+  renderDuePlan();
   /* 近7天正确率折线 */
   var days = [];
   for(var i=6;i>=0;i--){ var dd = new Date(); dd.setDate(dd.getDate()-i); days.push(todayStr(dd)); }
@@ -1511,9 +1530,18 @@ function renderVocab(){
   $('#vwTotal').textContent = DB.words.length;
   $('#vwDone').textContent = Object.keys(d.mk).length;
   $('#vwDue').textContent = dueWords().length;
+  /* 排序/筛选上次怎么选的，回来还是怎么选（存了不读等于没存） */
+  if($('#vocabSort'))   $('#vocabSort').value   = DB.settings.vocabSort   || 'new';
+  if($('#vocabFilter')) $('#vocabFilter').value = DB.settings.vocabFilter || 'all';
   if(!window.__vocabBound){
     window.__vocabBound = true;
     $('#vocabSearch').addEventListener('input', function(){ renderVocabList(); });
+  ['vocabSort','vocabFilter'].forEach(function(id){
+    var el = $('#'+id);
+    el.addEventListener('change', function(){
+      DB.settings[id] = el.value; save(); renderVocabList();
+    });
+  });
     $('#vocabList').addEventListener('click', function(e){
       var b = e.target.closest('[data-act]'); if(!b) return;
       var id = b.getAttribute('data-id');
@@ -1527,12 +1555,25 @@ function renderVocab(){
   }
   renderVocabList();
 }
+var VOCAB_SORTS = {
+  new:   function(a,b){ return (b.ts||0)-(a.ts||0); },
+  wrong: function(a,b){ return (b.wrong||0)-(a.wrong||0) || (b.ts||0)-(a.ts||0); },
+  due:   function(a,b){ return (a.due||0)-(b.due||0); },
+  alpha: function(a,b){ return norm(a.w).localeCompare(norm(b.w)); }
+};
 function renderVocabList(){
   var q = norm($('#vocabSearch') ? $('#vocabSearch').value : '');
-  var list = DB.words.slice().sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
+  var sel = $('#vocabSort'), flt = $('#vocabFilter');
+  var list = DB.words.slice().sort(VOCAB_SORTS[(sel && sel.value) || 'new'] || VOCAB_SORTS.new);
+  var f = (flt && flt.value) || 'all';
+  if(f === 'due')      list = list.filter(function(w){ return !w.mastered && (w.due||0) <= Date.now(); });
+  if(f === 'wrong')    list = list.filter(function(w){ return w.wrong; });
+  if(f === 'new')      list = list.filter(function(w){ return !w.right && !w.wrong && !w.mastered; });
+  if(f === 'mastered') list = list.filter(function(w){ return w.mastered; });
   if(q) list = list.filter(function(w){ return norm(w.w).indexOf(q)>=0 || (w.cn||'').indexOf(q)>=0; });
   if(!list.length){
-    $('#vocabList').innerHTML = DB.words.length ? emptyBox('search','没有匹配的单词','换个关键词试试，或者直接在上面的输入框里添加新词。','')
+    $('#vocabList').innerHTML = DB.words.length ? emptyBox('search', (f==='all'?'没有匹配的单词':'这个筛选下没有词'),
+        (f==='all'?'换个关键词试试，或者直接在上面的输入框里添加新词。':'把上面的「筛选」切回「全部」看看。'),'')
       : emptyBox('book','生词本还是空的','这里放你还没掌握的词。做题时点任意英文单词就能收录，也可以在上面直接输入。',
           '<button class="btn pri" data-route="quiz">去默写</button><button class="btn" data-route="book">浏览教材词表</button>','art-vocab');
     return;
@@ -1717,6 +1758,37 @@ function startSession(kind, qs, scope){
   card.style.display = 'block'; rep.style.display = 'none';
   renderQuestion();
 }
+/* 卡住时给一级台阶：首字母 + 字母数。给完整掩码会连短词一起泄底，也给不出"几个词"的信息。
+   用了提示的这道题不计入连对，也不推进复习间隔——否则就变成"看着提示刷连对"。 */
+function hintText(w){
+  var s = String(w||'').trim();
+  var letters = s.replace(/[^A-Za-z]/g, '').length;
+  return '首字母 ' + (s.charAt(0) || '?').toUpperCase() + ' · 共 ' + letters + ' 个字母';
+}
+/* 复习计划预览：调度（due + reSchedule）本来就在跑，但用户只看得到"今天"这一个数字。
+   这里把往后 7 天摊开，等于把已有机制亮出来，而不是新增机制。 */
+function renderDuePlan(){
+  var el = $('#duePlan'); if(!el) return;
+  var now = Date.now(), day = 86400000;
+  var pending = 0, tmr = 0, week = 0, mastered = 0;
+  DB.words.forEach(function(w){
+    if(w.mastered){ mastered++; return; }
+    var due = w.due || 0;                       /* 新词没排过期，视为今天到期 */
+    if(due <= now) pending++;
+    if(due > now && due <= now + day) tmr++;
+    if(due <= now + 7 * day) week++;
+  });
+  if(!DB.words.length){ el.style.display = 'none'; return; }
+  if(!pending && !tmr && !week && mastered === DB.words.length){
+    el.innerHTML = '<span class="small muted">'+icon('check')+' 生词本里的词都标为已掌握了，没有待复习的。</span>';
+    el.style.display = 'block'; return;
+  }
+  el.innerHTML = '<div class="row"><span class="small muted">复习计划</span><div class="grow"></div>'
+    + '<span class="small">今天 <b style="color:var(--accent)">'+pending+'</b> · 明天 '+tmr+' · 7 天内 '+week+'</span></div>'
+    + '<div class="small muted" style="margin-top:2px">按「连续答对次数」自动排期（0/1/2/4/7/15 天）；'
+    + '答错会回到最短间隔。</div>';
+  el.style.display = 'block';
+}
 /* 答题页/判定页共用的顶部：第 N / M 题 · 题型，右上角一个退出 */
 function qaTop(n, total, label){
   return '<div class="qa-top"><div class="qa-center">第 '+n+' / '+total+' 题 · '+esc(label)+'</div>'
@@ -1750,6 +1822,9 @@ function renderQuestion(){
   if(Q.kind==='write' && q.mode==='cn2en'){
     body += '<div class="qcn">'+esc(q.cn)+'</div><p class="small muted center">在输入框内输入英文，确认后判定（该题型不提供读音）：</p>'
       + '<input data-qinput="1" placeholder="输入英文单词…" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">'
+      + '<div class="center mt8"><button class="btn small" data-qact="hint"'+(q.hinted?' disabled':'')+'>'
+        +(q.hinted?'提示已用':'看首字母提示')+'</button>'
+        +' <span class="small muted" id="hintBox">'+(q.hinted?esc(hintText(q.w)):'')+'</span></div>'
       + '<div class="mt12 center"><button class="btn pri big" data-qact="confirm">确认提交</button></div>';
   }
   if(Q.kind==='listen'){
@@ -1768,6 +1843,14 @@ function renderQuestion(){
     document.addEventListener('click', function(e){
       var t = e.target.closest('[data-qact],[data-opt]'); if(!t || !Q) return;
       if(t.getAttribute('data-qact')==='quit'){ quitSession(); return; }
+      if(t.getAttribute('data-qact')==='hint'){
+        var hq = Q.qs[Q.i];
+        if(!hq || hq.answered || hq.hinted) return;
+        hq.hinted = true;
+        var hb = document.getElementById('hintBox'); if(hb) hb.textContent = hintText(hq.w);
+        t.disabled = true; t.textContent = '提示已用';
+        return;
+      }
       var q = Q.qs[Q.i]; if(!q) return;
       if(t.hasAttribute('data-opt')){
         if(q.answered) return;
@@ -1813,11 +1896,12 @@ function judgeCurrent(){
   else { d.w++; d.mk = d.mk||{}; d.mk[norm(q.w)] = 1; }
   var wb = DB.words.find(function(x){ return norm(x.w)===norm(q.w); });
   if(wb){
-    if(ok){ wb.right = (wb.right||0)+1; reSchedule(wb); }
+    /* 用了提示：不加连对、不推进间隔（reSchedule 按 right 取档，不涨就等于原地复现），但也不倒扣 */
+    if(ok){ if(!q.hinted) wb.right = (wb.right||0)+1; reSchedule(wb); }
     else { wb.wrong = (wb.wrong||0)+1; wb.right = 0; }
   }
   if(!ok){ addWrong({w:q.w, ph:q.ph, cn:q.cn}, Q.kind==='listen' ? '听写' : (q.mode==='en2cn' ? '英选中' : '中默英')); }
-  else { wrongOnCorrect({w:q.w}); }
+  else if(!q.hinted){ wrongOnCorrect({w:q.w}); }
   save();
   renderFeedback();
 }
@@ -1831,6 +1915,7 @@ function renderFeedback(){
     html += '<p class="center small muted">已记入错题本</p>';
   }
   html += '<div class="qword" style="font-size:30px">'+esc(q.w)+'</div><div class="qph">'+esc(q.ph||'')+'</div><p class="center">'+esc(q.cn||'')+'</p>';
+  if(q.ok && q.hinted){ html += '<p class="center small muted">用了首字母提示，本次不计入连对</p>'; }
   if(!q.ok && Q.kind!=='listen' && q.mode==='cn2en' && q.input){ html += '<p class="center small muted">你的答案：'+esc(q.input)+'</p>'; }
   if(!q.ok && Q.kind==='listen' && q.input){ html += '<p class="center small muted">你听到的是：'+esc(q.input)+'</p>'; }
   html += '<div class="center mt8"><button class="btn" data-qact="play">'+icon('volume')+' 再听一遍</button></div>';
@@ -2327,7 +2412,7 @@ function buildIeltsReportHTML(rep, offline, errmsg){
     h += '</div>';
     h += '<div class="report-item"><b>发音：未评测</b><div class="small muted">要评发音得分析录音（音素、重音、语调）。本应用只把录音留给你自己回放，没做发音评测，所以不给分——比给一个猜出来的分数更诚实。想练发音可以对照考官朗读（'+icon('volume')+'）跟读。</div></div>';
     h += '<p class="small muted">说明：上面三项是 AI 基于<strong>文字</strong>的估分（看不到你的语气与停顿），仅供参考。</p>';
-    if(rep.errors && rep.errors.length){
+    if(Array.isArray(rep.errors) && rep.errors.length){
       h += '<b class="mt12" style="display:block">逐句纠错</b>';
       rep.errors.forEach(function(er){
         h += '<div class="report-item">'+(er.orig?('<s class="muted">'+renderPassage(er.orig)+'</s> → '):'')+'<b class="ok-t">'+renderPassage(er.fix||'')+'</b>'
@@ -2773,6 +2858,8 @@ function pracCheck(type, r){
     if(typeof r.passage !== 'string' || !r.passage) return '缺短文';
     if(!isArr(r.opts, 3)) return '选项不足 3 个';
     if(!r.ans || typeof r.ans !== 'object') return '缺答案';
+    /* 答案必须是 A/B/C 字母：模型给数字或空对象时判分会永远错，学生以为自己做错了 */
+    for(var j=1;j<=3;j++){ if('ABC'.indexOf(String(r.ans[String(j)]||'').slice(-1)) < 0) return '第 '+j+' 空答案不是 A/B/C'; }
   } else if(type === 'grammar'){
     if(typeof r.passage !== 'string' || !r.passage) return '缺短文';
     if(!isArr(r.blanks, 1)) return '缺空格';
@@ -2780,6 +2867,7 @@ function pracCheck(type, r){
   } else if(type === 'cont'){
     if(typeof r.story !== 'string' || !r.story) return '缺故事材料';
     if(!isArr(r.starts, 2)) return '段首句不足两句';
+    if(!r.starts.every(function(x){ return typeof x === 'string' && x.trim(); })) return '段首句格式不对';
   } else if(type === 'essay'){
     if(typeof r.prompt !== 'string' || !r.prompt) return '缺作文题干';
   }
