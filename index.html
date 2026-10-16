@@ -185,7 +185,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="ic">⚙️</span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.6 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.7 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main id="main">
@@ -343,7 +343,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.6 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.7 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1822,15 +1822,27 @@ function mockSteps(sc){
   sc.p3.forEach(function(q){ a.push({k:'p3', q:q, sec:60}); });
   return a;
 }
+function aiMockScript(L){
+  var recent = (DB.ielts||[]).slice(0,4).map(function(x){ return x.topic; }).filter(Boolean);
+  var sys = '你是雅思口语考官。请为 '+L.name+'（band '+L.range+'）级别的考生出一套完整口语模考题目。'
+    + '只输出 JSON：{"p1":["","","",""],"p2":{"topic":"","bullets":["","","",""]},"p3":["","","",""]}。'
+    + '要求：全部用英文；p1 是 4 个日常寒暄问题；p2 的 topic 是一句 Describe 开头的卡片题，bullets 是 4 条要点提示；'
+    + 'p3 是 4 个与 p2 话题相关的深入讨论问题；难度贴合该档位；问题之间不得重复。'
+    + (recent.length ? ('也不要重复这些已用过的话题：'+recent.join('；')+'。') : '');
+  return dualLLM([{role:'system',content:sys},{role:'user',content:'请出题。'}],
+      {json:true, note:'必须是自然、地道的英文问题，四个 p3 问题要层层递进'})
+    .then(function(r){
+      if(!r || !r.p1 || !r.p1.length || !r.p2 || !r.p3 || !r.p3.length) throw new Error('返回格式不完整');
+      return r;
+    });
+}
+var mockToken = 0;
 function startIeltsMock(){
   var L = IELTS_LEVELS.find(function(x){ return x.id===ieltsSel; }) || IELTS_LEVELS[0];
-  var sc = IELTS_MOCK[ieltsSel] || IELTS_MOCK.beginner;
-  ieltsSess = { level:ieltsSel, levelName:L.name, range:L.range, topic:sc.p2.topic, msgs:[], turns:0, mock:true, report:'' };
-  ieltsMock = { sc:sc, steps:mockSteps(sc), i:0, left:0, timer:null };
-  ieltsMock.left = ieltsMock.steps[0].sec;
-  ieltsSess.msgs.push({role:'a', text:ieltsMock.steps[0].q});
   $('#ieltsHome').style.display = 'none';
   var card = $('#ieltsChatCard'); card.style.display = 'block';
+  card.innerHTML = '<b>全真模考 · '+esc(L.name)+'（'+esc(L.range)+'）</b><p class="small muted mt8">'
+    + (aiReady() ? 'AI 正在随机出题并互检（约 10-20 秒）…' : '加载题目…') + '</p>';
   if(!window.__mockBound){
     window.__mockBound = true;
     card.addEventListener('click', function(e){
@@ -1839,6 +1851,20 @@ function startIeltsMock(){
       if(a === 'quit') mockQuit(); else mockNext();
     });
   }
+  var token = ++mockToken;
+  var p = aiReady()
+    ? aiMockScript(L).catch(function(e){ toast('AI 出题失败，改用内置题目：'+e.message); return null; })
+    : Promise.resolve(null);
+  p.then(function(sc){
+    if(token !== mockToken) return;                      /* 期间已退出或重开 */
+    beginMock(sc || IELTS_MOCK[ieltsSel] || IELTS_MOCK.beginner, L);
+  });
+}
+function beginMock(sc, L){
+  ieltsSess = { level:ieltsSel, levelName:L.name, range:L.range, topic:sc.p2.topic, msgs:[], turns:0, mock:true, report:'' };
+  ieltsMock = { sc:sc, steps:mockSteps(sc), i:0, left:0, timer:null };
+  ieltsMock.left = ieltsMock.steps[0].sec;
+  ieltsSess.msgs.push({role:'a', text:ieltsMock.steps[0].q});
   renderIeltsMock(); speakAgent(ieltsMock.steps[0].q);
   ieltsMock.timer = setInterval(mockTick, 1000);
 }
@@ -1893,6 +1919,7 @@ function mockFinish(){
   ieltsEnd();
 }
 function mockQuit(){
+  mockToken++;
   if(ieltsMock && ieltsMock.timer) clearInterval(ieltsMock.timer);
   ieltsMock = null; ieltsSess = null;
   renderIelts(); toast('已退出模考');
@@ -1932,15 +1959,23 @@ function startIelts(){
   var topic = topics[Math.floor(Math.random()*topics.length)];
   if(ieltsSess && ieltsSess.lastTopic===topic && topics.length>1){ topic = topics[(topics.indexOf(topic)+1)%topics.length]; }
   var prevTopic = ieltsSess ? ieltsSess.lastTopic : null;
-  ieltsSess = { level:ieltsSel, levelName:level.name, range:level.range, topic:topic, lastTopic:prevTopic||topic, msgs:[], finished:false, report:'', turns:0 };
+  var useAI = aiReady();
+  ieltsSess = { level:ieltsSel, levelName:level.name, range:level.range, topic:(useAI ? '（AI 随机选题中…）' : topic),
+                poolTopic:topic, lastTopic:prevTopic||topic, msgs:[], finished:false, report:'', turns:0 };
   if(aiReady()){
     ieltsSess.msgs.push({role:'a', text:'Connecting to the examiner…', pending:true});
     renderIeltsChat();
     ieltsLLM().then(function(t){
       var m = ieltsSess && ieltsSess.msgs[0]; if(!m || !m.pending) return;
+      var mt = String(t).match(/^\s*Topic:\s*([^\n]+)/m);
+      if(mt){                                   /* 把 AI 选的话题取出来显示在标题上 */
+        ieltsSess.topic = mt[1].trim().replace(/[.。\s]+$/,'');
+        t = String(t).replace(/^\s*Topic:[^\n]*\n?/m, '').trim();
+      }
       m.text = t; m.pending = false; renderIeltsChat(); speakAgent(t);
     }).catch(function(e){
       var m = ieltsSess && ieltsSess.msgs[0]; if(!m) return;
+      ieltsSess.topic = ieltsSess.poolTopic;    /* AI 失败就退回话题池 */
       m.text = 'Topic: '+ieltsSess.topic+'.\n'+firstQ(ieltsSess.level); m.pending = false;
       renderIeltsChat(); speakAgent(m.text); toast('AI 连接失败，已切换离线示例：'+e.message);
     });
@@ -1952,7 +1987,12 @@ function startIelts(){
 }
 function speakAgent(t){ TTS.speak(String(t).replace(/\n/g,' ')); }
 async function ieltsLLM(){
-  var sys = 'You are an IELTS speaking examiner and practice partner. Level: '+ieltsSess.levelName+' (band '+ieltsSess.range+'). Topic: '+ieltsSess.topic+'. Rules: speak natural English; keep each reply to 1-3 sentences; ask only ONE question at a time; if the student makes a clear grammar or word-choice mistake, briefly correct it (max one short sentence) and then continue; keep the difficulty appropriate for the level.';
+  var first = !(ieltsSess.msgs||[]).some(function(m){ return !m.pending; });
+  var recent = (DB.ielts||[]).slice(0,6).map(function(x){ return x.topic; }).filter(Boolean);
+  var sys = 'You are an IELTS speaking examiner and practice partner. Level: '+ieltsSess.levelName+' (band '+ieltsSess.range+'). Rules: speak natural English; keep each reply to 1-3 sentences; ask only ONE question at a time; if the student makes a clear grammar or word-choice mistake, briefly correct it (max one short sentence) and then continue; keep the difficulty appropriate for the level.'
+    + (first
+        ? (' THIS IS THE FIRST MESSAGE: invent ONE fresh, random speaking topic suitable for this level' + (recent.length ? (' and different from all of these already-used topics: '+recent.join(' | ')) : '') + '. Output the topic on its own first line in the exact form "Topic: <topic>", then a one-sentence greeting and your first question about that topic.')
+        : (' Stay strictly on the current topic: '+ieltsSess.topic+'.'));
   var msgs = [{role:'system', content:sys}];
   ieltsSess.msgs.forEach(function(m){ if(!m.pending){ msgs.push({role: m.role==='a' ? 'assistant':'user', content:m.text}); } });
   if(msgs.length===1){ msgs.push({role:'user', content:'Please start the conversation with a short greeting and your first question.'}); }
@@ -1961,8 +2001,8 @@ async function ieltsLLM(){
 async function ieltsSend(){
   if(!ieltsSess || ieltsSess.finished) return;
   var inp = $('#chatInput'); var t = (inp.value||'').trim(); if(!t) return;
-  ieltsSess.msgs.push({role:'u', text:t, audio: window.__lastMicUrl||null});
-  window.__lastMicUrl = null; ieltsSess.turns++;
+  ieltsSess.msgs.push({role:'u', text:t, audio: window.__lastMicUrl||null, secs: window.__lastMicSecs||0});
+  window.__lastMicUrl = null; window.__lastMicSecs = 0; ieltsSess.turns++;
   inp.value = ''; renderIeltsChat();
   if(aiReady()){
     ieltsSess.msgs.push({role:'a', text:'…', pending:true}); renderIeltsChat();
@@ -1989,6 +2029,7 @@ function offlineNextQuestion(){
   return 'Can you add more details or give a specific example?';
 }
 async function ieltsMic(){
+  var micT0 = Date.now();
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){ toast('当前浏览器不支持语音识别，可直接打字；推荐电脑版 Chrome/Edge'); return; }
   var btn = $('#btnMic'); if(btn){ btn.disabled = true; btn.textContent = '🎙…'; }
@@ -2012,6 +2053,7 @@ async function ieltsMic(){
   if(rec){ try{ await new Promise(function(res){ rec.onstop = res; rec.stop(); }); }catch(e){} }
   if(stream){ try{ stream.getTracks().forEach(function(t){ t.stop(); }); }catch(e){} }
   if(rec && chunks.length){ try{ window.__lastMicUrl = URL.createObjectURL(new Blob(chunks,{type:'audio/webm'})); }catch(e){} }
+  window.__lastMicSecs = Math.max(1, Math.round((Date.now() - micT0) / 1000));   /* 这段录音的时长，用来实测语速 */
   if(btn){ btn.disabled = false; btn.textContent = '🎤'; }
   if(text){ var inp = $('#chatInput'); if(inp){ inp.value = text; toast('识别完成，可修改后发送'); } }
   else { toast('没有识别到内容，请再试一次或直接打字'); }
@@ -2059,13 +2101,24 @@ function renderIeltsChat(){
   }
   var cb = $('#chatBox'); if(cb){ cb.scrollTop = cb.scrollHeight; }
 }
+function ieltsWPM(){
+  var us = (ieltsSess && ieltsSess.msgs ? ieltsSess.msgs : []).filter(function(m){ return m.role==='u' && !m.pending && m.secs > 0; });
+  if(!us.length) return null;
+  var w = 0, sec = 0;
+  us.forEach(function(m){ w += countWords(m.text); sec += m.secs; });
+  if(sec < 5) return null;
+  return { wpm: Math.round(w / (sec / 60)), n: us.length, secs: Math.round(sec) };
+}
 function buildIeltsReportHTML(rep, offline, errmsg){
   var h = '<hr class="hr"><h3>训练报告</h3>';
-  var labels = [['fluency','流利与连贯'],['vocabulary','词汇'],['grammar','语法'],['pronunciation','发音']];
+  var wpm = ieltsWPM();
+  var labels = [['fluency','流利与连贯'],['vocabulary','词汇'],['grammar','语法']];
   if(rep){
-    h += '<b>四项评分（AI 估分，1-9）</b><div class="grid g4 mt8">';
+    h += '<b>评分（AI 估分，1-9）</b><div class="grid g3 mt8">';
     labels.forEach(function(L){ h += '<div class="card stat" style="margin:0"><b>'+(rep.scores&&rep.scores[L[0]]!=null?rep.scores[L[0]]:'-')+'</b><span>'+L[1]+'</span></div>'; });
-    h += '</div><p class="small muted">说明：评分为 AI 基于文字的估分，发音项按可推断程度给出，仅供参考。</p>';
+    h += '</div>';
+    h += '<div class="report-item"><b>发音：未评测</b><div class="small muted">要评发音得分析录音（音素、重音、语调）。本应用只把录音留给你自己回放，没做发音评测，所以不给分——比给一个猜出来的分数更诚实。想练发音可以对照考官朗读（🔊）跟读。</div></div>';
+    h += '<p class="small muted">说明：上面三项是 AI 基于<strong>文字</strong>的估分（看不到你的语气与停顿），仅供参考。</p>';
     if(rep.errors && rep.errors.length){
       h += '<b class="mt12" style="display:block">逐句纠错</b>';
       rep.errors.forEach(function(er){
@@ -2073,15 +2126,18 @@ function buildIeltsReportHTML(rep, offline, errmsg){
           + (er.why?('<div class="small muted">'+esc(er.why)+'</div>'):'')+'</div>';
       });
     }
+    if(wpm){ h += '<div class="card"><b>实测语速：'+wpm.wpm+' 词/分</b><div class="small muted">'+wpm.n+' 次语音作答、共 '+wpm.secs+' 秒（只统计用 🎤 回答的轮次）。雅思口语 6 分常见区间 120-150 词/分；低于 100 通常说明停顿较多，先求说顺再求说快。</div></div>'; }
     if(rep.advice){ h += '<div class="report-item ok"><b>提升建议</b><div>'+esc(rep.advice)+'</div></div>'; }
   } else {
-    h += '<div class="report-item">'+ (errmsg ? ('AI 评分失败（'+esc(errmsg)+'），已生成基础报告。') : '当前为离线模式（未配置 AI）：以下为基础报告，配置 AI 后可生成逐句纠错与四项评分。') +'</div>';
+    h += '<div class="report-item">'+ (errmsg ? ('AI 评分失败（'+esc(errmsg)+'），已生成基础报告。') : '当前为离线模式（未配置 AI）：以下为基础报告，配置 AI 后可生成逐句纠错与三项评分。') +'</div>';
     var s = ieltsSess;
     var turns = s.msgs.filter(function(m){ return m.role==='u'; });
     var words = turns.map(function(m){ return (String(m.text).match(/[A-Za-z][A-Za-z'\-]*/g)||[]).length; });
     var avg = words.length ? Math.round(words.reduce(function(a,b){ return a+b; },0)/words.length) : 0;
     h += '<b class="mt8" style="display:block">基础统计</b><ul>'
-      + '<li>回答轮数：'+turns.length+'</li><li>平均每轮词数：'+avg+'（建议 25-60 词）</li></ul>';
+      + '<li>回答轮数：'+turns.length+'</li><li>平均每轮词数：'+avg+'（建议 25-60 词）</li>'
+      + (wpm ? ('<li><b>实测语速：'+wpm.wpm+' 词/分</b>（'+wpm.n+' 次语音作答，共 '+wpm.secs+' 秒；雅思 6 分常见区间 120-150）</li>') : '')
+      + '</ul>';
     h += '<div class="report-item ok"><b>提升建议（通用）</b><ul>'
       + '<li>回答结构：先给观点，再举例子，最后总结。</li>'
       + '<li>多用连接词：because, however, for example, as a result。</li>'
