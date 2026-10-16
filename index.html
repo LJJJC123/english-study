@@ -160,6 +160,14 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 .qa-center{text-align:center;color:var(--muted);font-size:13px;margin-bottom:8px}
 /* 答题页顶部：题号居中，右上角留一个退出入口（否则中途想停只能刷页） */
 .qa-top{display:flex;align-items:center;gap:8px}
+/* 打卡表：7 列 × 6 周。格子里写日期数字，比纯色块多一层信息 */
+.cg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:10px;width:min(100%,420px)}   /* 1:1 格子必须限宽：不限的话桌面端每格会被拉到 140px，日历吃掉半屏 */
+.cg .cg-h{font-size:11px;color:var(--muted);text-align:center;line-height:1.6}
+.cg .cg-d{aspect-ratio:1/1;border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;
+  justify-content:center;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.cg .cg-d.on{background:var(--accent);border-color:var(--accent);color:var(--pri-ink);font-weight:600}
+.cg .cg-d.today{box-shadow:0 0 0 2px var(--pri-line)}
+.cg .cg-d.future{border-style:dashed;opacity:.35}
 .qa-top .qa-center{flex:1 1 auto;min-width:0;margin:0}
 .pulseok{animation:okp .55s ease}
 @keyframes okp{0%{transform:scale(1)}40%{transform:scale(1.035)}100%{transform:scale(1)}}
@@ -285,7 +293,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.19 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.20 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main>
@@ -293,7 +301,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
 <section class="view" id="view-home">
   <h2 class="page">学习看板</h2>
   <div class="sub" id="homeDate">-</div>
-  <div class="card" id="duePlan" style="display:none;padding:10px 14px;margin:0 0 12px"></div>
+  <div class="card" id="todayCard" style="padding:12px 14px;margin:0 0 12px"></div>
   <div class="grid stats6">
     <div class="card stat"><span class="stat-ic" data-ic="book"></span><b id="stWords">0</b><span>生词总数</span></div>
     <div class="card stat"><span class="stat-ic" data-ic="check"></span><b id="stDone">0</b><span>今日已默写</span></div>
@@ -303,7 +311,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
     <div class="card stat" title="累计收进错题本的错词中，已有多少比例连续答对 2 次移出"><span class="stat-ic" data-ic="rotate"></span><b id="stClear">—</b><span>错题消除率</span></div>
   </div>
   <div class="card">
-    <div class="row"><b>近 7 天正确率</b><div class="grow"></div><span class="small muted" id="stStreak">连续打卡 0 天</span></div>
+    <div class="row"><b>近 7 天正确率</b></div>
     <div class="sparkwrap"><svg class="spark" id="spark" viewBox="0 0 700 70" preserveAspectRatio="none"></svg></div>
     <div class="small muted" id="sparkNote">完成一次默写/听写后，这里会显示你的正确率趋势。</div>
   </div>
@@ -313,11 +321,16 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
     <div class="card"><b><span data-ic="mic"></span> 雅思口语</b><p class="small muted">初学 / 中级 / 高级，语音对练，评价与建议。</p><button class="btn wide" data-route="ielts">进入陪练</button></div>
     <div class="card"><b><span data-ic="target"></span> 练习场</b><p class="small muted">阅读 / 七选五 / 完形 / 语法填空 / 读后续写 / 作文。</p><button class="btn wide" data-route="practice">去练习</button></div>
   </div>
-  <div class="card row">
-    <span>每日默写目标：</span>
-    <input id="goalInput" type="number" min="5" max="200" style="width:90px" value="20">
-    <span class="small muted">词 / 天</span>
-    <button class="btn small" id="btnSaveGoal">保存</button>
+  <div class="card">
+    <div class="row"><b>打卡表</b><div class="grow"></div><span class="small muted" id="checkinSum"></span></div>
+    <div class="cg" id="checkinGrid"></div>
+    <div class="small muted mt8">点「开始默写 / 听写」后答过至少一题，这一天就算打卡。空格子可以补不回来——所以别断。</div>
+    <div class="row mt12" style="border-top:1px solid var(--line);padding-top:12px">
+      <span>每日默写目标：</span>
+      <input id="goalInput" type="number" min="5" max="200" style="width:90px" value="20">
+      <span class="small muted">词 / 天</span>
+      <button class="btn small" id="btnSaveGoal">保存</button>
+    </div>
   </div>
 </section>
 
@@ -459,7 +472,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.19 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.20 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1491,7 +1504,6 @@ function renderHome(){
   rollNum($('#stDone'), Object.keys(d.mk).length);
   rollNum($('#stDue'), dueWords().length);
   rollNum($('#stWrong'), DB.wrong.length);
-  $('#stStreak').textContent = '连续打卡 ' + streak() + ' 天';
   var wkAgo = Date.now() - 7*86400000;
   var added = DB.words.filter(function(w){ return (w.ts||0) >= wkAgo; }).length;
   var learned = DB.words.filter(function(w){ return w.mastered && (w.mts||0) >= wkAgo; }).length;
@@ -1500,7 +1512,8 @@ function renderHome(){
   var wa = (DB.stats.wrongAdded||0);
   $('#stClear').textContent = wa ? Math.round((DB.stats.wrongCleared||0) / wa * 100) + '%' : '—';
   $('#goalInput').value = DB.settings.goal || 20;
-  renderDuePlan();
+  renderToday();
+  renderCheckin();
   /* 近7天正确率折线 */
   var days = [];
   for(var i=6;i>=0;i--){ var dd = new Date(); dd.setDate(dd.getDate()-i); days.push(todayStr(dd)); }
@@ -1748,7 +1761,6 @@ function startQuizDefault(kind, scope, bk, unit){
 }
 function startSession(kind, qs, scope){
   Q = { kind:kind, qs:qs, i:0, scope:scope, right:0 };
-  markActivity();
   var setup = kind==='write' ? $('#quizSetup') : $('#listenSetup');
   var card = kind==='write' ? $('#quizCard') : $('#listenCard');
   var rep = kind==='write' ? $('#quizReport') : $('#listenReport');
@@ -1767,27 +1779,54 @@ function hintText(w){
 }
 /* 复习计划预览：调度（due + reSchedule）本来就在跑，但用户只看得到"今天"这一个数字。
    这里把往后 7 天摊开，等于把已有机制亮出来，而不是新增机制。 */
-function renderDuePlan(){
-  var el = $('#duePlan'); if(!el) return;
-  var now = Date.now(), day = 86400000;
-  var pending = 0, tmr = 0, week = 0, mastered = 0;
-  DB.words.forEach(function(w){
-    if(w.mastered){ mastered++; return; }
-    var due = w.due || 0;                       /* 新词没排过期，视为今天到期 */
-    if(due <= now) pending++;
-    if(due > now && due <= now + day) tmr++;
-    if(due <= now + 7 * day) week++;
-  });
-  if(!DB.words.length){ el.style.display = 'none'; return; }
-  if(!pending && !tmr && !week && mastered === DB.words.length){
-    el.innerHTML = '<span class="small muted">'+icon('check')+' 生词本里的词都标为已掌握了，没有待复习的。</span>';
-    el.style.display = 'block'; return;
+/* 顶部一张卡装"今天"：复习计划 + 目标进度 + 连续打卡。三者都是"今天该做什么"，不该分散成三块。 */
+function renderToday(){
+  var el = $('#todayCard'); if(!el) return;
+  var cards = DB.words.length;
+  var goal = DB.settings.goal || 20;
+  var d = statDay(); d.mk = d.mk || {};
+  var done = Object.keys(d.mk).length;
+  var hit = done >= goal;
+  var pct = Math.min(100, Math.round(done / goal * 100));
+
+  var h = '<div class="row"><span class="small muted" title="按「连续答对次数」自动排期（0/1/2/4/7/15 天）；答错会回到最短间隔">复习计划</span>'
+        + '<div class="grow"></div>';
+  if(cards){
+    h += '<span class="small">今天 <b style="color:var(--accent)">' + P_count() + '</b> · 明天 ' + P_tmr() + ' · 7 天内 ' + P_week() + '</span>';
+  } else {
+    h += '<span class="small muted">生词本还是空的</span>';
   }
-  el.innerHTML = '<div class="row"><span class="small muted">复习计划</span><div class="grow"></div>'
-    + '<span class="small">今天 <b style="color:var(--accent)">'+pending+'</b> · 明天 '+tmr+' · 7 天内 '+week+'</span></div>'
-    + '<div class="small muted" style="margin-top:2px">按「连续答对次数」自动排期（0/1/2/4/7/15 天）；'
-    + '答错会回到最短间隔。</div>';
-  el.style.display = 'block';
+  h += '</div>'
+    + '<div class="row mt12"><span class="small muted">今日目标</span><div class="grow"></div>'
+    + '<span class="small">' + done + ' / ' + goal + ' 词' + (hit ? '　<b style="color:var(--accent)">已达标 ✓</b>' : '') + '</span></div>'
+    + '<div class="prog mt8"><i style="width:' + pct + '%"></i></div>'
+    + '<div class="row mt8"><span class="small muted">' + (hit ? '今天的目标完成了' : '还差 ' + (goal - done) + ' 词达标') + '</span>'
+    + '<div class="grow"></div><span class="small muted">连续打卡 <b style="color:var(--ink)">' + streak() + '</b> 天</span></div>';
+  el.innerHTML = h;
+}
+function P_count(){ var n=Date.now(); return DB.words.filter(function(w){ return !w.mastered && (w.due||0) <= n; }).length; }
+function P_tmr(){ var n=Date.now(); return DB.words.filter(function(w){ return !w.mastered && (w.due||0) > n && (w.due||0) <= n+86400000; }).length; }
+function P_week(){ var n=Date.now(); return DB.words.filter(function(w){ return !w.mastered && (w.due||0) <= n+7*86400000; }).length; }
+
+/* 打卡表：6 周 × 7 天，周一开头。数据就是一直在记的 DB.stats.checkin，只是终于画出来了。 */
+function renderCheckin(){
+  var el = $('#checkinGrid'); if(!el) return;
+  var set = {}; DB.stats.checkin.forEach(function(k){ set[k] = 1; });
+  var t = new Date(); t.setHours(0,0,0,0);
+  var dow = (t.getDay() + 6) % 7;                        /* 0 = 周一 */
+  var start = new Date(t); start.setDate(t.getDate() - dow - 35);
+  var h = '', days = 0;
+  ['一','二','三','四','五','六','日'].forEach(function(w){ h += '<div class="cg-h">' + w + '</div>'; });
+  for(var i = 0; i < 42; i++){
+    var dd = new Date(start); dd.setDate(start.getDate() + i);
+    if(dd.getTime() > t.getTime()){ h += '<div class="cg-d future"></div>'; continue; }
+    var key = todayStr(dd), on = !!set[key];
+    if(on) days++;
+    h += '<div class="cg-d' + (on ? ' on' : '') + (dd.getTime() === t.getTime() ? ' today' : '')
+       + '" title="' + key + (on ? ' 已打卡' : ' 未打卡') + '">' + dd.getDate() + '</div>';
+  }
+  el.innerHTML = h;
+  $('#checkinSum').textContent = '这 6 周打卡 ' + days + ' 天 · 共 ' + DB.stats.checkin.length + ' 天';
 }
 /* 答题页/判定页共用的顶部：第 N / M 题 · 题型，右上角一个退出 */
 function qaTop(n, total, label){
@@ -1891,6 +1930,7 @@ function judgeCurrent(){
   else { if(!norm(input)){ toast('请输入英文单词'); return; } ok = spellOk(input, q.w); }
   q.answered = true; q.ok = ok; q.input = input;
   if(ok) Q.right++;
+  markActivity();   /* 打卡口径：至少真答了一题才算，光点"开始"不算 */
   var d = statDay(); d.q++; if(ok) d.c++;
   if(Q.kind==='listen'){ d.l++; }
   else { d.w++; d.mk = d.mk||{}; d.mk[norm(q.w)] = 1; }
@@ -3008,7 +3048,9 @@ function clearWrong(){
 }
 function saveGoal(){
   var n = parseInt($('#goalInput').value,10) || 20; n = Math.max(5, Math.min(200,n));
-  DB.settings.goal = n; save(); $('#goalInput').value = n; toast('已保存：每天 '+n+' 词');
+  DB.settings.goal = n; save(); $('#goalInput').value = n;
+  renderToday();                      /* 目标改了，顶部那张卡的进度条与达标状态要跟着变 */
+  toast('已保存：每天 '+n+' 词');
 }
 /* ================= 初始化 ================= */
 function init(){
