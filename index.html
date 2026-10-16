@@ -15,11 +15,16 @@
 <title>英语学习助手 · 高中同步 | 雅思口语</title>
 <style>
 :root{
-  --bg:#f6f7fb; --card:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e6e8ef;
+  --bg:#f6f7fb; --card:#fdfdff; --pri-ink:#fdfdff; --ink-strong:#111827;
+  --hover:#fbfbff; --hairline:#c9cde8; --track:#eef0f6; --focus-line:#a5b4fc;
+  --ok-line:#86efac; --bad-line:#fda4af; --skel:#f7f8fc; --chip-bg:#f4f5fb; --pri-2:#8b5cf6; --ink:#1f2937; --muted:#6b7280; --line:#e6e8ef;
   --pri:#4f46e5; --pri-weak:#eef2ff; --pri-line:#c7d2fe;
   --ok:#16a34a; --okbg:#ecfdf5; --bad:#e11d48; --badbg:#fff1f2; --amber:#d97706;
   --radius:16px;
 }
+/* finesse · register=product · A=indigo+slate-tinted · B=type 12-40 · C=card+grid
+ * D=CSS-only(no lib) · E=tinted-paper · SOUL=6 SPECTACLE=2 DENSITY=7 */
+
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{font-family:"Segoe UI","Microsoft YaHei",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6;-webkit-tap-highlight-color:transparent}
@@ -27,22 +32,36 @@ button{font-family:inherit}
 .appbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;padding:8px 14px;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .brand{font-weight:700;font-size:17px;letter-spacing:.2px}
 .brand small{color:var(--muted);font-weight:400;margin-left:8px;font-size:12px}
-.iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
-.iconbtn:hover{border-color:#c9cde8;background:#fbfbff}
+.iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+.iconbtn:hover{border-color:var(--hairline);background:var(--hover)}
 main{max-width:1080px;margin:0 auto;padding:14px 14px 96px}
 .view{display:none}
 .view.active{display:block;animation:fade .22s ease}
+/* 克制的反馈动效：卡片错峰进场（product-ui §0.4），不做弹跳、不做无状态装饰 */
+.view.active .card,.view.active>.grid{animation:riseIn .34s cubic-bezier(.22,.61,.36,1) backwards}
+.view.active>.grid:nth-of-type(1),.view.active>.card:nth-of-type(1){animation-delay:0s}
+.view.active>.grid:nth-of-type(2),.view.active>.card:nth-of-type(2){animation-delay:.05s}
+.view.active>.grid:nth-of-type(3),.view.active>.card:nth-of-type(3){animation-delay:.1s}
+.view.active>.grid:nth-of-type(n+4),.view.active>.card:nth-of-type(n+4){animation-delay:.15s}
+@keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 /* 描边与阴影二选一：常驻内容用描边（阴影留给弹窗、抽屉这类浮层），避免"框套框" */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin:12px 0}
 .grid>.card{margin:0}
+/* 卡片内 CTA 底部对齐：文案长短不同时按钮不再高低不齐 */
+.card>.btn.wide{margin-top:auto}
+.g2>.card,.g3>.card,.g4>.card,.stats6>.card{display:flex;flex-direction:column}
+.g2>.card>.btn,.g2>.card>.row{margin-top:auto}
 /* 设置页的「册 / 单元」：默认收起，摘要里显示当前选择（识别优于回忆，也少摆一堆选项） */
 .picker{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
 .picker>summary{cursor:pointer;font-size:13px;color:var(--pri);list-style:none;display:flex;align-items:center;gap:6px}
 .picker>summary::-webkit-details-marker{display:none}
 .picker>summary::before{content:'▸';font-size:12px;transition:transform .15s}
 .picker[open]>summary::before{content:'▾'}
-h2.page{font-size:20px;margin:4px 0 2px}
+h2.page{font-size:20px;margin:4px 0 2px;text-wrap:balance}
+/* 标题断行不出现孤字；正文断行更均匀 */
+.card>b,.li-title,.qa-center,.qcn,.qword{text-wrap:balance}
+p,.psg,.bub{text-wrap:pretty}
 .sub{color:var(--muted);font-size:13px;margin:2px 0 10px}
 .grid{display:grid;gap:10px}
 .g2{grid-template-columns:repeat(2,1fr)}
@@ -56,12 +75,17 @@ h2.page{font-size:20px;margin:4px 0 2px}
 .card.stat.accent b,.card.stat.accent span{color:var(--pri)}
 @media(max-width:820px){.g3{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){.g2{grid-template-columns:1fr}}
-.stat{text-align:center;padding:10px 6px}
-.stat b{font-size:24px;display:block;line-height:1.3}
-.stat span{color:var(--muted);font-size:13px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 14px;font-size:15px;cursor:pointer;transition:.15s;color:var(--ink)}
-.btn:hover{border-color:#c9cde8;background:#fbfbff}
-.btn.pri{background:var(--pri);border-color:var(--pri);color:#fff}
+/* KPI 卡：图标片 + 标签 + 数字（数字用等宽数位，避免跳动） */
+.stat{text-align:center;padding:12px 8px}
+.stat .stat-ic{width:30px;height:30px;border-radius:9px;background:var(--pri-weak);color:var(--pri);
+  display:inline-flex;align-items:center;justify-content:center;margin-bottom:6px}
+.stat .stat-ic .ic{width:16px;height:16px;vertical-align:0}
+.stat b{font-size:24px;display:block;line-height:1.25;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat span{color:var(--muted);font-size:12.5px;display:block;margin-top:2px}
+.stat.accent .stat-ic{background:var(--card)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:8px 14px;font-size:15px;cursor:pointer;transition:.15s;color:var(--ink)}
+.btn:hover{border-color:var(--hairline);background:var(--hover)}
+.btn.pri{background:var(--pri);border-color:var(--pri);color:var(--pri-ink)}
 .btn.pri:hover{filter:brightness(1.07);background:var(--pri)}
 .btn.big{padding:12px 18px;font-size:15px;border-radius:12px}
 .btn.wide{width:100%}
@@ -71,36 +95,36 @@ h2.page{font-size:20px;margin:4px 0 2px}
 /* 图标：尺寸跟随字号，颜色跟随文字，纵向与文字基线对齐 */
 .ic{width:1.15em;height:1.15em;flex:0 0 auto;vertical-align:-0.2em}
 button .ic{pointer-events:none}
-.chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;margin:2px 4px 2px 0;background:#fff;transition:.15s}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;margin:2px 4px 2px 0;background:var(--card);transition:.15s}
 .chip.on{background:var(--pri-weak);border-color:var(--pri-line);color:var(--pri);font-weight:600}
-input,textarea,select{font:inherit;border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%;background:#fff;color:var(--ink)}
-input:focus,textarea:focus,select:focus{outline:2px solid #dfe5ff;border-color:#a5b4fc}
+input,textarea,select{font:inherit;border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%;background:var(--card);color:var(--ink)}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--focus-line);border-color:var(--focus-line)}
 textarea{resize:vertical;min-height:90px;line-height:1.7}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .grow{flex:1 1 auto;min-width:0}
-.drawer{position:fixed;top:0;bottom:0;left:0;width:276px;max-width:84vw;background:#fff;border-right:1px solid var(--line);transform:translateX(-103%);transition:transform .25s ease;z-index:60;padding:14px 12px;overflow:auto}
+.drawer{position:fixed;top:0;bottom:0;left:0;width:276px;max-width:84vw;background:var(--card);border-right:1px solid var(--line);transform:translateX(-103%);transition:transform .25s ease;z-index:60;padding:14px 12px;overflow:auto}
 .drawer.open{transform:none;box-shadow:8px 0 30px rgba(15,23,42,.10)}
 .backdrop{position:fixed;inset:0;background:rgba(15,23,42,.35);opacity:0;pointer-events:none;transition:.2s;z-index:55}
 .backdrop.show{opacity:1;pointer-events:auto}
 .drawer h3{margin:6px 8px 8px;font-size:13px;color:var(--muted);font-weight:600;letter-spacing:1px}
 .navlist{display:flex;flex-direction:column;gap:2px}
 .navlist a{display:flex;gap:10px;align-items:center;padding:12px 10px;border-radius:12px;color:var(--ink);text-decoration:none;font-size:15px;cursor:pointer}
-.navlist a:hover{background:#f4f5fb}
+.navlist a:hover{background:var(--hover)}
 .navlist a.on{background:var(--pri-weak);color:var(--pri);font-weight:600}
 .navlist .icslot{width:22px;text-align:center;font-size:17px}
 .nav-sec{margin-top:14px}
-.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#111827;color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;opacity:0;transition:.25s;z-index:90;max-width:88vw;text-align:center;pointer-events:none}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink-strong);color:var(--pri-ink);padding:10px 16px;border-radius:12px;font-size:13px;opacity:0;transition:.25s;z-index:90;max-width:88vw;text-align:center;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%)}
 .modalwrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:80;padding:16px;background:rgba(15,23,42,.35)}
 .modalwrap.show{display:flex}
-.modal{background:#fff;border-radius:16px;max-width:560px;width:100%;max-height:86vh;overflow:auto;padding:18px 18px 16px;box-shadow:0 20px 60px rgba(15,23,42,.25)}
+.modal{background:var(--card);border-radius:16px;max-width:560px;width:100%;max-height:86vh;overflow:auto;padding:18px 18px 16px;box-shadow:0 20px 60px rgba(15,23,42,.25)}
 .modal h3{margin:0 0 4px;font-size:17px}
 .opts{display:grid;gap:8px}
-.opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;background:#fff;transition:.12s;font-size:15px}
+.opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;background:var(--card);transition:.12s;font-size:15px}
 .opt:hover{border-color:var(--pri-line)}
 .opt.sel{border-color:var(--pri);background:var(--pri-weak)}
-.opt.ok{border-color:#86efac;background:var(--okbg)}
-.opt.bad{border-color:#fda4af;background:var(--badbg)}
+.opt.ok{border-color:var(--ok-line);background:var(--okbg)}
+.opt.bad{border-color:var(--bad-line);background:var(--badbg)}
 .qword{font-size:32px;font-weight:700;letter-spacing:.5px;text-align:center;margin:8px 0 2px}
 .qcn{font-size:24px;font-weight:600;text-align:center;margin:10px 0 4px}
 .qph{text-align:center;color:var(--muted);font-size:15px}
@@ -111,23 +135,41 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 @keyframes badp{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}65%{transform:translateX(5px)}}
 .chat{display:flex;flex-direction:column;gap:10px;min-height:220px}
 .bub{max-width:84%;padding:10px 12px;border-radius:16px;font-size:15px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
-.bub.a{background:#fff;border:1px solid var(--line);align-self:flex-start;border-top-left-radius:8px}
-.bub.u{background:var(--pri);color:#fff;align-self:flex-end;border-bottom-right-radius:8px}
-.bub.u .tw:hover{background:rgba(255,255,255,.22);color:#fff}
+.bub.a{background:var(--card);border:1px solid var(--line);align-self:flex-start;border-top-left-radius:8px}
+.bub.u{background:var(--pri);color:var(--pri-ink);align-self:flex-end;border-bottom-right-radius:8px}
+.bub.u .tw:hover{background:rgba(255,255,255,.22);color:var(--pri-ink)}
 .bub .mini{font-size:12px;opacity:.75;margin-top:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.bub.u .mini{color:#e0e7ff}
+.bub.u .mini{color:var(--pri-line)}
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:18px 6px}
+/* 空状态：图标 + 缺什么/为什么/下一步 + 动作，而不是一行灰字 */
+.emptybox{text-align:center;padding:26px 16px 22px}
+.emptybox .eb-ic{width:44px;height:44px;border-radius:14px;background:var(--pri-weak);color:var(--pri);
+  display:inline-flex;align-items:center;justify-content:center;margin-bottom:10px}
+.emptybox .eb-ic .ic{width:22px;height:22px;vertical-align:0}
+.emptybox .eb-t{font-weight:600;font-size:14.5px;margin-bottom:4px}
+.emptybox .eb-d{color:var(--muted);font-size:13px;line-height:1.65;max-width:34em;margin:0 auto}
+.emptybox .eb-a{margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+/* 骨架屏：形状与最终内容一致，只在真正等待时出现 */
+.skel{background:linear-gradient(90deg,var(--track) 25%,var(--skel) 37%,var(--track) 63%);
+  background-size:400% 100%;animation:skel 1.4s ease infinite;border-radius:8px}
+@keyframes skel{0%{background-position:100% 50%}100%{background-position:0 50%}}
+.skel-line{height:14px;margin:8px 0}
+.skel-line.w60{width:60%}.skel-line.w40{width:40%}
+/* 按钮内的小转圈（提交类操作） */
+.spin{width:1.15em;height:1.15em;border:2px solid currentColor;border-right-color:transparent;
+  border-radius:50%;display:inline-block;vertical-align:-.2em;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .wordgrid{display:flex;flex-wrap:wrap;gap:6px}
-.wchip{border:1px solid var(--line);border-radius:8px;padding:4px 8px;font-size:13px;cursor:pointer;background:#fff;transition:.12s}
+.wchip{border:1px solid var(--line);border-radius:8px;padding:4px 8px;font-size:13px;cursor:pointer;background:var(--card);transition:.12s}
 .wchip:hover{border-color:var(--pri);color:var(--pri)}
 .wchip.mastered{opacity:.55;text-decoration:line-through}
 .psg{line-height:2.05;font-size:15px;letter-spacing:.1px}
 .psg .tw{cursor:pointer;border-radius:4px;padding:0 1px;transition:.1s}
-.psg .tw:hover{background:#eef2ff;color:var(--pri)}
-.psg .blank{display:inline-block;min-width:86px;border-bottom:2px solid #c7d2fe;height:1.2em;margin:0 4px;vertical-align:baseline}
+.psg .tw:hover{background:var(--pri-weak);color:var(--pri)}
+.psg .blank{display:inline-block;min-width:86px;border-bottom:2px solid var(--pri-line);height:1.2em;margin:0 4px;vertical-align:baseline}
 .blank-in{display:inline-block;width:96px;padding:2px 6px;font-size:15px;border-radius:8px;margin:0 3px}
 .badge{font-size:12px;border-radius:8px;padding:1px 8px;background:var(--pri-weak);color:var(--pri);margin-left:6px;white-space:nowrap}
-.badge.gray{background:#f3f4f8;color:var(--muted)}
+.badge.gray{background:var(--chip-bg);color:var(--muted)}
 .badge.red{background:var(--badbg);color:var(--bad)}
 .badge.green{background:var(--okbg);color:var(--ok)}
 .ok-t{color:var(--ok);font-weight:600}
@@ -150,12 +192,12 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 .hr{height:1px;background:var(--line);margin:12px 0;border:0}
 .score-big{font-size:40px;font-weight:800;color:var(--pri)}
 .opt-row{display:flex;gap:8px;align-items:center;margin:6px 0}
-.prog{height:8px;background:#eef0f6;border-radius:999px;overflow:hidden}
-.prog>i{display:block;height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);width:0;transition:width .25s}
+.prog{height:8px;background:var(--track);border-radius:999px;overflow:hidden}
+.prog>i{display:block;height:100%;background:linear-gradient(90deg,var(--pri),var(--pri-2));width:0;transition:width .25s}
 .timer{font-variant-numeric:tabular-nums;font-weight:600}
 .report-item{border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:6px 0;font-size:13px}
-.report-item.ok{border-color:#bbf7d0;background:var(--okbg)}
-.report-item.bad{border-color:#fecdd3;background:var(--badbg)}
+.report-item.ok{border-color:var(--ok-line);background:var(--okbg)}
+.report-item.bad{border-color:var(--bad-line);background:var(--badbg)}
 @media(max-width:640px){
   body{font-size:15px}
   .qword{font-size:32px}
@@ -167,7 +209,9 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 /* ============ 移动端 / 无障碍优化（v1.2） ============ */
 .appbar{padding-top:calc(9px + env(safe-area-inset-top));padding-left:calc(14px + env(safe-area-inset-left));padding-right:calc(14px + env(safe-area-inset-right))}
 .drawer{padding-top:calc(14px + env(safe-area-inset-top));padding-left:calc(12px + env(safe-area-inset-left))}
-button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visible,.opt:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+/* 聚焦环用柔和的品牌色环，而不是浏览器默认描边 */
+:root{--ring:0 0 0 3px rgba(79,70,229,.22)}
+button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visible,.opt:focus-visible{outline:2px solid transparent;box-shadow:var(--ring)}
 @media(max-width:640px){
   /* iOS Safari 对 16px 以下的输入框会在聚焦时自动放大页面 */
   input,textarea,select{font-size:17px}
@@ -212,7 +256,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.11 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.12 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main id="main">
@@ -221,12 +265,12 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   <h2 class="page">学习看板</h2>
   <div class="sub" id="homeDate">-</div>
   <div class="grid stats6">
-    <div class="card stat"><b id="stWords">0</b><span>生词总数</span></div>
-    <div class="card stat"><b id="stDone">0</b><span>今日已默写</span></div>
-    <div class="card stat accent" title="该做的事：今天还差多少词没默写"><b id="stDue">0</b><span>今日待默写</span></div>
-    <div class="card stat"><b id="stWrong">0</b><span>错题数</span></div>
-    <div class="card stat" title="近 7 天：新加入生词本的词数 − 这 7 天转为已掌握的词数"><b id="stNet">0</b><span>近 7 天生词净增</span></div>
-    <div class="card stat" title="累计收进错题本的错词中，已有多少比例连续答对 2 次移出"><b id="stClear">—</b><span>错题消除率</span></div>
+    <div class="card stat"><span class="stat-ic" data-ic="book"></span><b id="stWords">0</b><span>生词总数</span></div>
+    <div class="card stat"><span class="stat-ic" data-ic="check"></span><b id="stDone">0</b><span>今日已默写</span></div>
+    <div class="card stat accent" title="该做的事：今天还差多少词没默写"><span class="stat-ic" data-ic="pencil"></span><b id="stDue">0</b><span>今日待默写</span></div>
+    <div class="card stat"><span class="stat-ic" data-ic="alert"></span><b id="stWrong">0</b><span>错题数</span></div>
+    <div class="card stat" title="近 7 天：新加入生词本的词数 − 这 7 天转为已掌握的词数"><span class="stat-ic" data-ic="chart"></span><b id="stNet">0</b><span>近 7 天生词净增</span></div>
+    <div class="card stat" title="累计收进错题本的错词中，已有多少比例连续答对 2 次移出"><span class="stat-ic" data-ic="rotate"></span><b id="stClear">—</b><span>错题消除率</span></div>
   </div>
   <div class="card">
     <div class="row"><b>近 7 天正确率</b><div class="grow"></div><span class="small muted" id="stStreak">连续打卡 0 天</span></div>
@@ -368,7 +412,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.11 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.12 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1378,19 +1422,36 @@ async function openWordCard(w, src){
   };
 }
 /* ================= 学习看板 ================= */
+/* 数字从 0 滚到目标值：product-ui §0.4 的 number roll-up；减弱动效时直接落终值 */
+function rollNum(el, target, prefix){
+  if(!el) return;
+  prefix = prefix || '';
+  var REDUCE = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(REDUCE || !target){ el.textContent = prefix + target; return; }
+  var t0 = 0, dur = 520;
+  if(el.__raf) cancelAnimationFrame(el.__raf);
+  var step = function(ts){
+    if(!t0) t0 = ts;
+    var k = Math.min(1, (ts - t0) / dur);
+    var v = Math.round(target * (1 - Math.pow(1 - k, 3)));
+    el.textContent = prefix + v;
+    if(k < 1) el.__raf = requestAnimationFrame(step); else el.__raf = 0;
+  };
+  el.__raf = requestAnimationFrame(step);
+}
 function renderHome(){
   $('#homeDate').textContent = '今天 · ' + todayStr() + ' · 数据保存在本机浏览器';
-  $('#stWords').textContent = DB.words.length;
+  rollNum($('#stWords'), DB.words.length);
   var d = statDay(); d.mk = d.mk || {};
-  $('#stDone').textContent = Object.keys(d.mk).length;
-  $('#stDue').textContent = dueWords().length;
-  $('#stWrong').textContent = DB.wrong.length;
+  rollNum($('#stDone'), Object.keys(d.mk).length);
+  rollNum($('#stDue'), dueWords().length);
+  rollNum($('#stWrong'), DB.wrong.length);
   $('#stStreak').textContent = '连续打卡 ' + streak() + ' 天';
   var wkAgo = Date.now() - 7*86400000;
   var added = DB.words.filter(function(w){ return (w.ts||0) >= wkAgo; }).length;
   var learned = DB.words.filter(function(w){ return w.mastered && (w.mts||0) >= wkAgo; }).length;
   var net = added - learned;
-  $('#stNet').textContent = (net > 0 ? '+' : '') + net;
+  rollNum($('#stNet'), net, net > 0 ? '+' : '');
   var wa = (DB.stats.wrongAdded||0);
   $('#stClear').textContent = wa ? Math.round((DB.stats.wrongCleared||0) / wa * 100) + '%' : '—';
   $('#goalInput').value = DB.settings.goal || 20;
@@ -1444,7 +1505,9 @@ function renderVocabList(){
   var list = DB.words.slice().sort(function(a,b){ return (b.ts||0)-(a.ts||0); });
   if(q) list = list.filter(function(w){ return norm(w.w).indexOf(q)>=0 || (w.cn||'').indexOf(q)>=0; });
   if(!list.length){
-    $('#vocabList').innerHTML = '<div class="empty">'+(DB.words.length? '没有匹配的单词。' : '生词本还是空的：上方输入单词添加，或在做题时点击生词收录。')+'</div>';
+    $('#vocabList').innerHTML = DB.words.length ? emptyBox('search','没有匹配的单词','换个关键词试试，或者直接在上面的输入框里添加新词。','')
+      : emptyBox('book','生词本还是空的','这里放你还没掌握的词。做题时点任意英文单词就能收录，也可以在上面直接输入。',
+          '<button class="btn pri" data-route="quiz">去默写</button><button class="btn" data-route="book">浏览教材词表</button>');
     return;
   }
   var html = '';
@@ -1502,7 +1565,7 @@ function renderBook(){
   var list = DB.book.slice();
   if(bookFilter.bk!=='all') list = list.filter(function(x){ return (x.bk||'我的词表')===bookFilter.bk; });
   if(bookFilter.unit!=='all') list = list.filter(function(x){ return (x.unit||'未分组')===bookFilter.unit; });
-  if(!list.length){ $('#bookGrid').innerHTML = '<div class="empty">暂无单词，可在下方导入词表。</div>'; return; }
+  if(!list.length){ $('#bookGrid').innerHTML = emptyBox('books','这个范围内还没有单词','换个册或单元看看，也可以在下方导入自己的词表。',''); return; }
   var CAP = 600;
   var html = '<div class="wordgrid">';
   list.slice(0, CAP).forEach(function(x){ html += '<span class="wchip" data-w="'+esc(x.w)+'">'+esc(x.w)+'</span>'; });
@@ -1830,7 +1893,8 @@ function renderWrong(){
       else if(act==='del'){ DB.wrong = DB.wrong.filter(function(x){ return x.id!==id; }); save(); renderWrong(); toast('已删除'); }
     });
   }
-  if(!DB.wrong.length){ $('#wrongList').innerHTML = '<div class="empty">错题本是空的。默写或听写中的错词会自动记入这里；同一词连续答对 2 次后自动移出。</div>'; return; }
+  if(!DB.wrong.length){ $('#wrongList').innerHTML = emptyBox('check','错题本是空的','默写和听写答错的词会自动记到这里；同一个词连续答对 2 次后自动移出。',
+      '<button class="btn" data-route="quiz">去默写</button><button class="btn" data-route="listen">去听写</button>'); return; }
   var html = '';
   DB.wrong.forEach(function(it){
     html += '<div class="list-item"><div class="li-main">'
@@ -2033,8 +2097,9 @@ function renderIeltsHome(){
     + '<b class="mt12" style="display:block">本难度话题（每次进入随机不同）</b>'
     + '<p class="small muted">'+IELTS_TOPICS[ieltsSel].join(' · ')+'</p>'
     + '<div class="row mt12"><button class="btn pri big" id="btnStartIelts">开始训练</button>'
-    + '<button class="btn big" id="btnMockIelts">'+icon('headphone')+' 全真模考（Part1→2→3 计时）</button>'
+    + '<button class="btn big" id="btnMockIelts">'+icon('headphone')+' 全真模考（计时）</button>'
     + '<span class="small muted">'+(aiReady()? 'AI 模式：考官由大模型扮演，支持逐句纠错与四项评分' : '离线模式：内置示例考官脚本；配置 AI 后体验完整对练')+'</span></div>'
+    + '<p class="small muted mt8">全真模考按 Part 1 → Part 2 → Part 3 连考：每题倒计时，时间到自动进入下一步，结束直接出评分报告。</p>'
     + '<p class="small muted mt8">支持语音对话：点麦克风按钮说话（需麦克风权限与联网），考官回复会自动朗读（美音）；也可直接打字。</p>';
   var el = $('#ieltsHome'); el.innerHTML = h; el.style.display = 'block';
   if(!window.__ieltsHomeBound){
@@ -2270,7 +2335,10 @@ async function ieltsEnd(){
 }
 function renderIeltsRecords(){
   var el = $('#ieltsRecords');
-  if(!DB.ielts.length){ el.innerHTML = ''; return; }
+  if(!DB.ielts.length){
+    el.innerHTML = emptyBox('mic','还没有口语训练记录','每次和考官对练或做完一套全真模考，都会在这里留下对话与评分报告。','');
+    return;
+  }
   var h = '<div class="card"><b>训练记录（'+DB.ielts.length+'）</b><p class="small muted">每次对话保留记录与评价，可回看、可删除。</p>';
   DB.ielts.forEach(function(r){
     h += '<div class="list-item"><div class="li-main"><div class="li-title">'+esc(r.level)+' · '+esc(r.topic)+' <span class="badge gray">'+fmtDate(r.ts)+'</span></div>'
@@ -2362,6 +2430,25 @@ function topPointWrong(n){
   var m = DB.stats.pointWrong || {};
   return Object.keys(m).map(function(k){ return [k, m[k]]; }).sort(function(a,b){ return b[1]-a[1]; }).slice(0, n||3);
 }
+/* 空状态：图标 + 缺什么 / 为什么 / 下一步 + 动作（product-ui §5），而不是一行灰字 */
+/* 按钮提交的加载态：超过 300ms 才换成转圈，避免闪一下反而显得卡（product-ui §5） */
+function btnSpin(btn, label){
+  if(!btn) return function(){};
+  var keep = btn.innerHTML, timer = setTimeout(function(){
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span> ' + (label || '处理中…');
+  }, 300);
+  return function(){
+    clearTimeout(timer);
+    btn.disabled = false;
+    btn.innerHTML = keep;
+  };
+}
+function emptyBox(ic, title, desc, actions){
+  return '<div class="emptybox"><span class="eb-ic">'+icon(ic)+'</span>'
+    + '<div class="eb-t">'+esc(title)+'</div><div class="eb-d">'+esc(desc)+'</div>'
+    + (actions ? ('<div class="eb-a">'+actions+'</div>') : '') + '</div>';
+}
 function renderPointBar(){
   var el = $('#practicePoints'); if(!el) return;
   el.innerHTML = '<div class="card" style="padding:10px 12px"><b class="small">考点专项</b>'
@@ -2423,8 +2510,8 @@ function pracClick(e){
   if(a==='submit-objective'){ pracSubmit(); }
   if(a==='reset'){ pracData = { answers:{}, inputs:{} }; renderPracticeBody(); toast('已重置，可重新作答'); }
   if(a==='toggle-model'){ var m = $('#pracModel'); if(m){ m.style.display = m.style.display==='none' ? 'block' : 'none'; } }
-  if(a==='submit-writing'){ pracWriting(); }
-  if(a==='gen'){ pracGen(); }
+  if(a==='submit-writing'){ pracWriting(g); }
+  if(a==='gen'){ pracGen(g); }
 }
 function renderPracticeBody(){
   if(pracSel === 'mock'){ renderMock(); return; }
@@ -2571,12 +2658,13 @@ function pracSubmit(){
   DB.practice.unshift({ id:uid(), type:pracLabel(), ts:Date.now(), score:score, total:total, wrong:wrong });
   save(); renderPracticeHistory();
 }
-async function pracWriting(){
+async function pracWriting(btn){
+  var doneSpin = btnSpin(btn, '批改中…');
   var isCont = (pracSel==='cont');
   var d = isCont ? PD.cont : PD.essay;
   var ta = $('#pracText'); var t = ta ? ta.value : '';
   var n = countWords(t);
-  if(n < 20){ toast('至少写 20 词再提交批改'); return; }
+  if(n < 20){ doneSpin(); toast('至少写 20 词再提交批改'); return; }
   var links = ['however','therefore','although','because','finally','suddenly','besides','in addition','as a result','for example','moreover','meanwhile','in fact','on the other hand','what is more'];
   var found = links.filter(function(l){ return t.toLowerCase().indexOf(l)>=0; });
   $('#pracResult-'+pracSel).innerHTML = '<hr class="hr"><b>批改结果</b><p class="small muted">'+(aiReady()?'AI 批改中…':'当前为离线模式（未配置 AI），生成基础反馈…')+'</p>';
@@ -2600,6 +2688,7 @@ async function pracWriting(){
   } else {
     out += basicWritingFeedback(n, found, isCont);
   }
+  doneSpin();
   $('#pracResult-'+pracSel).innerHTML = out;
   DB.practice.unshift({ id:uid(), type:(isCont?'读后续写':'作文练习'), ts:Date.now(), score:null, total:null, words:n });
   save(); renderPracticeHistory();
@@ -2646,8 +2735,9 @@ function pracCheck(type, r){
   }
   return '';
 }
-async function pracGen(){
+async function pracGen(btn){
   if(!aiReady()){ aiHint(); return; }
+  var doneSpin = btnSpin(btn, 'AI 出题中…');
   var P = {
     reading:{ sys:'你是高中英语命题人，出题参照近5年全国卷/新课标卷与浙江模考卷 C 篇阅读风格。', usr:'请生成 1 篇高考阅读 C 篇风格短文（120-150词）和 3 道四选一阅读题。只输出 JSON：{"title":"","passage":"","questions":[{"q":"","opts":["","","",""],"ans":0,"why":"","point":"考点（细节理解/推理判断/主旨大意/词义猜测 之一）"}]}', ap:function(r){ PD.reading = { title:r.title||'AI 生成 · C篇', passage:r.passage, questions:r.questions||[] }; } },
     grammar:{ sys:'你是高中英语命题人，语法填空命题参照高考真题考点分布。', usr:'按人教版高中范围生成 1 篇语法填空（5 个空，文中用 [[1]]..[[5]] 标记），避免出现超纲生词。只输出 JSON：{"title":"","passage":"","blanks":[{"ans":"","variants":[""],"hint":"提示词","why":"中文解析","point":"考点（时态语态/非谓语动词/词性转换/连词与从句/冠词与介词/固定搭配 之一）"}]}', ap:function(r){ PD.grammar = { title:r.title||'AI 生成 · 语法填空', passage:r.passage, blanks:r.blanks||[] }; } },
@@ -2657,21 +2747,26 @@ async function pracGen(){
     essay:{ sys:'你是高中英语作文命题人。', usr:'生成一道高中英语应用文写作题（含背景、要点、词数要求）。只输出 JSON：{"title":"","prompt":""}', ap:function(r){ PD.essay = { title:r.title||'AI 生成 · 作文', prompt:r.prompt, model:'' }; } }
   };
   var g = P[pracSel];
-  if(!g){ toast('该题型的 AI 生成将于正式版接入；当前请使用示例题'); return; }
+  if(!g){ doneSpin(); toast('该题型的 AI 生成将于正式版接入；当前请使用示例题'); return; }
   toast('AI 出题中（双侧互检）…');
   try{
     var usr = g.usr + (pracPoint ? ('本套题请集中考查考点：'+pracPoint+'（题目和解析都要体现）。') : '');
     var kr = kbRef(g.sys + ' ' + usr + ' ' + pracPoint, 3);
     var r = await dualLLM([{role:'system',content:g.sys + kr.text},{role:'user',content:usr}], {json:true, note:'题目必须无误、答案正确、无超纲生词、符合高考风格、每道题都要给出 point 考点标签'});
+    doneSpin();   /* 校验完就还原按钮，后面的渲染不算等待 */
     var bad = pracCheck(pracSel, r);
     if(bad){ toast('AI 出的题结构不对（'+bad+'），已保留原题，可再点一次重试'); return; }
     g.ap(r); pracData = { answers:{}, inputs:{} }; renderPracticeBody();
     toast('新题已生成 ✓ 已互检，参考知识库 '+kr.titles.length+' 条');
-  }catch(e){ toast('生成失败：'+e.message); }
+  }catch(e){ doneSpin(); toast('生成失败：'+e.message); }
 }
 function renderPracticeHistory(){
   var el = $('#practiceHistory');
-  if(!DB.practice.length){ el.innerHTML = ''; return; }
+  if(!DB.practice.length){
+    el.innerHTML = emptyBox('file','还没有练习记录','做完一场阅读、完形或整套模考后，这里会列出每场的得分与错题回顾。',
+      '<button class="btn" data-route="practice">挑一个题型开始</button>');
+    return;
+  }
   var h = '<div class="card"><b>练习记录</b><p class="small muted">练习场错题不进错题本（按你的决定），可在这里查看每场错题回顾。</p>';
   DB.practice.slice(0,20).forEach(function(r){
     var sc = (r.score==null) ? (r.words ? (r.words+' 词作文') : '-') : (r.score+' / '+r.total);
