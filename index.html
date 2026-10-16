@@ -161,6 +161,11 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 /* 答题页顶部：题号居中，右上角留一个退出入口（否则中途想停只能刷页） */
 .qa-top{display:flex;align-items:center;gap:8px}
 /* 打卡表：7 列 × 6 周。格子里写日期数字，比纯色块多一层信息 */
+.mk-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px}
+.mk-table th,.mk-table td{border-bottom:1px solid var(--line);padding:7px 6px;text-align:left}
+.mk-table th{color:var(--muted);font-weight:600;font-size:12px}
+.mk-table td:nth-child(3),.mk-table td:nth-child(4),.mk-table th:nth-child(3),.mk-table th:nth-child(4){text-align:right;font-variant-numeric:tabular-nums}
+.mk-table tr:last-child td{border-bottom:none}
 .cg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:10px;width:min(100%,420px)}   /* 1:1 格子必须限宽：不限的话桌面端每格会被拉到 140px，日历吃掉半屏 */
 .cg .cg-h{font-size:11px;color:var(--muted);text-align:center;line-height:1.6}
 .cg .cg-d{aspect-ratio:1/1;border:1px solid var(--line);border-radius:6px;display:flex;align-items:center;
@@ -293,7 +298,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.23 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.24 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main>
@@ -472,7 +477,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.23 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.24 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -2641,7 +2646,7 @@ const POINT_TYPE = { '细节理解':'reading','推理判断':'reading','主旨�
 var pracPoint = '';
 var setupUnitOpen = false;   /* 设置页「册/单元」展开状态，重绘后保持 */
 /* ---- 整套模考：把各节按顺序铺在一页，各自提交、底部汇总 ---- */
-var pracMockOn = false, pracMockAppend = false, pracMockSum = {}, pracDataMap = {};
+var pracMockOn = false, pracMockAppend = false, pracDataMap = {};
 function mockSwitch(sec){
   if(!pracMockOn || !sec || sec === pracSel) return;
   pracDataMap[pracSel] = pracData;
@@ -2649,7 +2654,7 @@ function mockSwitch(sec){
   pracSel = sec;
 }
 function renderMock(){
-  pracMockOn = true; pracMockAppend = false; pracMockSum = {}; pracDataMap = {};
+  pracMockOn = true; pracMockAppend = false; pracDataMap = {};
   pracData = { answers:{}, inputs:{} };
   el2('<div class="card"><b>整套模考 · 按浙江卷顺序</b><p class="small muted">阅读 → 七选五 → 完形 → 语法填空 → 读后续写。每节做完点它自己的「提交并查看解析」，底部会实时汇总客观题得分；读后续写不自动判分，可单独提交 AI 批改。</p></div>');
   pracMockAppend = true;
@@ -2658,17 +2663,57 @@ function renderMock(){
   renderQixuan(); renderCloze(); renderGrammar();
   var keep = pracSel; pracSel = 'cont'; renderWriting(); pracSel = keep;
   pracMockAppend = false;
-  $('#practiceBody').insertAdjacentHTML('beforeend', '<div class="card"><b>客观题合计</b><div id="mockTotal" class="mt8">还没提交任何一节。</div></div>');
+  $('#practiceBody').insertAdjacentHTML('beforeend',
+    '<div class="card"><b>交卷</b>'
+    + '<p class="small muted">按高考分值计分：阅读理解 15 题×2.5 ＋ 七选五 5 题×2.5 ＋ 完形填空 15 题×1 ＋ 语法填空 10 题×1.5 ＝ <b>客观题满分 80</b>。'
+    + '读后续写 25 分不自动判分，可单独点它下面的「提交 AI 批改」。</p>'
+    + '<button class="btn pri big" data-pact="mock-finish">交卷并出总分</button>'
+    + '<div id="mockResult"></div></div>');
+  $('#practiceBody').insertAdjacentHTML('beforeend', '<div class="card" id="mockRating" style="display:none"></div>');
 }
-function renderMockTotal(){
-  var el = $('#mockTotal'); if(!el) return;
-  var order = [['reading','阅读'],['qixuan','七选五'],['cloze','完形'],['grammar','语法填空']];
-  var s = 0, t = 0, parts = [];
-  order.forEach(function(x){
-    var r = pracMockSum[x[0]];
-    if(r){ s += r.s; t += r.t; parts.push(x[1] + ' ' + r.s + '/' + r.t); } else parts.push(x[1] + ' 未提交');
+/* 整卷交卷：一次判完四节客观题，按高考分值给总分。
+   分值用的是真题的固定满分（37.5/12.5/15/15＝80），不是「题数×每题分值」——
+   万一某节题量不足，分数自然会低，而不是把满分也跟着缩水、看着像考得不错。 */
+var MOCK_SECTIONS = [
+  { k:'reading', name:'阅读理解（四篇）', full:37.5 },
+  { k:'qixuan',  name:'七选五',           full:12.5 },
+  { k:'cloze',   name:'完形填空',          full:15   },
+  { k:'grammar', name:'语法填空',          full:15   }
+];
+function mockFinish(){
+  if(!pracMockOn) return;
+  pracDataMap[pracSel] = pracData;              /* 先把当前这节的作答归档，再按节取 */
+  var keepSel = pracSel, keepData = pracData;
+  var rows = '', detail = '', got = 0, right = 0, asked = 0, allWrong = [];
+  MOCK_SECTIONS.forEach(function(sec){
+    pracSel = sec.k; pracData = pracDataMap[sec.k] || { answers:{}, inputs:{} };
+    var g = gradeSection(sec.k), per = sec.full / (g.total || 1);
+    var sc = g.score * per;
+    got += sc; right += g.score; asked += g.total;
+    rows += '<tr><td>' + sec.name + '</td><td>' + g.total + ' 题</td>'
+          + '<td>' + g.score + ' / ' + g.total + '</td>'
+          + '<td><b>' + sc.toFixed(1) + '</b> / ' + sec.full + '</td></tr>';
+    allWrong = allWrong.concat(g.wrong.map(function(w){ w.sec = sec.name; return w; }));
+    detail += '<div class="mt12"><b>' + sec.name + ' · 逐题解析</b>' + g.html + '</div>';
   });
-  el.innerHTML = parts.join(' · ') + (t ? ('<div class="mt8"><b>客观题合计：' + s + ' / ' + t + '（正确率 ' + Math.round(s / t * 100) + '%）</b></div>') : '');
+  pracSel = keepSel; pracData = keepData;
+  var rate = asked ? Math.round(right / asked * 100) : 0;
+  var fullSum = MOCK_SECTIONS.reduce(function(a, x){ return a + x.full; }, 0);
+  var tp = topPointWrong(5);
+  $('#mockResult').innerHTML =
+      '<hr class="hr"><div class="center"><div class="score-big">' + got.toFixed(1) + ' <span class="small muted">/ ' + fullSum + '</span></div>'
+    + '<div class="small muted">客观题总分 · 正确率 ' + rate + '%（' + right + '/' + asked + ' 题）</div></div>'
+    + '<table class="mk-table"><tr><th>部分</th><th>题量</th><th>对题</th><th>得分</th></tr>' + rows
+    + '<tr><td><b>客观题合计</b></td><td>' + asked + ' 题</td><td>' + right + ' 题</td><td><b>' + got.toFixed(1) + ' / ' + fullSum + '</b></td></tr>'
+    + '<tr><td class="muted">读后续写</td><td>1 题</td><td>不自动判分</td><td class="muted">— / 25</td></tr></table>'
+    + (tp.length ? ('<p class="small muted">累计错得最多的考点：' + tp.map(function(x){ return esc(x[0]) + '（' + x[1] + ' 次）'; }).join('、') + '</p>') : '')
+    + '<p class="small muted">练习场错题不进错题本；如需巩固，可点击文中/题目中的生词加入生词本后再默写。</p>';
+  $('#mockRating').innerHTML = '<b>逐题解析</b>' + detail;
+  $('#mockRating').style.display = 'block';
+  DB.practice.unshift({ id:uid(), type:'整套模考 · 客观题', ts:Date.now(),
+    score:Math.round(got*10)/10, total:fullSum, wrong:allWrong });
+  save(); renderPracticeHistory();
+  $('#mockResult').scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 function ptOf(d, i, item){
   if(item && item.point) return item.point;
@@ -2771,6 +2816,7 @@ function pracClick(e){
   if(a==='toggle-model'){ var m = $('#pracModel'); if(m){ m.style.display = m.style.display==='none' ? 'block' : 'none'; } }
   if(a==='submit-writing'){ pracWriting(g); }
   if(a==='gen'){ pracGen(g); }
+  if(a==='mock-finish'){ mockFinish(); }
 }
 function renderPracticeBody(){
   if(pracSel === 'mock'){ renderMock(); return; }
@@ -2790,6 +2836,12 @@ function srcLine(src){
   var t = (src && String(src).trim()) ? String(src).trim() : '未标注（AI 未说明素材出处）';
   return '素材来源：' + esc(t) + '　·　';
 }
+/* 逐节提交按钮：模考时整卷只有底部一个「交卷」，不在每节露提交（真实考试也不会一节一发卷） */
+function submitRow(sec, label){
+  if(pracMockOn) return '';
+  return '<div class="mt12"><button class="btn pri" data-pact="submit-objective" data-sec="'+sec+'">'+(label||'提交并查看解析')+'</button></div>'
+    + '<div id="pracResult-'+sec+'"></div>';
+}
 function genRow(note){
   return '<div class="row"><span class="small muted">'+esc(note)+'</span><div class="grow"></div>'
     + '<button class="btn" data-pact="gen">'+icon('sparkle')+' AI 出新题'+(aiReady()?'':'（需配置AI）')+'</button></div>';
@@ -2797,14 +2849,17 @@ function genRow(note){
 /* 阅读有单篇 / 四篇连做两种模式。数据形状是同一套（sets 数组），单篇就是只有一项——
    所以渲染只写一条分支，不按模式分家。 */
 var readMode = 'single';
-function readData(){ return readMode === 'full' ? PD.readFull : PD.reading; }
+/* 模考时强制用四篇：渲染用哪一份，判分就必须用同一份 ——
+   否则模考里的阅读会拿 A 篇的作答去对 C 篇的答案（v0.23 引入的 bug）。 */
+function readData(){ return (pracMockOn || readMode === 'full') ? PD.readFull : PD.reading; }
 function renderReading(){
   var d = readData();
   var MODES = [['single','单篇（1 篇 · 4 题）'],['full','四篇连做（A3+B4+C4+D4 = 15 题）']];
   var h = '<div class="card" data-sec="reading"><b>'+esc(d.title)+'</b>'
-    + '<div class="row mt8"><span class="small muted">模式</span>'
-    + MODES.map(function(m){ return '<span class="chip'+(readMode===m[0]?' on':'')+'" data-rm="'+m[0]+'">'+m[1]+'</span>'; }).join('')
-    + '</div>'
+    + (pracMockOn ? '' :
+        '<div class="row mt8"><span class="small muted">模式</span>'
+        + MODES.map(function(m){ return '<span class="chip'+(readMode===m[0]?' on':'')+'" data-rm="'+m[0]+'">'+m[1]+'</span>'; }).join('')
+        + '</div>')
     + '<p class="small muted mt8">点击文中任意单词可查看释义并加入生词本。</p>';
   var gi = 0;
   (d.sets || []).forEach(function(st){
@@ -2821,8 +2876,7 @@ function renderReading(){
     });
     h += '</div>';
   });
-  h += '<div class="mt12"><button class="btn pri" data-pact="submit-objective" data-sec="reading">提交并查看解析</button></div>'
-    + '<div id="pracResult-reading"></div>' + genRow('素材取自近 5 年全国卷 / 新课标卷 / 浙江模考卷的风格，正文由 AI 仿写，不是真题原文') + '</div>';
+  h += submitRow('reading') + genRow('素材取自近 5 年全国卷 / 新课标卷 / 浙江模考卷的风格，正文由 AI 仿写，不是真题原文') + '</div>';
   el2(h);
 }
 function renderCloze(){
@@ -2841,8 +2895,7 @@ function renderCloze(){
     q.opts.forEach(function(o,oi){ h += '<div class="opt" data-q="'+qi+'" data-o="'+oi+'">'+String.fromCharCode(65+oi)+'. '+esc(o)+'</div>'; });
     h += '</div>';
   });
-  h += '<div class="mt12"><button class="btn pri" data-pact="submit-objective" data-sec="cloze">提交并查看解析</button></div>'
-    + '<div id="pracResult-cloze"></div>' + genRow('完形填空 · 示例题（AI 按高考考点分布出题）') + '</div>';
+  h += submitRow('cloze') + genRow('完形填空 · 示例题（AI 按高考考点分布出题）') + '</div>';
   el2(h);
 }
 function renderQixuan(){
@@ -2859,8 +2912,7 @@ function renderQixuan(){
       + '</div>';
   }
   h += '<div class="mt8">' + d.opts.map(function(o){ return '<p class="small muted">'+esc(o)+'</p>'; }).join('') + '</div>';
-  h += '<div class="mt12"><button class="btn pri" data-pact="submit-objective" data-sec="qixuan">提交并查看解析</button></div>'
-    + '<div id="pracResult-qixuan"></div>' + genRow('七选五 · 示例题') + '</div>';
+  h += submitRow('qixuan') + genRow('七选五 · 示例题') + '</div>';
   el2(h);
 }
 function renderGrammar(){
@@ -2873,8 +2925,7 @@ function renderGrammar(){
     + '<p class="psg">'+ph+'</p>'
     + (d.points ? '<p class="small muted">本套考点：'+d.points.map(function(x){ return esc(x); }).join(' / ')+'</p>' : '')
     + '<div class="row mt8"><span class="small muted">学习进度：</span><span class="chip on">人教版 · 示例进度（正式版按你的单元进度生成，避免陌生词）</span></div>'
-    + '<div class="mt12"><button class="btn pri" data-pact="submit-objective" data-sec="grammar">提交并查看解析</button></div>'
-    + '<div id="pracResult-grammar"></div>' + genRow('语法填空 · 示例题（按当前学习进度出题）') + '</div>';
+    + submitRow('grammar') + genRow('语法填空 · 示例题（按当前学习进度出题）') + '</div>';
   el2(h);
 }
 function renderWriting(){
@@ -2900,12 +2951,14 @@ function renderWriting(){
 }
 function el2(h){ if(pracMockAppend){ $('#practiceBody').insertAdjacentHTML('beforeend', h); } else { $('#practiceBody').innerHTML = h; } }
 function countWords(t){ return (String(t).trim().match(/[A-Za-z][A-Za-z'\-]*/g)||[]).length; }
-function pracSubmit(){
+/* 逐节判分：抽成纯函数，逐节提交与整卷交卷共用同一套。
+   两套判分逻辑跑偏是这类页面最容易出的 bug，所以只留一份。 */
+function gradeSection(sec){
   var out = '', score = 0, total = 0, wrong = [];
-  if(pracSel==='reading' || pracSel==='cloze'){
+  if(sec==='reading' || sec==='cloze'){
     /* 阅读是多篇结构，先摊平成一条题目列表——顺序必须与渲染时给的 data-q 完全一致 */
     var flat = [];
-    if(pracSel==='reading'){
+    if(sec==='reading'){
       (readData().sets || []).forEach(function(st){
         (st.questions || []).forEach(function(q){ flat.push({ q:q, owner:st }); });
       });
@@ -2924,19 +2977,22 @@ function pracSubmit(){
       if(!ok) wrong.push({stem:(q.q||q.stem), right:q.opts[q.ans], user:(ua==null?'未作答':q.opts[ua]), why:q.why, point:pt});
     });
   }
-  if(pracSel==='qixuan'){
+  if(sec==='qixuan'){
     var d = PD.qixuan;
-    [1,2,3].forEach(function(i){
+    /* 空数从答案对象推，不写死 —— 高考七选五是 5 空；写死 3 会让后两空白答 */
+    var qkeys = Object.keys(d.ans || {}).sort(function(a,b){ return (+a) - (+b); });
+    if(!qkeys.length) qkeys = ['1','2','3'];
+    qkeys.forEach(function(i){
       total++;
       var pt = ptOf(d, i);
-      var ua = pracData.answers['qx'+i]; var ok = (ua === d.ans[String(i)]); if(ok) score++; else pointWrong(pt);
+      var ua = pracData.answers['qx'+i]; var ok = (ua === d.ans[i]); if(ok) score++; else pointWrong(pt);
       out += '<div class="report-item '+(ok?'ok':'bad')+'">'+pointBadge(pt)+'<b>空 '+i+'：</b>'+(ok?'<span class="ok-t">正确</span>':'<span class="bad-t">错误</span>')
-        + '（正确：'+d.ans[String(i)]+(ok?'':'；你选了：'+(ua||'未作答'))+'）'
-        + '<div class="small muted">解析：'+esc(d.why[String(i)]||'')+'</div></div>';
-      if(!ok) wrong.push({stem:'空 '+i, right:d.ans[String(i)], user:(ua||'未作答'), why:d.why[String(i)], point:pt});
+        + '（正确：'+d.ans[i]+(ok?'':'；你选了：'+(ua||'未作答'))+'）'
+        + '<div class="small muted">解析：'+esc((d.why||{})[i]||'')+'</div></div>';
+      if(!ok) wrong.push({stem:'空 '+i, right:d.ans[i], user:(ua||'未作答'), why:(d.why||{})[i], point:pt});
     });
   }
-  if(pracSel==='grammar'){
+  if(sec==='grammar'){
     var dg = PD.grammar;
     var inputs = document.querySelectorAll('#practiceBody .blank-in');
     Array.prototype.forEach.call(inputs, function(inp, idx){
@@ -2952,14 +3008,17 @@ function pracSubmit(){
       if(!ok) wrong.push({stem:'空 '+(idx+1)+'（提示词：'+(b.hint||'')+'）', right:b.ans, user:inp.value, why:b.why, point:pt});
     });
   }
-  var html = '<hr class="hr"><div class="center"><b>得分：'+score+' / '+total+'</b></div>' + out
+  return { score:score, total:total, html:out, wrong:wrong };
+}
+function pracSubmit(){
+  var g = gradeSection(pracSel);
+  var html = '<hr class="hr"><div class="center"><b>得分：'+g.score+' / '+g.total+'</b></div>' + g.html
     + '<div class="row mt8" style="justify-content:center"><button class="btn" data-pact="reset">重做本场</button></div>'
     + (function(){ var tp = topPointWrong(3); return tp.length ? ('<p class="small muted">累计错得最多的考点：' + tp.map(function(x){ return esc(x[0]) + '（' + x[1] + ' 次）'; }).join('、') + '</p>') : ''; })()
     + '<p class="small muted">练习场错题不进错题本；如需巩固，可点击文中/题目中的生词加入生词本后再默写。</p>';
   $('#pracResult-'+pracSel).innerHTML = html;
   $('#pracResult-'+pracSel).scrollIntoView({behavior:'smooth', block:'nearest'});
-  if(pracMockOn){ pracMockSum[pracSel] = { s:score, t:total }; renderMockTotal(); }
-  DB.practice.unshift({ id:uid(), type:pracLabel(), ts:Date.now(), score:score, total:total, wrong:wrong });
+  DB.practice.unshift({ id:uid(), type:pracLabel(), ts:Date.now(), score:g.score, total:g.total, wrong:g.wrong });
   save(); renderPracticeHistory();
 }
 async function pracWriting(btn){
