@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#f6f7fb">
+<meta name="theme-color" content="#0d0e15">
 <meta name="description" content="人教版高中英语词汇闭环（生词本 · 默写 · 听写 · 错题本）＋ 雅思口语陪练 ＋ 练习场">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="英语助手">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -15,21 +15,41 @@
 <title>英语学习助手 · 高中同步 | 雅思口语</title>
 <style>
 :root{
-  --bg:#f6f7fb; --card:#fdfdff; --pri-ink:#fdfdff; --ink-strong:#111827;
-  --hover:#fbfbff; --hairline:#c9cde8; --track:#eef0f6; --focus-line:#a5b4fc;
-  --ok-line:#86efac; --bad-line:#fda4af; --skel:#f7f8fc; --chip-bg:#f4f5fb; --pri-2:#8b5cf6; --ink:#1f2937; --muted:#6b7280; --line:#e6e8ef;
-  --pri:#4f46e5; --pri-weak:#eef2ff; --pri-line:#c7d2fe;
-  --ok:#16a34a; --okbg:#ecfdf5; --bad:#e11d48; --badbg:#fff1f2; --amber:#d97706;
+  color-scheme: dark;                      /* 原生控件（滚动条、数字箭头）也跟着变深 */
+  --bg:#0d0e15;                            /* 带靛蓝色相的近黑，不是纯黑 */
+  --card:#16171f;                          /* 抬起的暗面 */
+  --panel:#1b1d28;                         /* 再抬一层：输入框、次级面 */
+  --ink:#e9eaf2; --muted:#9aa0b6;
+  --line:rgba(255,255,255,.09);             /* 发丝级描边，不用硬灰框 */
+  --ink-strong:#f3f4fa;                     /* 提示条等"反相"面 */
+  --pri:#8b93ff;                            /* 深色下把品牌色提亮，才够对比 */
+  --pri-2:#a78bfa;
+  --pri-weak:rgba(139,147,255,.15);
+  --pri-line:rgba(139,147,255,.38);
+  --pri-ink:#0d0e15;                        /* 亮底上的字：深色主题下是近黑 */
+  --hover:rgba(255,255,255,.06);
+  --hairline:rgba(255,255,255,.20);
+  --track:rgba(255,255,255,.10);
+  --focus-line:rgba(139,147,255,.60);
+  --skel:rgba(255,255,255,.08);
+  --chip-bg:rgba(255,255,255,.06);
+  --ok:#4ade80; --okbg:rgba(74,222,128,.13); --ok-line:rgba(74,222,128,.38);
+  --bad:#fb7185; --badbg:rgba(251,113,133,.13); --bad-line:rgba(251,113,133,.38);
+  --amber:#fbbf24;
+  --shadow-modal:0 24px 70px rgba(0,0,0,.62);
+  --shadow-drawer:12px 0 40px rgba(0,0,0,.5);
+  --scrim:rgba(5,6,10,.66);
+  --appbar:rgba(13,14,21,.82);
   --radius:16px;
 }
 /* finesse · register=product · A=indigo+slate-tinted · B=type 12-40 · C=card+grid
- * D=CSS-only(no lib) · E=tinted-paper · SOUL=6 SPECTACLE=2 DENSITY=7 */
+ * D=CSS-only(no lib) · E=night-indigo · SOUL=6 SPECTACLE=2 DENSITY=7 */
 
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{font-family:"Segoe UI","Microsoft YaHei",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6;-webkit-tap-highlight-color:transparent}
 button{font-family:inherit}
-.appbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;padding:8px 14px;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.appbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--appbar);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .brand{font-weight:700;font-size:17px;letter-spacing:.2px}
 .brand small{color:var(--muted);font-weight:400;margin-left:8px;font-size:12px}
 .iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
@@ -97,14 +117,14 @@ p,.psg,.bub{text-wrap:pretty}
 button .ic{pointer-events:none}
 .chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;margin:2px 4px 2px 0;background:var(--card);transition:.15s}
 .chip.on{background:var(--pri-weak);border-color:var(--pri-line);color:var(--pri);font-weight:600}
-input,textarea,select{font:inherit;border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%;background:var(--card);color:var(--ink)}
+input,textarea,select{font:inherit;border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%;background:var(--panel);color:var(--ink)}
 input:focus,textarea:focus,select:focus{outline:2px solid var(--focus-line);border-color:var(--focus-line)}
 textarea{resize:vertical;min-height:90px;line-height:1.7}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .grow{flex:1 1 auto;min-width:0}
 .drawer{position:fixed;top:0;bottom:0;left:0;width:276px;max-width:84vw;background:var(--card);border-right:1px solid var(--line);transform:translateX(-103%);transition:transform .25s ease;z-index:60;padding:14px 12px;overflow:auto}
-.drawer.open{transform:none;box-shadow:8px 0 30px rgba(15,23,42,.10)}
-.backdrop{position:fixed;inset:0;background:rgba(15,23,42,.35);opacity:0;pointer-events:none;transition:.2s;z-index:55}
+.drawer.open{transform:none;box-shadow:var(--shadow-drawer)}
+.backdrop{position:fixed;inset:0;background:var(--scrim);opacity:0;pointer-events:none;transition:.2s;z-index:55}
 .backdrop.show{opacity:1;pointer-events:auto}
 .drawer h3{margin:6px 8px 8px;font-size:13px;color:var(--muted);font-weight:600;letter-spacing:1px}
 .navlist{display:flex;flex-direction:column;gap:2px}
@@ -115,9 +135,9 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 .nav-sec{margin-top:14px}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink-strong);color:var(--pri-ink);padding:10px 16px;border-radius:12px;font-size:13px;opacity:0;transition:.25s;z-index:90;max-width:88vw;text-align:center;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%)}
-.modalwrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:80;padding:16px;background:rgba(15,23,42,.35)}
+.modalwrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:80;padding:16px;background:var(--scrim)}
 .modalwrap.show{display:flex}
-.modal{background:var(--card);border-radius:16px;max-width:560px;width:100%;max-height:86vh;overflow:auto;padding:18px 18px 16px;box-shadow:0 20px 60px rgba(15,23,42,.25)}
+.modal{background:var(--card);border-radius:16px;max-width:560px;width:100%;max-height:86vh;overflow:auto;padding:18px 18px 16px;box-shadow:var(--shadow-modal)}
 .modal h3{margin:0 0 4px;font-size:17px}
 .opts{display:grid;gap:8px}
 .opt{border:1px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;background:var(--card);transition:.12s;font-size:15px}
@@ -137,9 +157,9 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 .bub{max-width:84%;padding:10px 12px;border-radius:16px;font-size:15px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
 .bub.a{background:var(--card);border:1px solid var(--line);align-self:flex-start;border-top-left-radius:8px}
 .bub.u{background:var(--pri);color:var(--pri-ink);align-self:flex-end;border-bottom-right-radius:8px}
-.bub.u .tw:hover{background:rgba(255,255,255,.22);color:var(--pri-ink)}
+.bub.u .tw:hover{background:rgba(0,0,0,.14);color:var(--pri-ink)}
 .bub .mini{font-size:12px;opacity:.75;margin-top:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.bub.u .mini{color:var(--pri-line)}
+.bub.u .mini{color:rgba(13,14,21,.66)}
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:18px 6px}
 /* 空状态：图标 + 缺什么/为什么/下一步 + 动作，而不是一行灰字 */
 .emptybox{text-align:center;padding:26px 16px 22px}
@@ -256,7 +276,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.12 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.13 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main id="main">
@@ -408,11 +428,11 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   <div class="card">
     <b><span data-ic="broom"></span> 数据管理</b>
     <p class="small muted">清空后无法恢复（建议先导出备份）。</p>
-    <button class="btn" id="btnClearAll" style="color:var(--bad);border-color:#fecdd3">清空全部数据</button>
+    <button class="btn" id="btnClearAll" style="color:var(--bad);border-color:var(--bad-line)">清空全部数据</button>
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.12 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.13 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1468,9 +1488,9 @@ function renderHome(){
   var svg = '';
   if(has){
     var poly = pts.filter(function(p){ return p.acc!==null; });
-    if(poly.length>1){ svg += '<polyline points="'+poly.map(function(p){return p.x+','+p.y;}).join(' ')+'" fill="none" stroke="#6366f1" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'; }
-    poly.forEach(function(p){ svg += '<circle cx="'+p.x+'" cy="'+p.y+'" r="4.5" fill="#4f46e5"/>'; });
-    svg += '<line x1="0" y1="60.5" x2="700" y2="60.5" stroke="#e6e8ef" stroke-width="1"/>';
+    if(poly.length>1){ svg += '<polyline points="'+poly.map(function(p){return p.x+','+p.y;}).join(' ')+'" fill="none" stroke="#8b93ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'; }
+    poly.forEach(function(p){ svg += '<circle cx="'+p.x+'" cy="'+p.y+'" r="4.5" fill="#a78bfa"/>'; });
+    svg += '<line x1="0" y1="60.5" x2="700" y2="60.5" stroke="rgba(255,255,255,.16)" stroke-width="1"/>';
     $('#sparkNote').textContent = '点：每天的综合正确率（默写+听写）。';
   } else {
     $('#sparkNote').textContent = '完成一次默写/听写后，这里会显示你的正确率趋势。';
