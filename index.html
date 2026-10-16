@@ -185,7 +185,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="ic">⚙️</span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.7 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.8 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main id="main">
@@ -343,7 +343,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.7 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.8 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1241,6 +1241,35 @@ function onSelCollect(e){
   if(e && e.target && e.target.closest && e.target.closest('input,textarea,select,button,a,.chip,.opt,.tab,[data-qact],[data-opt]')) return;
   var w=selWord(); if(w){ openWordCard(w,'划选生词'); }
 }
+/* ================= 键盘可达性：选项/标签/卡片是 div/span 做的“按钮”，补上语义与键盘操作 =================
+   用 MutationObserver 统一处理，省得在十几个渲染函数里各写一遍；新增节点自动补 tabindex/role。 */
+(function(){
+  var SEL = '.opt,.chip,.tab,.wchip';
+  function mark(el){
+    if(!el || el.nodeType !== 1 || !el.matches || !el.matches(SEL)) return;
+    if(!el.hasAttribute('tabindex')){ el.setAttribute('tabindex','0'); el.setAttribute('role','button'); }
+    var on = el.classList.contains('on') || el.classList.contains('sel') || el.classList.contains('ok');
+    if(on) el.setAttribute('aria-pressed','true'); else el.removeAttribute('aria-pressed');
+  }
+  function markTree(root){
+    if(!root || root.nodeType !== 1) return;
+    if(root.matches && root.matches(SEL)) mark(root);
+    if(root.querySelectorAll) Array.prototype.forEach.call(root.querySelectorAll(SEL), mark);
+  }
+  window.__a11yMark = markTree;                    /* 暴露出来方便自检 */
+  new MutationObserver(function(recs){
+    recs.forEach(function(r){
+      if(r.type === 'attributes'){ mark(r.target); return; }
+      Array.prototype.forEach.call(r.addedNodes, markTree);
+    });
+  }).observe(document.body, { childList:true, subtree:true, attributes:true, attributeFilter:['class'] });
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Enter' && e.key !== ' ' && e.key !== 'Spacebar') return;
+    var t = e.target;
+    if(!t || !t.matches || !t.matches('[role="button"][tabindex]')) return;
+    e.preventDefault(); t.click();
+  });
+})();
 document.addEventListener('mouseup', onSelCollect);
 document.addEventListener('touchend', function(e){ setTimeout(function(){ onSelCollect(e); }, 260); }, {passive:true});
 window.addEventListener('hashchange',function(){ const r=(location.hash||'').replace(/^#\/?/,'')||'home'; if(r!==currentRoute) go(r); });
@@ -1341,7 +1370,8 @@ function renderVocab(){
       var id = b.getAttribute('data-id');
       var w = DB.words.find(function(x){ return x.id===id; }); if(!w) return;
       var act = b.getAttribute('data-act');
-      if(act==='play'){ TTS.speak(w.w); }
+      if(act==='open'){ openWordCard(w.w, '生词本'); }
+      else if(act==='play'){ TTS.speak(w.w); }
       else if(act==='master'){ w.mastered = !w.mastered; if(w.mastered){ w.mts = Date.now(); } else { delete w.mts; } save(); renderVocabList(); toast(w.mastered?('「'+w.w+'」已标记为掌握'):('「'+w.w+'」恢复复习')); }
       else if(act==='del'){ DB.words = DB.words.filter(function(x){ return x.id!==id; }); save(); renderVocabList(); renderVocab(); toast('已删除'); }
     });
@@ -1365,7 +1395,7 @@ function renderVocabList(){
     st.push('<span class="badge gray">'+esc(w.src||'手动')+'</span>');
     html += '<div class="list-item">'
       + '<div class="li-main">'
-      + '<div class="li-title" style="cursor:pointer" onclick="openWordCard(\''+esc(w.w).replace(/'/g,"\\'")+'\',\'生词本\')">'+esc(w.w)+' <span class="small muted">'+esc(w.ph||'')+'</span></div>'
+      + '<div class="li-title" style="cursor:pointer" data-act="open" data-id="'+w.id+'" role="button" tabindex="0" title="点击查看词卡">'+esc(w.w)+' <span class="small muted">'+esc(w.ph||'')+'</span></div>'
       + '<div class="li-sub">'+esc(w.cn||'（暂无释义）')+'</div>'
       + '<div class="mt8">'+st.join('')+'</div>'
       + '</div>'
@@ -1540,7 +1570,7 @@ function renderQuestion(){
   var q = Q.qs[Q.i]; if(!q) return;
   var total = Q.qs.length, n = Q.i+1;
   var head = '<div class="qa-center">第 '+n+' / '+total+' 题 · '+(Q.kind==='listen' ? '听写' : (q.mode==='en2cn' ? '英选中' : '中默英'))+'</div>'
-    + '<div class="prog"><i style="width:'+Math.round((Q.i)/total*100)+'%"></i></div><div class="mt12"></div>';
+    + '<div class="prog"><i style="width:'+Math.round((Q.i+1)/total*100)+'%"></i></div><div class="mt12"></div>';
   var body = '';
   if(Q.kind==='write' && q.mode==='en2cn'){
     body += '<div class="qword">'+esc(q.w)+'</div><div class="qph">'+esc(q.ph||'')+'</div>'
@@ -2052,7 +2082,10 @@ async function ieltsMic(){
   }catch(e){}
   if(rec){ try{ await new Promise(function(res){ rec.onstop = res; rec.stop(); }); }catch(e){} }
   if(stream){ try{ stream.getTracks().forEach(function(t){ t.stop(); }); }catch(e){} }
-  if(rec && chunks.length){ try{ window.__lastMicUrl = URL.createObjectURL(new Blob(chunks,{type:'audio/webm'})); }catch(e){} }
+  if(rec && chunks.length){ try{
+    if(window.__lastMicUrl){ URL.revokeObjectURL(window.__lastMicUrl); }   /* 上一条不再用，先释放，避免长会话堆积 */
+    window.__lastMicUrl = URL.createObjectURL(new Blob(chunks,{type:'audio/webm'}));
+  }catch(e){} }
   window.__lastMicSecs = Math.max(1, Math.round((Date.now() - micT0) / 1000));   /* 这段录音的时长，用来实测语速 */
   if(btn){ btn.disabled = false; btn.textContent = '🎤'; }
   if(text){ var inp = $('#chatInput'); if(inp){ inp.value = text; toast('识别完成，可修改后发送'); } }
@@ -2518,6 +2551,35 @@ function basicWritingFeedback(n, found, isCont){
   h += '<p class="small muted">配置 AI 后可获得逐句纠错、升级表达与预估分数。</p>';
   return h;
 }
+/* AI 返回的是外部数据，字段缺一个就会让渲染层 q.opts.forEach 抛错，这里先做最小校验 */
+function pracCheck(type, r){
+  var isArr = function(x, n){ return Array.isArray(x) && x.length >= n; };
+  var optOk = function(o, n){ return o && typeof o === 'object' && Array.isArray(o.opts) && o.opts.length >= (n||2); };
+  if(!r || typeof r !== 'object') return '返回的不是对象';
+  if(type === 'reading' || type === 'cloze'){
+    var qs = type === 'reading' ? r.questions : r.items;
+    if(!isArr(qs, 1)) return '缺少题目数组';
+    for(var i = 0; i < qs.length; i++){
+      if(!optOk(qs[i])) return '第 ' + (i+1) + ' 题缺选项';
+      if(typeof qs[i].ans !== 'number' || qs[i].ans < 0 || qs[i].ans >= qs[i].opts.length) return '第 ' + (i+1) + ' 题答案下标越界';
+      if(typeof qs[i].q !== 'string' && typeof qs[i].stem !== 'string') return '第 ' + (i+1) + ' 题缺题干';
+    }
+  } else if(type === 'qixuan'){
+    if(typeof r.passage !== 'string' || !r.passage) return '缺短文';
+    if(!isArr(r.opts, 3)) return '选项不足 3 个';
+    if(!r.ans || typeof r.ans !== 'object') return '缺答案';
+  } else if(type === 'grammar'){
+    if(typeof r.passage !== 'string' || !r.passage) return '缺短文';
+    if(!isArr(r.blanks, 1)) return '缺空格';
+    for(var k = 0; k < r.blanks.length; k++){ if(!r.blanks[k] || typeof r.blanks[k].ans !== 'string') return '第 ' + (k+1) + ' 空缺答案'; }
+  } else if(type === 'cont'){
+    if(typeof r.story !== 'string' || !r.story) return '缺故事材料';
+    if(!isArr(r.starts, 2)) return '段首句不足两句';
+  } else if(type === 'essay'){
+    if(typeof r.prompt !== 'string' || !r.prompt) return '缺作文题干';
+  }
+  return '';
+}
 async function pracGen(){
   if(!aiReady()){ aiHint(); return; }
   var P = {
@@ -2535,6 +2597,8 @@ async function pracGen(){
     var usr = g.usr + (pracPoint ? ('本套题请集中考查考点：'+pracPoint+'（题目和解析都要体现）。') : '');
     var kr = kbRef(g.sys + ' ' + usr + ' ' + pracPoint, 3);
     var r = await dualLLM([{role:'system',content:g.sys + kr.text},{role:'user',content:usr}], {json:true, note:'题目必须无误、答案正确、无超纲生词、符合高考风格、每道题都要给出 point 考点标签'});
+    var bad = pracCheck(pracSel, r);
+    if(bad){ toast('AI 出的题结构不对（'+bad+'），已保留原题，可再点一次重试'); return; }
     g.ap(r); pracData = { answers:{}, inputs:{} }; renderPracticeBody();
     toast('新题已生成 ✓ 已互检，参考知识库 '+kr.titles.length+' 条');
   }catch(e){ toast('生成失败：'+e.message); }
@@ -2584,7 +2648,11 @@ function renderData(){
   $('#rateVal').textContent = String(DB.settings.rate||0.95);
 }
 function exportJsonAll(){
-  download('英语学习数据-'+todayStr()+'.json', JSON.stringify(DB,null,2));
+  /* 备份文件里不带 API 密钥：整个 DB 直接落盘会把密钥明文写进文件，转发备份就等于泄露 */
+  var pack = JSON.parse(JSON.stringify(DB));
+  if(pack.settings && pack.settings.ai) pack.settings.ai.key = '';
+  download('英语学习数据-'+todayStr()+'.json', JSON.stringify(pack,null,2));
+  toast('已导出（含生词本/错题本/记录；本地文件里不含 API 密钥）');
 }
 function exportVocabCsv(){
   if(!DB.words.length){ toast('生词本为空'); return; }
@@ -2594,8 +2662,17 @@ function exportVocabCsv(){
   download('生词本-'+todayStr()+'.csv', '\ufeff'+lines.join('\n'), 'text/csv');
 }
 function clearAllData(){
-  confirmModal('清空全部数据','将删除生词本、错题本、雅思记录、练习记录与统计，且无法恢复。确定继续吗？', function(){
-    try{ localStorage.removeItem(LSKEY); }catch(e){}
+  confirmModal('清空全部数据','将删除生词本、错题本、雅思记录、练习记录与统计（AI 接口设置保留），且无法恢复。确定继续吗？', function(){
+    try{
+      /* 不能只 removeItem：load() 见 seeded 为空会重新灌入示例生词，看起来像“没清干净”。
+         这里写入一份空数据并显式置 seeded=true，内置词表（教材词表）会自动重建，不算用户数据。 */
+      localStorage.setItem(LSKEY, JSON.stringify({
+        words:[], wrong:[], ielts:[], practice:[],
+        stats:{ days:{}, checkin:[] },
+        settings: DB.settings,
+        seeded: true
+      }));
+    }catch(e){}
     location.reload();
   }, '清空');
 }
@@ -2669,7 +2746,10 @@ function init(){
         var d = JSON.parse(reader.result);
         confirmModal('导入数据','导入将覆盖当前数据（生词本/错题本/记录/设置）。确定导入吗？', function(){
           try{
+            var prevKey = (DB.settings && DB.settings.ai && DB.settings.ai.key) || '';
             ['words','wrong','book','stats','ielts','practice','settings'].forEach(function(k){ if(d[k]!=null) DB[k] = d[k]; });
+            /* 备份文件不带密钥，导入后沿用本机原来的密钥，免得被空值覆盖 */
+            if(DB.settings && DB.settings.ai && !DB.settings.ai.key && prevKey) DB.settings.ai.key = prevKey;
             save(); renderData(); go('home'); toast('导入成功 ✓');
           }catch(err){ toast('导入失败：'+err.message); }
         });
