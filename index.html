@@ -36,6 +36,12 @@ main{max-width:1080px;margin:0 auto;padding:14px 14px 96px}
 /* 描边与阴影二选一：常驻内容用描边（阴影留给弹窗、抽屉这类浮层），避免"框套框" */
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin:12px 0}
 .grid>.card{margin:0}
+/* 设置页的「册 / 单元」：默认收起，摘要里显示当前选择（识别优于回忆，也少摆一堆选项） */
+.picker{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
+.picker>summary{cursor:pointer;font-size:13px;color:var(--pri);list-style:none;display:flex;align-items:center;gap:6px}
+.picker>summary::-webkit-details-marker{display:none}
+.picker>summary::before{content:'▸';font-size:12px;transition:transform .15s}
+.picker[open]>summary::before{content:'▾'}
 h2.page{font-size:20px;margin:4px 0 2px}
 .sub{color:var(--muted);font-size:13px;margin:2px 0 10px}
 .grid{display:grid;gap:10px}
@@ -62,6 +68,9 @@ h2.page{font-size:20px;margin:4px 0 2px}
 .btn.ghost{border-color:transparent;background:transparent;color:var(--pri)}
 .btn.small{padding:4px 10px;font-size:13px;border-radius:8px}
 .btn:disabled{opacity:.5;cursor:not-allowed}
+/* 图标：尺寸跟随字号，颜色跟随文字，纵向与文字基线对齐 */
+.ic{width:1.15em;height:1.15em;flex:0 0 auto;vertical-align:-0.2em}
+button .ic{pointer-events:none}
 .chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;margin:2px 4px 2px 0;background:#fff;transition:.15s}
 .chip.on{background:var(--pri-weak);border-color:var(--pri-line);color:var(--pri);font-weight:600}
 input,textarea,select{font:inherit;border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%;background:#fff;color:var(--ink)}
@@ -78,7 +87,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 .navlist a{display:flex;gap:10px;align-items:center;padding:12px 10px;border-radius:12px;color:var(--ink);text-decoration:none;font-size:15px;cursor:pointer}
 .navlist a:hover{background:#f4f5fb}
 .navlist a.on{background:var(--pri-weak);color:var(--pri);font-weight:600}
-.navlist .ic{width:22px;text-align:center;font-size:17px}
+.navlist .icslot{width:22px;text-align:center;font-size:17px}
 .nav-sec{margin-top:14px}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:#111827;color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;opacity:0;transition:.25s;z-index:90;max-width:88vw;text-align:center;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%)}
@@ -179,31 +188,31 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
 </head>
 <body>
 <header class="appbar">
-  <button class="iconbtn" id="btnMenu" title="目录">☰</button>
+  <button class="iconbtn" id="btnMenu" title="目录"><span data-ic="menu"></span></button>
   <div class="brand">英语学习助手<small>高中同步 · 雅思口语</small></div>
   <div class="grow"></div>
-  <button class="iconbtn" id="btnQuick" title="快速开始">⚡</button>
+  <button class="iconbtn" id="btnQuick" title="快速开始"><span data-ic="bolt"></span></button>
 </header>
 
 <div class="backdrop" id="backdrop"></div>
 <aside class="drawer" id="drawer">
   <h3>目录</h3>
   <nav class="navlist" id="navHome">
-    <a data-route="home"><span class="ic">📊</span>学习看板</a>
-    <a data-route="vocab"><span class="ic">📒</span>生词本</a>
-    <a data-route="book"><span class="ic">📚</span>高中英语</a>
-    <a data-route="quiz"><span class="ic">✍️</span>默写</a>
-    <a data-route="listen"><span class="ic">🎧</span>听写</a>
-    <a data-route="wrong"><span class="ic">🗂️</span>错题本</a>
-    <a data-route="ielts"><span class="ic">🗣️</span>雅思口语</a>
-    <a data-route="practice"><span class="ic">🏋️</span>练习场</a>
+    <a data-route="home"><span class="icslot" data-ic="chart"></span>学习看板</a>
+    <a data-route="vocab"><span class="icslot" data-ic="book"></span>生词本</a>
+    <a data-route="book"><span class="icslot" data-ic="books"></span>高中英语</a>
+    <a data-route="quiz"><span class="icslot" data-ic="pencil"></span>默写</a>
+    <a data-route="listen"><span class="icslot" data-ic="headphone"></span>听写</a>
+    <a data-route="wrong"><span class="icslot" data-ic="alert"></span>错题本</a>
+    <a data-route="ielts"><span class="icslot" data-ic="mic"></span>雅思口语</a>
+    <a data-route="practice"><span class="icslot" data-ic="target"></span>练习场</a>
   </nav>
   <div class="nav-sec"><h3>设置</h3>
     <nav class="navlist">
-      <a data-route="data"><span class="ic">⚙️</span>数据与设置</a>
+      <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.10 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.11 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main id="main">
@@ -225,10 +234,10 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
     <div class="small muted" id="sparkNote">完成一次默写/听写后，这里会显示你的正确率趋势。</div>
   </div>
   <div class="grid g2">
-    <div class="card"><b>✍️ 默写</b><p class="small muted">看英文选中文 / 看中文默写英文，错误自动进错题本。</p><button class="btn pri wide" data-route="quiz">开始默写</button></div>
-    <div class="card"><b>🎧 听写</b><p class="small muted">听单词 → 默写英文 → 选择中文，最多重听 2 次。</p><button class="btn pri wide" data-route="listen">开始听写</button></div>
-    <div class="card"><b>🗣️ 雅思口语</b><p class="small muted">初学 / 中级 / 高级，语音对练，评价与建议。</p><button class="btn wide" data-route="ielts">进入陪练</button></div>
-    <div class="card"><b>🏋️ 练习场</b><p class="small muted">阅读 / 七选五 / 完形 / 语法填空 / 读后续写 / 作文。</p><button class="btn wide" data-route="practice">去练习</button></div>
+    <div class="card"><b><span data-ic="pencil"></span> 默写</b><p class="small muted">看英文选中文 / 看中文默写英文，错误自动进错题本。</p><button class="btn pri wide" data-route="quiz">开始默写</button></div>
+    <div class="card"><b><span data-ic="headphone"></span> 听写</b><p class="small muted">听单词 → 默写英文 → 选择中文，最多重听 2 次。</p><button class="btn pri wide" data-route="listen">开始听写</button></div>
+    <div class="card"><b><span data-ic="mic"></span> 雅思口语</b><p class="small muted">初学 / 中级 / 高级，语音对练，评价与建议。</p><button class="btn wide" data-route="ielts">进入陪练</button></div>
+    <div class="card"><b><span data-ic="target"></span> 练习场</b><p class="small muted">阅读 / 七选五 / 完形 / 语法填空 / 读后续写 / 作文。</p><button class="btn wide" data-route="practice">去练习</button></div>
   </div>
   <div class="card row">
     <span>每日默写目标：</span>
@@ -254,8 +263,8 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
     <div class="small muted mt8" id="addWordHint">词库：人教版（2019）高中英语全 7 册词表，共 2526 词。配置 AI 后可联网查询任意单词。</div>
   </div>
   <div class="row mt8">
-    <button class="btn pri" id="btnVocabWrite">✍️ 默写（随机生词）</button>
-    <button class="btn" id="btnVocabListen">🎧 听写</button>
+    <button class="btn pri" id="btnVocabWrite"><span data-ic="pencil"></span> 默写（随机生词）</button>
+    <button class="btn" id="btnVocabListen"><span data-ic="headphone"></span> 听写</button>
     <div class="grow"></div>
     <input id="vocabSearch" placeholder="搜索…" style="width:150px">
   </div>
@@ -270,8 +279,8 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   <div class="card" id="bookGrid"></div>
   <div class="card">
     <div class="row">
-      <button class="btn pri big grow" id="btnBookWrite">✍️ 默写全册</button>
-      <button class="btn big grow" id="btnBookListen">🎧 听写全册</button>
+      <button class="btn pri big grow" id="btnBookWrite"><span data-ic="pencil"></span> 默写全册</button>
+      <button class="btn big grow" id="btnBookListen"><span data-ic="headphone"></span> 听写全册</button>
     </div>
     <hr class="hr">
     <b>导入词表</b>
@@ -301,7 +310,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   <h2 class="page">错题本</h2>
   <div class="sub">默认只收录默写 / 听写错误；同一词连续答对 2 次后自动移出（也可手动删除）。练习场错题不收录，仅在每场结束复盘。</div>
   <div class="row">
-    <button class="btn pri" id="btnWrongRedo">🔁 重练全部错词</button>
+    <button class="btn pri" id="btnWrongRedo"><span data-ic="rotate"></span> 重练全部错词</button>
     <button class="btn" id="btnWrongClear">清空</button>
   </div>
   <div class="card" id="wrongList"></div>
@@ -328,7 +337,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   <h2 class="page">数据与设置</h2>
   <div class="sub">所有数据仅保存在本机浏览器；建议定期导出备份。</div>
   <div class="card">
-    <b>📤 数据备份</b>
+    <b><span data-ic="upload"></span> 数据备份</b>
     <p class="small muted">导出学习数据（生词本 / 错题本 / 记录）为 JSON；生词本可导出 CSV（可导入 Anki 等）。</p>
     <div class="row">
       <button class="btn" id="btnExportJson">导出全部数据(JSON)</button>
@@ -338,7 +347,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
     </div>
   </div>
   <div class="card">
-    <b>🤖 AI 设置</b>
+    <b><span data-ic="robot"></span> AI 设置</b>
     <p class="small muted">用于：生词释义联网查询、练习场出题、作文批改、雅思逐句纠错与评分。密钥仅保存在本机浏览器。</p>
     <div class="row"><input class="grow" id="aiBase" placeholder="接口地址，如 https://api.openai.com/v1"></div>
     <div class="row mt8"><input class="grow" id="aiKey" type="password" placeholder="API Key（sk-...）"></div>
@@ -347,19 +356,19 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
     <div class="row mt8"><button class="btn pri" id="btnAiSave">保存</button><button class="btn" id="btnAiTest">连接测试</button><span class="small muted" id="aiHint"></span></div>
   </div>
   <div class="card">
-    <b>🔊 发音设置</b>
+    <b><span data-ic="volume"></span> 发音设置</b>
     <p class="small muted">单词发音优先使用浏览器美音语音（词典级录音将在正式版接入，TTS 兜底）。</p>
     <div class="row"><select id="voiceSel" class="grow"></select><button class="btn" id="btnVoiceTest">试听</button></div>
     <div class="row mt8"><span class="small muted">语速</span><input id="rateRange" type="range" min="0.6" max="1.2" step="0.05" value="0.95" style="width:160px"><span class="small" id="rateVal">0.95</span></div>
   </div>
   <div class="card">
-    <b>🧹 数据管理</b>
+    <b><span data-ic="broom"></span> 数据管理</b>
     <p class="small muted">清空后无法恢复（建议先导出备份）。</p>
     <button class="btn" id="btnClearAll" style="color:var(--bad);border-color:#fecdd3">清空全部数据</button>
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.10 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.11 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1069,6 +1078,41 @@ function fmtDate(ts){ const d=new Date(ts); const z=n=>String(n).padStart(2,'0')
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 function norm(s){ return (s||'').trim().toLowerCase().replace(/[’]/g,"'").replace(/\s+/g,' '); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+/* ================= 图标集：内联 SVG，零依赖 =================
+   统一 24 格、2px 线宽、圆头圆角，颜色跟随文字（currentColor）。
+   课程里「图标要成套、统一线宽与视觉尺寸」说的就是这件事。 */
+const ICONS = {
+  menu:'<path d="M3 6h18M3 12h18M3 18h18"/>',
+  bolt:'<path d="M13 2 4 14h6l-1 8 9-12h-6z"/>',
+  chart:'<path d="M3 20h18"/><path d="M6.5 20v-8"/><path d="M12 20V5"/><path d="M17.5 20v-5"/>',
+  book:'<path d="M5 3h10a2 2 0 0 1 2 2v16H7a2 2 0 0 1-2-2z"/><path d="M9 3v18"/>',
+  books:'<path d="M3 4h5v16H3z"/><path d="M8 4h5v16H8z"/><path d="M14.4 5.3l4.3 1.1-4 14.6-4.3-1.1z"/>',
+  pencil:'<path d="M4 20h4L18.5 9.5a2.8 2.8 0 0 0-4-4L4 16z"/><path d="M14 6l4 4"/>',
+  headphone:'<path d="M4 14v-2a8 8 0 0 1 16 0v2"/><path d="M4 14h3v6H5a1 1 0 0 1-1-1z"/><path d="M20 14h-3v6h2a1 1 0 0 0 1-1z"/>',
+  alert:'<circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/>',
+  mic:'<rect x="9" y="2.5" width="6" height="10.5" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>',
+  target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/>',
+  sliders:'<path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="17" r="2"/>',
+  volume:'<path d="M11 5 6.5 9H3v6h3.5L11 19z"/><path d="M15.5 9.5a3.5 3.5 0 0 1 0 5"/><path d="M18.5 6.5a7.5 7.5 0 0 1 0 11"/>',
+  trash:'<path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6.5 7l1 13h9l1-13"/>',
+  check:'<path d="M4.5 12.5 9.5 17.5 19.5 6.5"/>',
+  rotate:'<path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v4h-4"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  play:'<path d="M7.5 4.5v15l12-7.5z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M16.5 16.5 21 21"/>',
+  sparkle:'<path d="M11 3l1.7 4.8L17.5 9.5l-4.8 1.7L11 16l-1.7-4.8L4.5 9.5l4.8-1.7z"/><path d="M18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z"/>',
+  upload:'<path d="M12 16V4"/><path d="M7 9l5-5 5 5"/><path d="M4 20h16"/>',
+  robot:'<rect x="4" y="8" width="16" height="11" rx="2.5"/><path d="M12 4.5V8"/><circle cx="9.5" cy="13.5" r="1"/><circle cx="14.5" cy="13.5" r="1"/>',
+  broom:'<path d="M14.5 3.5 20 9"/><path d="M4 20l6.5-6.5"/><path d="M10.5 13.5l3.5 3.5-3 3H6.5L4 17.5z"/>',
+  file:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/>'
+};
+function icon(n){ return '<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(ICONS[n]||'')+'</svg>'; }
+/* 静态 HTML 里只写 data-ic="名字"，由这里统一填充，避免图标定义散落各处 */
+function fillIcons(root){
+  (root||document).querySelectorAll('[data-ic]').forEach(function(el){
+    if(!el.innerHTML) el.innerHTML = icon(el.getAttribute('data-ic'));
+  });
+}
 let toastTimer=null;
 function toast(msg,ms){ ms=ms||2000; const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),ms); }
 let modalOpenedAt=0;
@@ -1322,7 +1366,7 @@ async function openWordCard(w, src){
     html += '<p class="center small muted">'+esc(r.reason||'未找到该单词')+'</p>';
   }
   html += '<div class="row mt12" style="justify-content:center">';
-  html += '<button class="btn" id="wcPlay">🔊 美音</button>';
+  html += '<button class="btn" id="wcPlay">'+icon('volume')+' 美音</button>';
   html += inV ? '<button class="btn" disabled>已在生词本</button>' : '<button class="btn pri" id="wcAdd">＋ 加入生词本</button>';
   html += '<button class="btn" onclick="closeModal()">关闭</button></div>';
   openModal(html);
@@ -1417,9 +1461,9 @@ function renderVocabList(){
       + '<div class="mt8">'+st.join('')+'</div>'
       + '</div>'
       + '<div style="display:flex;flex-direction:column;gap:6px">'
-      + '<button class="btn small" data-act="play" data-id="'+w.id+'">🔊</button>'
-      + '<button class="btn small" data-act="master" data-id="'+w.id+'">'+(w.mastered?'↩︎':'✓')+'</button>'
-      + '<button class="btn small" data-act="del" data-id="'+w.id+'" style="color:var(--bad)">🗑</button>'
+      + '<button class="btn small" data-act="play" data-id="'+w.id+'" title="朗读">'+icon('volume')+'</button>'
+      + '<button class="btn small" data-act="master" data-id="'+w.id+'" title="'+(w.mastered?'恢复复习':'标记已掌握')+'">'+icon(w.mastered?'rotate':'check')+'</button>'
+      + '<button class="btn small" data-act="del" data-id="'+w.id+'" title="删除" style="color:var(--bad)">'+icon('trash')+'</button>'
       + '</div></div>';
   });
   $('#vocabList').innerHTML = html;
@@ -1466,8 +1510,8 @@ function renderBook(){
   $('#bookGrid').innerHTML = html;
   $('#bookGrid').onclick = function(e){ var c = e.target.closest('.wchip'); if(c){ openWordCard(c.getAttribute('data-w'), '高中英语'); } };
   var isUnit = (bookFilter.unit!=='all'), isBook = (bookFilter.bk!=='all');
-  $('#btnBookWrite').textContent = isUnit ? '✍️ 默写本单元' : (isBook ? '✍️ 默写本册' : '✍️ 默写全册');
-  $('#btnBookListen').textContent = isUnit ? '🎧 听写本单元' : (isBook ? '🎧 听写本册' : '🎧 听写全册');
+  $('#btnBookWrite').innerHTML = icon('pencil') + ' ' + (isUnit ? '默写本单元' : (isBook ? '默写本册' : '默写全册'));
+  $('#btnBookListen').innerHTML = icon('headphone') + ' ' + (isUnit ? '听写本单元' : (isBook ? '听写本册' : '听写全册'));
 }
 function doImportWords(){
   var txt = $('#importText').value || '';
@@ -1487,7 +1531,7 @@ function doImportWords(){
 }
 /* ================= 快速开始 ================= */
 function quickStart(){
-  var items = [['quiz','✍️ 默写','看中文/英文写答'],['listen','🎧 听写','听音拼写+选义'],['ielts','🗣️ 雅思口语','语音陪练'],['practice','🏋️ 练习场','阅读/续写/作文']];
+  var items = [['quiz', icon('pencil')+' 默写','看中文/英文写答'],['listen', icon('headphone')+' 听写','听音拼写+选义'],['ielts', icon('mic')+' 雅思口语','语音陪练'],['practice', icon('target')+' 练习场','阅读/续写/作文']];
   var html = '<h3>快速开始</h3><p class="small muted">选择要进行的练习：</p><div class="grid g2">';
   items.forEach(function(it){ html += '<button class="btn big" data-route="'+it[0]+'" onclick="closeModal()">'+it[1]+'<span class="small muted" style="display:block;font-size:11px">'+it[2]+'</span></button>'; });
   html += '</div>';
@@ -1591,7 +1635,7 @@ function renderQuestion(){
   var body = '';
   if(Q.kind==='write' && q.mode==='en2cn'){
     body += '<div class="qword">'+esc(q.w)+'</div><div class="qph">'+esc(q.ph||'')+'</div>'
-      + '<div class="center mt8"><button class="btn" data-qact="play">🔊 播放读音</button></div>'
+      + '<div class="center mt8"><button class="btn" data-qact="play">'+icon('volume')+' 播放读音</button></div>'
       + '<p class="small muted center">选择正确的中文意思：</p>'
       + '<div class="opts">'+q.opts.map(function(o,i){ return '<div class="opt" data-opt="'+i+'">'+String.fromCharCode(65+i)+'. '+esc(o)+'</div>'; }).join('')+'</div>'
       + '<div class="mt12 center"><button class="btn pri big" data-qact="confirm" disabled>确认提交</button></div>';
@@ -1602,7 +1646,7 @@ function renderQuestion(){
       + '<div class="mt12 center"><button class="btn pri big" data-qact="confirm">确认提交</button></div>';
   }
   if(Q.kind==='listen'){
-    body += '<div class="center"><button class="btn pri big" data-qact="play" id="lPlay" style="min-width:220px">🔊 播放单词</button></div>'
+    body += '<div class="center"><button class="btn pri big" data-qact="play" id="lPlay" style="min-width:220px">'+icon('volume')+' 播放单词</button></div>'
       + '<p class="small muted center mt8" id="lLeft">还可重听 '+Math.max(0,2-q.plays)+' 次</p>'
       + '<p class="small muted">1）默写英文：</p>'
       + '<input data-qinput="1" placeholder="听到的单词是…" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="done">'
@@ -1681,7 +1725,7 @@ function renderFeedback(){
   html += '<div class="qword" style="font-size:30px">'+esc(q.w)+'</div><div class="qph">'+esc(q.ph||'')+'</div><p class="center">'+esc(q.cn||'')+'</p>';
   if(!q.ok && Q.kind!=='listen' && q.mode==='cn2en' && q.input){ html += '<p class="center small muted">你的答案：'+esc(q.input)+'</p>'; }
   if(!q.ok && Q.kind==='listen' && q.input){ html += '<p class="center small muted">你听到的是：'+esc(q.input)+'</p>'; }
-  html += '<div class="center mt8"><button class="btn" data-qact="play">🔊 再听一遍</button></div>';
+  html += '<div class="center mt8"><button class="btn" data-qact="play">'+icon('volume')+' 再听一遍</button></div>';
   var last = (Q.i>=Q.qs.length-1);
   html += '<div class="mt12 center"><button class="btn pri big" data-qact="next">'+(last?'查看本轮报告':'下一题')+'</button></div>';
   var card = Q.kind==='write' ? $('#quizCard') : $('#listenCard');
@@ -1734,11 +1778,15 @@ function renderSetup(kind){
   var el  = function(sfx){ return $('#' + ID + sfx); };
   el('Card').style.display = 'none'; el('Report').style.display = 'none';
   var s = '<b>范围</b><div class="mt8">' + chipUI('scope','vocab','生词本',sel.scope) + chipUI('scope','book','高中全册',sel.scope) + '</div>'
-    + (sel.scope === 'book' ? bookScopeChips(sel, 'bbk', 'bunit') : '')
+    + (sel.scope === 'book' ? ('<details class="picker"' + (setupUnitOpen ? ' open' : '') + '><summary>单元范围：'
+        + esc(sel.bk === 'all' ? ('全部（' + DB.book.length + ' 词）') : (sel.bk + ' · ' + (sel.unit === 'all' ? '整册' : sel.unit)))
+        + '</summary>' + bookScopeChips(sel, 'bbk', 'bunit') + '</details>') : '')
     + (isQ ? ('<b class="mt12" style="display:block">题型</b><div class="mt8">' + chipUI('type','en2cn','英选中',sel.type) + chipUI('type','cn2en','中默英',sel.type) + chipUI('type','mix','混合出题',sel.type) + '</div>') : '')
     + '<b class="mt12" style="display:block">题量</b><div class="mt8">' + [10,20,30].map(function(n){ return chipUI('count', n, n + ' 题', sel.count); }).join('') + '</div>'
     + '<div class="row mt12"><button class="btn pri big" id="btnStart' + BTN + '">' + (isQ ? '开始默写' : '开始听写') + '</button><span class="small muted" id="' + ID + 'PoolNote"></span></div>';
   el('Setup').innerHTML = s; el('Setup').style.display = 'block';
+  var det = el('Setup').querySelector('details.picker');
+  if(det) det.addEventListener('toggle', function(){ setupUnitOpen = det.open; });
   el('PoolNote').textContent = '当前范围可用：' + scopePool(sel.scope, sel.bk, sel.unit).length + ' 词'
     + (isQ ? '（优先到期复习词，错词在错题本中单独重练）' : '');
   if(window['__' + ID + 'SetupBound']) return;
@@ -1789,9 +1837,9 @@ function renderWrong(){
       + '<div class="li-title">'+esc(it.w)+' <span class="small muted">'+esc(it.ph||'')+'</span> <span class="badge red">'+esc(it.type)+'</span> <span class="badge gray">错 '+it.count+' 次</span></div>'
       + '<div class="li-sub">'+esc(it.cn||'')+' · 最近 '+fmtDate(it.last||it.ts)+' · 连对进度 '+((it.streak||0))+'/2</div>'
       + '</div><div style="display:flex;flex-direction:column;gap:6px">'
-      + '<button class="btn small" data-act="play" data-id="'+it.id+'">🔊</button>'
+      + '<button class="btn small" data-act="play" data-id="'+it.id+'" title="朗读">'+icon('volume')+'</button>'
       + '<button class="btn small" data-act="redo" data-id="'+it.id+'">重练</button>'
-      + '<button class="btn small" data-act="del" data-id="'+it.id+'" style="color:var(--bad)">🗑</button>'
+      + '<button class="btn small" data-act="del" data-id="'+it.id+'" title="删除" style="color:var(--bad)">'+icon('trash')+'</button>'
       + '</div></div>';
   });
   $('#wrongList').innerHTML = html;
@@ -1985,9 +2033,9 @@ function renderIeltsHome(){
     + '<b class="mt12" style="display:block">本难度话题（每次进入随机不同）</b>'
     + '<p class="small muted">'+IELTS_TOPICS[ieltsSel].join(' · ')+'</p>'
     + '<div class="row mt12"><button class="btn pri big" id="btnStartIelts">开始训练</button>'
-    + '<button class="btn big" id="btnMockIelts">🎧 全真模考（Part1→2→3 计时）</button>'
+    + '<button class="btn big" id="btnMockIelts">'+icon('headphone')+' 全真模考（Part1→2→3 计时）</button>'
     + '<span class="small muted">'+(aiReady()? 'AI 模式：考官由大模型扮演，支持逐句纠错与四项评分' : '离线模式：内置示例考官脚本；配置 AI 后体验完整对练')+'</span></div>'
-    + '<p class="small muted mt8">支持语音对话：点 🎤 说话（需麦克风权限与联网），考官回复会自动朗读（美音）；也可直接打字。</p>';
+    + '<p class="small muted mt8">支持语音对话：点麦克风按钮说话（需麦克风权限与联网），考官回复会自动朗读（美音）；也可直接打字。</p>';
   var el = $('#ieltsHome'); el.innerHTML = h; el.style.display = 'block';
   if(!window.__ieltsHomeBound){
     window.__ieltsHomeBound = true;
@@ -1995,7 +2043,7 @@ function renderIeltsHome(){
       var c = e.target.closest('[data-lvl]');
       if(c){ ieltsSel = c.getAttribute('data-lvl'); renderIelts(); return; }
       if(e.target.id==='btnStartIelts'){ startIelts(); }
-      if(e.target.id==='btnMockIelts'){ startIeltsMock(); }
+      if(e.target.closest('#btnMockIelts')){ startIeltsMock(); }   /* 含图标，点图标时 e.target 不是按钮本身 */
     });
   }
 }
@@ -2079,7 +2127,7 @@ async function ieltsMic(){
   var micT0 = Date.now();
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR){ toast('当前浏览器不支持语音识别，可直接打字；推荐电脑版 Chrome/Edge'); return; }
-  var btn = $('#btnMic'); if(btn){ btn.disabled = true; btn.textContent = '🎙…'; }
+  var btn = $('#btnMic'); if(btn){ btn.disabled = true; btn.innerHTML = icon('mic')+'…'; }
   var rec = null, stream = null, chunks = [];
   try{
     stream = await navigator.mediaDevices.getUserMedia({audio:true});
@@ -2104,7 +2152,7 @@ async function ieltsMic(){
     window.__lastMicUrl = URL.createObjectURL(new Blob(chunks,{type:'audio/webm'}));
   }catch(e){} }
   window.__lastMicSecs = Math.max(1, Math.round((Date.now() - micT0) / 1000));   /* 这段录音的时长，用来实测语速 */
-  if(btn){ btn.disabled = false; btn.textContent = '🎤'; }
+  if(btn){ btn.disabled = false; btn.innerHTML = icon('mic'); }
   if(text){ var inp = $('#chatInput'); if(inp){ inp.value = text; toast('识别完成，可修改后发送'); } }
   else { toast('没有识别到内容，请再试一次或直接打字'); }
 }
@@ -2118,14 +2166,14 @@ function renderIeltsChat(){
   h += '<div class="chat" id="chatBox">';
   s.msgs.forEach(function(m,i){
     h += '<div class="bub '+(m.role==='a'?'a':'u')+'"'+(m.pending?' style="opacity:.55"':'')+'>'+renderPassage(m.text);
-    if(m.role==='a' && !m.pending){ h += '<div class="mini"><span class="btn small" data-chat="play" data-i="'+i+'">🔊 朗读</span></div>'; }
+    if(m.role==='a' && !m.pending){ h += '<div class="mini"><span class="btn small" data-chat="play" data-i="'+i+'">'+icon('volume')+' 朗读</span></div>'; }
     if(m.role==='u' && m.audio){ h += '<div class="mini"><span class="btn small" data-chat="audio" data-i="'+i+'">▶ 回放我的录音</span></div>'; }
     h += '</div>';
   });
   h += '</div>';
   if(!s.finished){
-    h += '<div class="row mt12"><input class="grow" id="chatInput" placeholder="用英文回答（或点 🎤 说话）" autocomplete="off">'
-      + '<button class="btn" id="btnMic" style="min-width:52px">🎤</button><button class="btn pri" id="btnSendMsg">发送</button></div>'
+    h += '<div class="row mt12"><input class="grow" id="chatInput" placeholder="用英文回答（或点麦克风按钮）" autocomplete="off">'
+      + '<button class="btn" id="btnMic" title="语音输入" style="min-width:52px">'+icon('mic')+'</button><button class="btn pri" id="btnSendMsg">发送</button></div>'
       + '<div class="row mt8"><span class="small muted">语音识别需联网；录音回放仅本次会话有效。</span><div class="grow"></div>'
       + '<button class="btn" id="btnEndIelts">结束并生成报告</button></div>';
   } else {
@@ -2140,7 +2188,7 @@ function renderIeltsChat(){
         if(c.getAttribute('data-chat')==='play'){ TTS.speak(m.text); }
         else if(m.audio){ try{ new Audio(m.audio).play(); }catch(err){} }
         return; }
-      if(e.target.id==='btnMic'){ ieltsMic(); }
+      if(e.target.closest('#btnMic')){ ieltsMic(); }
       if(e.target.id==='btnSendMsg'){ ieltsSend(); }
       if(e.target.id==='btnEndIelts'){ ieltsEnd(); }
       if(e.target.id==='btnNewIelts'){ ieltsSess = null; renderIelts(); }
@@ -2167,7 +2215,7 @@ function buildIeltsReportHTML(rep, offline, errmsg){
     h += '<b>评分（AI 估分，1-9）</b><div class="grid g3 mt8">';
     labels.forEach(function(L){ h += '<div class="card stat" style="margin:0"><b>'+(rep.scores&&rep.scores[L[0]]!=null?rep.scores[L[0]]:'-')+'</b><span>'+L[1]+'</span></div>'; });
     h += '</div>';
-    h += '<div class="report-item"><b>发音：未评测</b><div class="small muted">要评发音得分析录音（音素、重音、语调）。本应用只把录音留给你自己回放，没做发音评测，所以不给分——比给一个猜出来的分数更诚实。想练发音可以对照考官朗读（🔊）跟读。</div></div>';
+    h += '<div class="report-item"><b>发音：未评测</b><div class="small muted">要评发音得分析录音（音素、重音、语调）。本应用只把录音留给你自己回放，没做发音评测，所以不给分——比给一个猜出来的分数更诚实。想练发音可以对照考官朗读（'+icon('volume')+'）跟读。</div></div>';
     h += '<p class="small muted">说明：上面三项是 AI 基于<strong>文字</strong>的估分（看不到你的语气与停顿），仅供参考。</p>';
     if(rep.errors && rep.errors.length){
       h += '<b class="mt12" style="display:block">逐句纠错</b>';
@@ -2176,7 +2224,7 @@ function buildIeltsReportHTML(rep, offline, errmsg){
           + (er.why?('<div class="small muted">'+esc(er.why)+'</div>'):'')+'</div>';
       });
     }
-    if(wpm){ h += '<div class="card"><b>实测语速：'+wpm.wpm+' 词/分</b><div class="small muted">'+wpm.n+' 次语音作答、共 '+wpm.secs+' 秒（只统计用 🎤 回答的轮次）。雅思口语 6 分常见区间 120-150 词/分；低于 100 通常说明停顿较多，先求说顺再求说快。</div></div>'; }
+    if(wpm){ h += '<div class="card"><b>实测语速：'+wpm.wpm+' 词/分</b><div class="small muted">'+wpm.n+' 次语音作答、共 '+wpm.secs+' 秒（只统计用麦克风回答的轮次）。雅思口语 6 分常见区间 120-150 词/分；低于 100 通常说明停顿较多，先求说顺再求说快。</div></div>'; }
     if(rep.advice){ h += '<div class="report-item ok"><b>提升建议</b><div>'+esc(rep.advice)+'</div></div>'; }
   } else {
     h += '<div class="report-item">'+ (errmsg ? ('AI 评分失败（'+esc(errmsg)+'），已生成基础报告。') : '当前为离线模式（未配置 AI）：以下为基础报告，配置 AI 后可生成逐句纠错与三项评分。') +'</div>';
@@ -2210,7 +2258,7 @@ async function ieltsEnd(){
         {role:'system', content:'你是雅思口语考官与教练。根据对话记录输出：四项评分（流利与连贯、词汇、语法、发音，1-9 分；发音按文本可推断程度给出近似值）、逐句纠错（orig=学生原句, fix=更自然/正确的表达, why=中文说明）、提升建议。只输出JSON：{"scores":{"fluency":0,"vocabulary":0,"grammar":0,"pronunciation":0},"errors":[{"orig":"","fix":"","why":""}],"advice":""}' + kr.text},
         {role:'user', content:transcript.slice(0,6000)}
       ],{json:true, note:'评分与纠错必须基于对话记录本身'});
-      s.report = buildIeltsReportHTML(rep, false) + (kr.titles.length ? ('<p class="small muted">📚 已参考知识库：'+esc(kr.titles.join('、'))+'</p>') : '');
+      s.report = buildIeltsReportHTML(rep, false) + (kr.titles.length ? ('<p class="small muted">'+icon('book')+' 已参考知识库：'+esc(kr.titles.join('、'))+'</p>') : '');
     }catch(e){ s.report = buildIeltsReportHTML(null, true, e.message); }
   } else {
     s.report = buildIeltsReportHTML(null, true);
@@ -2263,7 +2311,7 @@ var PRACTICE_TYPES = [
   ['grammar','语法填空'],
   ['cont','读后续写'],
   ['essay','作文练习'],
-  ['mock','📝 整套模考']
+  ['mock', icon('file')+' 整套模考']
 ];
 var pracSel = 'reading';
 var pracData = { answers:{}, inputs:{} };
@@ -2273,6 +2321,7 @@ const POINT_TYPE = { '细节理解':'reading','推理判断':'reading','主旨�
   '逻辑关系':'qixuan','代词指代':'qixuan','词义辨析':'cloze','固定搭配':'cloze','语境逻辑':'cloze',
   '时态语态':'grammar','非谓语动词':'grammar','词性转换':'grammar','连词与从句':'grammar','冠词与介词':'grammar' };
 var pracPoint = '';
+var setupUnitOpen = false;   /* 设置页「册/单元」展开状态，重绘后保持 */
 /* ---- 整套模考：把各节按顺序铺在一页，各自提交、底部汇总 ---- */
 var pracMockOn = false, pracMockAppend = false, pracMockSum = {}, pracDataMap = {};
 function mockSwitch(sec){
@@ -2389,7 +2438,7 @@ function renderPracticeBody(){
 }
 function genRow(note){
   return '<div class="row"><span class="small muted">'+esc(note)+'</span><div class="grow"></div>'
-    + '<button class="btn" data-pact="gen">🪄 AI 出新题'+(aiReady()?'':'（需配置AI）')+'</button></div>';
+    + '<button class="btn" data-pact="gen">'+icon('sparkle')+' AI 出新题'+(aiReady()?'':'（需配置AI）')+'</button></div>';
 }
 function renderReading(){
   var d = PD.reading;
@@ -2544,7 +2593,7 @@ async function pracWriting(){
         {role:'user', content:'题目/材料：\n'+task+'\n\n学生作文：\n'+t}
       ], {note:'必须基于学生原文批改，指出真实存在的问题'});
       out += '<div class="small" style="white-space:pre-wrap">'+esc(r)+'</div>';
-      if(kr.titles.length) out += '<p class="small muted">📚 已参考知识库：'+esc(kr.titles.join('、'))+'</p>';
+      if(kr.titles.length) out += '<p class="small muted">'+icon('book')+' 已参考知识库：'+esc(kr.titles.join('、'))+'</p>';
     }catch(e){
       out += '<p class="small muted">AI 批改失败（'+esc(e.message)+'）。</p>' + basicWritingFeedback(n, found, isCont);
     }
@@ -2731,6 +2780,7 @@ function saveGoal(){
 /* ================= 初始化 ================= */
 function init(){
   load(); TTS.init();
+  fillIcons();          /* 把 data-ic 的占位填成 SVG 图标 */
   $('#btnMenu').onclick = openDrawer;
   $('#backdrop').onclick = closeDrawer;
   $('#btnQuick').onclick = quickStart;
