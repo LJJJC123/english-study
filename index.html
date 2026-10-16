@@ -293,7 +293,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.21 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.22 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main>
@@ -472,7 +472,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.21 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.22 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1130,36 +1130,81 @@ const IELTS_LEVELS = [
  {id:'high', name:'高级', range:'8-10 分', brief:'抽象社会话题，深入追问，高强度对练'}
 ];
 const PD = {
- reading:{ title:'C 篇 · 示例',
-  src:'示例文本（按 2025 浙江模考 C 篇风格编写，非真题原文）',
-  passage:'Many people believe that learning a musical instrument is only for children. However, research tells a different story. In a study at a university in California, scientists followed 120 adults aged between 60 and 80. Half of them learned to play the piano for six months, while the others kept their usual routines. During the study, the piano group showed clearer improvements in memory and attention than the other group. Researchers explain that reading notes and moving fingers at the same time gives the brain a full workout. The results do not mean everyone must buy a piano. Simple activities such as dancing or singing in a group may also help. The key message is simple: it is never too late to challenge your brain.',
+/* 演示内容全部按 2024 新课标卷实测规格写：阅读 C 篇 4 题约 350 词、七选五 5 空、完形 15 空约 220 词、
+   语法填空 10 空约 230 词、读后续写材料 300-350 词、应用文 80 词。
+   标「自编」的是完全虚构/通用知识，没有引用真实人物或文章——按素材来源规则，引用他人素材必须写出处。 */
+ reading:{ title:"阅读理解 C 篇 · 示例（4 题）",
+  src:"自编（说明文，未引用真实人物或文章）",
+  passage:"For most of the twentieth century, a library meant one thing: shelves of books and a rule of silence. People went there to borrow novels, look up facts in heavy reference books, or find a quiet desk to study. A librarian was expected to guard the collection and keep it in order.\n\nThat picture has changed quickly. In many cities the busiest part of a public library is no longer the book shelves but the ground floor, where visitors use computers, attend a free class, or simply sit with a cup of coffee. Some libraries lend tools, musical instruments and even seeds for a garden. Others run small recording rooms where teenagers produce music after school.\n\nWhy the change? Part of the answer is practical. When almost any fact can be found on a phone in seconds, a building that only stores information loses its purpose. The libraries that survive are the ones offering something a screen cannot: a warm place to be, equipment too expensive for one family to buy, and a person who can help.\n\nThere is a social reason too. As cities grow, public space shrinks. Cafes expect you to keep buying, and shopping centres close at night. The library stays open, costs nothing and asks no questions. For a student without a quiet room at home, or an older person who has not spoken to anyone all day, that matters more than the books.\n\nNone of this means books have become unimportant. Borrowing numbers are still high and reading groups are fuller than ever. What has changed is the balance: the collection is no longer the whole point of the building, but one service among several.\n\nCritics warn that libraries risk becoming everything to everyone and therefore nothing in particular. Supporters answer that this is exactly what a public institution should do - follow the needs of the people who pay for it. On the ground floor of a busy library on a Tuesday afternoon, it is hard to argue with them.",
+  points:["细节理解","推理判断","推理判断","主旨大意"],
   questions:[
-   {q:'What did the study at the university find?', opts:['Older adults who learned piano improved memory and attention.','Older adults disliked playing the piano.','Children learn music much faster than adults.','Dancing is better for the brain than singing.'], ans:0, why:'第三句起：the piano group showed clearer improvements in memory and attention。'},
-   {q:'What does "gives the brain a full workout" mean?', opts:['Makes the brain tired quickly.','Exercises the brain in a thorough way.','Makes the brain slow down.','Harms the brain over time.'], ans:1, why:'workout 指锻炼；此处意为让大脑得到充分锻炼。'},
-   {q:'What is the main message of the passage?', opts:['Only children can learn music.','Everyone should buy a piano.','It is never too late to challenge your brain.','Dancing is the best exercise.'], ans:2, why:'末句：it is never too late to challenge your brain。'}],
-   points:['细节理解','词义猜测','主旨大意']},
- qixuan:{ title:'七选五 · 示例（正式版按真题选项特征生成）',
-  passage:'How to Build a Reading Habit\nReading every day is easier said than done. [[1]] Fifteen minutes a day is enough at the beginning. Second, keep your book where you can see it. [[2]] Finally, share what you read. Talking about a book with friends makes you want to keep going. [[3]]',
-  opts:['A. A book on your desk is a quiet reminder.','B. Do not plan to read for two hours on day one.','C. It also helps you remember the story better.'],
-  ans:{'1':'B','2':'A','3':'C'}, points:{'1':'逻辑关系','2':'逻辑关系','3':'代词指代'}, why:{'1':'空1后紧接"十五分钟就够"，说明前面是"别一上来两小时"，选B。','2':'空2在"把书放在看得见的地方"之后，A"桌上的书是无声的提醒"承接最顺。','3':'空3在"和朋友讨论"之后，C"It also helps…"承接朋友讨论的另一个好处。'}},
- cloze:{ title:'完形填空 · 示例（正式版按真题考点分布生成）',
+   {q:"What was a librarian mainly expected to do in the twentieth century?", opts:["Run free classes for adults.","Guard the collection and keep it in order.","Lend tools and musical instruments.","Produce music with local teenagers."], ans:1, why:"第二段开头说图书馆变了，说明第一段的“guard the collection and keep it in order”是过去的主要职责。", point:"细节理解"},
+   {q:"Why do some libraries lend tools and musical instruments?", opts:["Because printed books are no longer borrowed.","Because local councils require them to do so.","Because such equipment is too expensive for one family to buy.","Because they want to compete with nearby cafes."], ans:2, why:"第三段列举“a screen cannot”给不了的东西，其中一项就是“equipment too expensive for one family to buy”。", point:"推理判断"},
+   {q:"What does “asks no questions” suggest about the library?", opts:["It does not employ enough staff.","It has stopped lending books.","It is usually empty during the day.","It accepts everyone without conditions."], ans:3, why:"与前半句“costs nothing”并列，说明它不设门槛、不盘问来者。", point:"推理判断"},
+   {q:"What is the passage mainly about?", opts:["How the role of public libraries has changed.","Why borrowing numbers are falling.","How to organise a successful reading group.","Why critics want libraries to close."], ans:0, why:"全文围绕图书馆从“只藏书”到“提供多种服务”的转变展开；其他三项都只是文中的细节或未提及。", point:"主旨大意"}
+  ]},
+ qixuan:{ title:"七选五 · 示例（5 空 / 7 选项）",
+  src:"自编（方法建议类短文，未引用真实人物或文章）",
+  passage:"Most people do not put things off because they are lazy. They delay because the task in front of them feels too large to begin. [[1]] The trick is not to force yourself to feel motivated; it is to make the first step so small that refusing it seems silly. Nothing about the task has changed; only the size of the first step has.\n\nStart by writing the task down in a form you can finish in one sitting. “Prepare for the English exam” is not a task; it is a wish. [[2]] A good version might be “review Unit 3 vocabulary for twenty minutes”. Now you know exactly when you are done. Vague goals cannot be finished, so they can always be postponed.\n\nNext, decide where and when you will do it. [[3]] Research on habit formation keeps finding the same thing: a fixed time and place does more for follow-through than any amount of enthusiasm. The decision is made once, and after that you no longer have to argue with yourself.\n\nIt also helps to remove one small obstacle in advance. If you plan to study in the morning, put the book on the kitchen table the night before. [[4]] Every step you remove from the beginning makes the beginning more likely. The same is true of distractions: put the phone in another room before you sit down.\n\nFinally, accept that the first attempt will be imperfect. [[5]] What matters is that the task has stopped being something you are avoiding and become something you are doing. Momentum, not perfection, is what carries you to the end. Two messy paragraphs written tonight are worth more than a perfect plan for tomorrow.",
+  opts:["A. Some people find that background music helps them concentrate.",
+        "B. Many students believe that they simply need more self-discipline.",
+        "C. This sounds trivial, yet it removes the moment when you have to decide.",
+        "D. When a goal stays vague, every part of it feels urgent and none of it feels possible.",
+        "E. Perfectionism may be praised at school, but here it works against you.",
+        "F. The same principle applies to almost every subject in the timetable.",
+        "G. That single decision takes less than a minute, yet it changes the whole day."],
+  ans:{"1":"B","2":"D","3":"G","4":"C","5":"E"},
+  why:{"1":"上文说“不是懒”，本句点出学生常见的误解（以为只是自律不够），与下句“关键不是逼自己有动力”正好衔接。",
+       "2":"上文说目标太笼统，本句解释笼统的坏处，下句给出“好版本”。",
+       "3":"上文刚提出“定时间地点”，本句用 That single decision 指代这一动作。",
+       "4":"本句用 This 指代上一句“前一晚把书放桌上”，与下句“减少一个步骤”呼应。",
+       "5":"上文说“接受第一次不完美”，本句说明为什么难接受——学校一直夸奖完美主义。"},
+  points:{"1":"逻辑关系","2":"代词指代","3":"代词指代","4":"代词指代","5":"逻辑关系"}},
+ cloze:{ title:"完形填空 · 示例（15 空）",
+  src:"自编（记叙文，未引用真实人物或事件）",
+  passage:"Last winter I was waiting for a train on a cold platform. The board said my train would be forty minutes ___1___, so I sat on a hard bench and pulled my coat around me.\n\nAn old man sat down beside me with a heavy bag. After a while he ___2___ it on the bench and asked, “Would you watch this for a minute?” Before I could answer, he had walked away.\n\nI felt ___3___. What if the bag held something dangerous? I looked around for help, but nobody ___4___ any attention to me. I began to ___5___ the bag with my eyes. Then I noticed a small ___6___: a paper label with a name and a phone number on it.\n\nHe returned with two cups of hot tea. “There is no cafe on this side,” he said. “I had to go ___7___.” He handed me one cup. I tried to ___8___ him, but he only smiled.\n\nHe had been a teacher and had ___9___ the same station for thirty years. When the train came, he ___10___ his bag and stood up. “Thank you for watching it,” he said. “I knew you would.”\n\nI have never ___11___ him again. But that small act of ___12___ stayed with me and quietly ___13___ the way I treat strangers. Now, whenever I am ___14___ about somebody, I remember the man and the tea he carried across a ___15___ platform for someone he had never met.",
   items:[
-   {stem:'Last winter, I joined a volunteer program in my community. At first, I was ___1___ about talking to strangers.', opts:['nervous','excited','proud','bored'], ans:0, why:'由后文 But…kind 的转折及 At first 可知最初是"紧张"，选 nervous。'},
-   {stem:'I helped the elderly people ___2___ their phones.', opts:['use','break','buy','draw'], ans:0, why:'志愿者帮老人"使用"手机最符合语境。'},
-   {stem:'By the end of the month, I became much more ___3___ in myself.', opts:['confident','silent','lazy','careless'], ans:0, why:'经历之后变得"更自信"，confident 符合语境。'},
-   {stem:'Volunteering taught me that small acts of ___4___ can warm a whole neighborhood.', opts:['kindness','money','luck','speed'], ans:0, why:'"小小的善意能温暖整个社区"，kindness 与 warm 呼应。'}],
-   points:['语境逻辑','词义辨析','固定搭配','语境逻辑']},
- grammar:{ title:'语法填空 · 示例（正式版按你的当前学习进度出题，避免陌生词）',
-  passage:'Liu Wei lost his arms in an accident when he was ten. However, he refused [[1]] (give) up. He learned [[2]] (play) the piano with his toes. In 2010, he [[3]] (win) the first prize in a TV talent show. His story shows that difficulties can [[4]] (overcome) with a strong will. Today, he often tells young people, "Nothing is [[5]] (possible) if you keep trying."',
-  blanks:[{ans:'to give', variants:['to give'], hint:'give', why:'refuse to do sth. 固定搭配。'},{ans:'to play', variants:['to play'], hint:'play', why:'learn to do sth. 固定搭配。'},{ans:'won', variants:['won'], hint:'win', why:'2010 年，一般过去时。'},{ans:'be overcome', variants:['be overcome'], hint:'overcome', why:'困难"被克服"，情态动词后接被动语态。'},{ans:'impossible', variants:['impossible'], hint:'possible', why:'"没有什么不可能"，用反义词 impossible。'}],
-   points:['固定搭配','非谓语动词','时态语态','时态语态','词性转换']},
- cont:{ title:'读后续写 · 示例（满分 25 分；正式版按浙江省评分标准批改）',
-  story:'Emma walked to the bus stop with her little brother, Tom. It was his first day at the new school. Tom held her hand tightly and looked at the ground. When the school bus arrived, he suddenly stopped. "I can\'t do this," he whispered. Emma looked at his pale face. She remembered her own first day, when a kind girl had smiled at her and showed her the way. She took a deep breath.',
-  starts:['Emma took Tom\'s hand and said, "…"','After school, Tom ran to Emma with a big smile.'],
-  model:'Emma took Tom\'s hand and said, "Look, everyone feels a little scared on the first day. Just smile and say hello, and I will be waiting for you here after school." Tom looked at her, took a deep breath and climbed onto the bus. Through the window, he waved at Emma. His hand was still a little shaky, but his eyes were brighter than before.\n\nAfter school, Tom ran to Emma with a big smile. "A boy called Jack shared his lunch with me, and we played basketball at noon!" he said, waving a small drawing in his hand. Emma smiled and hugged him. On the way home, Tom talked all the way. Emma thought about the girl who once showed her the way, and she felt warm and proud. A small act of kindness had planted a seed, and today it was quietly growing.'},
- essay:{ title:'作文练习 · 示例（应用文；正式版支持更多文体与 AI 批改）',
-  prompt:'假定你是李华，你校将举办"中国文化节"，请写一封邀请信，邀请外教 Mr. Smith 参加。\n内容包括：\n1. 时间与地点；\n2. 活动内容（如书法体验、汉服展示等）；\n3. 邀请原因。\n注意：1. 词数 80 左右；2. 可适当增加细节，使行文连贯。',
-  model:'Dear Mr. Smith,\n\nI am writing to invite you to our school\'s Chinese Culture Festival, which will be held in the school hall from 2:00 p.m. to 5:00 p.m. next Friday.\n\nAt the festival, you can try Chinese calligraphy, watch a traditional Hanfu show, and taste Chinese tea. Many students are looking forward to hearing your stories about China.\n\nI believe it would be a wonderful chance for us to share cultures. We would be honored if you could join us. Looking forward to your reply.\n\nYours,\nLi Hua'}
+   {stem:"The notice board said my train would be forty minutes ___, so I sat down on a hard bench.", opts:["late","long","away","close"], ans:0, why:"火车晚点用“forty minutes late”。", point:"语境逻辑"},
+   {stem:"After a while he ___ it on the bench and asked, “Would you watch this for a minute?”", opts:["threw","put","hid","emptied"], ans:1, why:"请人看管要先“放下”包；threw/hid/emptied 都与后文“请人照看”矛盾。", point:"词义辨析"},
+   {stem:"I felt ___.", opts:["proud","sleepy","uneasy","bored"], ans:2, why:"后两句是两个担心（“万一是危险物品”“万一他不回来”），说明是“不安”。", point:"语境逻辑"},
+   {stem:"I looked around, hoping someone would tell me what to do, but nobody ___ any attention to me.", opts:["paid","drew","gave","took"], ans:0, why:"固定搭配 pay attention to。", point:"固定搭配"},
+   {stem:"I began to ___ the bag with my eyes, as if looking at it would explain it.", opts:["count","study","lift","cover"], ans:1, why:"“用眼睛……它，仿佛看着它就能解释”＝仔细打量，study 最贴切。", point:"词义辨析"},
+   {stem:"Then I noticed a small ___; a paper label with a name and a phone number.", opts:["hole","crack","detail","handle"], ans:2, why:"冒号后解释的是一个“细节”：写着姓名电话的标签。", point:"语境逻辑"},
+   {stem:"“There is no cafe on this side,” he said. “I had to go ___.”", opts:["somewhere","upstairs","home","abroad"], ans:0, why:"因为这一侧没有咖啡店，他只能“去别处”买。", point:"语境逻辑"},
+   {stem:"He handed me one cup. I tried to ___ him, but he only smiled.", opts:["stop","thank","follow","warn"], ans:1, why:"对方递来热茶，自然的反应是道谢。", point:"语境逻辑"},
+   {stem:"He told me he had been a teacher and had ___ the same station for thirty years.", opts:["built","cleaned","used","passed"], ans:2, why:"三十年“使用/来往”同一个车站，used 最合逻辑；built/cleaned 与“曾是教师”无关。", point:"词义辨析"},
+   {stem:"When the train finally came, he ___ his bag and stood up.", opts:["dropped","picked up","opened","searched"], ans:1, why:"要上车自然“拿起”包站起来。", point:"语境逻辑"},
+   {stem:"I have never ___ him again.", opts:["met","called","thanked","noticed"], ans:0, why:"后文说那件小事留在心里，说明此后没再“遇到”他。", point:"语境逻辑"},
+   {stem:"But that small act of ___ has stayed with me.", opts:["patience","courage","kindness","honesty"], ans:2, why:"整件事是陌生人替他买茶、请他看包，属于“善意”。", point:"词义辨析"},
+   {stem:"it has quietly ___ the way I treat strangers.", opts:["recorded","changed","matched","hidden"], ans:1, why:"与下句“现在我会想起他”呼应，说明对待陌生人的方式被“改变”了。", point:"语境逻辑"},
+   {stem:"Now, whenever I am ___ about somebody, I remember the man on the platform.", opts:["curious","certain","worried","doubtful"], ans:3, why:"与开头“怀疑包里是不是危险物品”呼应：现在一旦对某人起疑，就想起他。", point:"语境逻辑"},
+   {stem:"the tea he carried across a ___ platform for someone he had never met.", opts:["crowded","empty","silent","distant"], ans:0, why:"要穿过人多的站台才显得这份心意费力；空无一人的站台反而不构成对比。", point:"词义辨析"}
+  ]},
+ grammar:{ title:"语法填空 · 示例（10 空）",
+  src:"自编（说明文，未引用真实人物或文章）",
+  passage:"Tea is one of the most widely drunk drinks in the world, yet the way it [[1]] (drink) has never been the same everywhere. In some countries people add milk and sugar; in others they drink it plain and hot, [[2]] a small cup that is refilled many times.\n\nThe plant itself is simple. It grows best in warm, wet places, and the young leaves [[3]] (pick) by hand are considered the finest. After picking, the leaves are dried. How long they are left to dry [[4]] (determine) the colour and strength of the final drink.\n\nWhat makes tea interesting is not the plant but the habit. Offering a cup is a way of [[5]] (say) that a visitor is welcome. Refusing it can seem unfriendly, [[6]] the visitor is in a hurry. In many families the same pot is used for years, and the person [[7]] pours it has a fixed place at the table.\n\nScientists have found that tea contains substances [[8]] may be good for the heart, though the effect is modest and easy [[9]] (exaggerate). What is certain is that the drink has survived for centuries not because of medicine but because of company. A cup of tea is rarely drunk alone [[10]] it can be helped.",
+  blanks:[
+   {ans:"is drunk", variants:["is drunk"], hint:"drink", why:"主语 the way 与 drink 是被动关系，且讲一般事实，用一般现在时被动。", point:"时态语态"},
+   {ans:"from", variants:["from","in"], hint:"", why:"“用一个小杯子喝”用 from a small cup / in a small cup。", point:"冠词与介词"},
+   {ans:"picked", variants:["picked"], hint:"pick", why:"leaves 与 pick 是被动，作后置定语用过去分词。", point:"非谓语动词"},
+   {ans:"determines", variants:["determines"], hint:"determine", why:"主语是从句 How long they are left to dry，视为单数，谓语用 determines。", point:"时态语态"},
+   {ans:"saying", variants:["saying"], hint:"say", why:"of 后接动名词。", point:"非谓语动词"},
+   {ans:"unless", variants:["unless"], hint:"", why:"“除非客人赶时间”，否则拒绝会显得不礼貌。", point:"连词与从句"},
+   {ans:"who", variants:["who","that"], hint:"", why:"先行词 the person 指人，关系代词在从句中作主语。", point:"连词与从句"},
+   {ans:"which", variants:["which","that"], hint:"", why:"先行词 substances 指物，关系代词在从句中作主语。", point:"连词与从句"},
+   {ans:"to exaggerate", variants:["to exaggerate"], hint:"exaggerate", why:"“容易……的”用 easy to do 结构。", point:"非谓语动词"},
+   {ans:"if", variants:["if"], hint:"", why:"“如果能避免的话”＝if it can be helped。", point:"连词与从句"}
+  ],
+  points:["时态语态","冠词与介词","非谓语动词","时态语态","非谓语动词","连词与从句","连词与从句","连词与从句","非谓语动词","连词与从句"]},
+ cont:{ title:"读后续写 · 示例（材料 300-350 词，续写约 150 词）",
+  src:"自编（虚构故事，未引用真实人物或事件）",
+  story:"Mia had been in the school band for two years, and she had never once played a solo. She was the third clarinet, which meant that most of the time she played the same notes as the two girls in front of her. She was good at it. Nobody noticed her, and she had decided that this was fine.\n\nIn November the band teacher, Mr Porter, announced that the winter concert would open with a short solo. Three students would try out, and the band would choose one. Mia did not put her name down.\n\nOn Thursday she stayed behind to tidy the music stands, as she usually did. She heard a sound from the corridor: someone was playing her part, badly, over and over. It was Daniel, a first-year boy who could not yet read music quickly. He was trying to learn the solo for the tryout.\n\n“You are playing it too fast,” Mia said, before she could stop herself. Daniel jumped. Then he held out the sheet music as if it were a question.\n\nSo Mia did something that surprised her. She sat down beside him and played the passage slowly. Then she sang the rhythm while he played. They stayed for an hour, and then another, until the caretaker came to lock the doors.\n\nBy the day of the tryout Mia had taught Daniel most of the solo. He was not the best, but he was no longer the worst. She still had not put her name down. That afternoon, Mr Porter stood at the front of the room with the list of three names in his hand. “Before we start,” he said, “I want to ask why there are only three names when four people have been practising in my corridor every evening.”\n\nThe room went quiet. Daniel looked at the floor.\n\n（续写两段，约 150 词）",
+  starts:["Mia felt her face turn red, and she looked at Daniel.","On the night of the concert, Mia walked onto the stage with the other three."],
+  model:""},
+ essay:{ title:"应用文写作 · 示例（80 词左右）",
+  src:"自编（虚构情境）",
+  prompt:"假定你是李华，你校英语社团将举办一场以“我的家乡”为主题的摄影展，请你给外教 Chris 写一封邮件，内容包括：\n1. 邀请他参加展览的开幕式；\n2. 简要介绍展览的内容与时间地点；\n3. 询问他是否愿意为展览写一段英文介绍。\n注意：\n（1）写作词数应为 80 个左右；\n（2）可以适当增加细节，使行文连贯；\n（3）不得使用真实姓名与校名。",
+  model:""}
 };
 const LSKEY='elw.v01';
 const DB = { words:[], wrong:[], book:[], stats:{days:{},checkin:[]}, ielts:[], practice:[], settings:{goal:20, voice:'', rate:0.95, ai:{base:'',key:'',model:'',dual:true}}, seeded:false };
@@ -1260,8 +1305,11 @@ function parseJson(t){ const m=String(t).match(/\{[\s\S]*\}/); return JSON.parse
    ponytail: 只有十来条教研要点 + 用户自己的错词，用汉字二元组关键词打分足够；
    若知识库涨到几百条再换向量检索。 */
 const KB = [
- {t:'高考英语题型结构（新课标卷）', tags:'高考 题型 结构 全国卷 新课标 分值',
-  x:'满分 150：听力 30、阅读理解（含七选五）50、语言知识运用（完形 30 + 语法填空 15）、写作（应用文 15 + 读后续写 25）。素材多为说明文、议论文、记叙文，话题贴近生活与文化。'},
+ {t:'高考英语试卷结构（新课标卷·2024 起）', tags:'高考 题型 结构 新课标 分值 题数 完形 语法填空 阅读',
+  x:'满分 150，四部分。听力 30 分（20 题，1.5 分/题）。阅读 50 分：第一节 4 篇共 15 题（A 篇 3 题、B/C/D 篇各 4 题，2.5 分/题）；第二节七选五 5 题，2.5 分/题。语言运用 30 分：第一节完形填空 15 空（1 分/题）；第二节语法填空 10 空（1.5 分/题）。写作 40 分：第一节应用文 80 词左右（15 分）；第二节读后续写 150 词左右（25 分）。'},
+ {t:'语篇长度基准（命题必须对齐）', tags:'语篇 长度 词数 阅读 完形 语法填空 读后续写 字数',
+  x:'阅读 A 篇约 260-290 词、B/C/D 篇各约 260-350 词（实测 2024 新课标Ⅰ卷四篇为 261/292/292/340 词）；七选五约 300 词并给 7 个选项（A-G，其中 2 个多余）；完形填空约 220 词挖 15 空；语法填空约 230 词挖 10 空；读后续写材料 350 词以内、要求续写 150 词左右；应用文 80 词左右。'},
+
  {t:'阅读 C/D 篇特点', tags:'阅读 说明文 议论文 推断 主旨 词义猜测',
   x:'C/D 篇多为说明文或议论文，约 300-350 词。常考：细节理解、推理判断、主旨大意、词义猜测、作者态度。设题顺序一般与行文顺序一致。'},
  {t:'七选五解题线索', tags:'七选五 逻辑 衔接 代词 复现',
@@ -2699,12 +2747,13 @@ function renderPracticeBody(){
   if(pracSel==='grammar'){ renderGrammar(); return; }
   renderWriting();
 }
-/* 素材来源的展示口径：C/D 篇正文是"按真题风格生成"的，不是真题原文。
-   所以一律拼成「AI 生成 · 仿 XX 风格」或「示例文本（…非真题原文）」——
-   不能让它看起来像真的选自某套卷子，那是假出处。 */
+/* 素材来源的展示口径：
+   - 引用了真实人物事迹 / 真实事件 / 他人文章 → 必须写出处；
+   - 完全自编虚构 → 写「自编」。
+   没标就明说"未标注"，不给读者留下"这大概是真的"的错觉。 */
 function srcLine(src){
-  if(!src) return '';
-  return '素材来源：' + esc(src) + '　·　';
+  var t = (src && String(src).trim()) ? String(src).trim() : '未标注（AI 未说明素材出处）';
+  return '素材来源：' + esc(t) + '　·　';
 }
 function genRow(note){
   return '<div class="row"><span class="small muted">'+esc(note)+'</span><div class="grow"></div>'
@@ -2727,6 +2776,14 @@ function renderReading(){
 function renderCloze(){
   var d = PD.cloze;
   var h = '<div class="card" data-sec="cloze"><b>'+esc(d.title)+'</b>';
+  if(d.src) h += '<p class="small muted">'+srcLine(d.src)+'读下面的短文，从每题所给的四个选项中选出最佳选项。</p>';
+  if(d.passage){
+    /* esc() 已经把 & < > 转义过了，这里只做两件事：把 ___n___ 换成高亮序号、把空行还原成真段落。
+       不换段落的话，200 多词的正文会被 HTML 折叠成一整块，读不下去。 */
+    h += '<p class="psg">'
+       + esc(d.passage).replace(/___(\d+)___/g, '<b class="ok-t">（$1）</b>').replace(/\n\n/g, '</p><p class="psg">')
+       + '</p><hr class="hr">';
+  }
   d.items.forEach(function(q,qi){
     h += '<p>'+pointBadge(ptOf(d,qi,q))+esc(q.stem).replace(/___(\d+)___/g,'<b>（$1）</b>')+'</p><div class="opts">';
     q.opts.forEach(function(o,oi){ h += '<div class="opt" data-q="'+qi+'" data-o="'+oi+'">'+String.fromCharCode(65+oi)+'. '+esc(o)+'</div>'; });
@@ -2738,13 +2795,17 @@ function renderCloze(){
 }
 function renderQixuan(){
   var d = PD.qixuan;
+  /* 空数与选项数都从数据里推：高考七选五是 5 空 + 7 选项（A-G），不再写死 3 空 / ABC */
+  var nBlank = (String(d.passage).match(/\[\[(\d+)\]\]/g) || []).length || 5;
+  var letters = d.opts.map(function(o, i){ return String.fromCharCode(65 + i); });
   var h = '<div class="card" data-sec="qixuan"><b>'+esc(d.title)+'</b>'
+    + '<p class="small muted">从 A-G 七个选项中选出能填入空白处的五个；有两项是多余的。</p>'
     + '<p class="psg">'+renderPassage(d.passage, function(i){ return '<span class="blank">（'+i+'）</span>'; })+'</p>';
-  [1,2,3].forEach(function(i){
+  for(var i = 1; i <= nBlank; i++){
     h += '<div class="opt-row">'+pointBadge(ptOf(d,i))+'<b class="small">空 '+i+'：</b>'
-      + ['A','B','C'].map(function(L){ return '<span class="chip" data-qx="'+i+'" data-opt-l="'+L+'">'+L+'</span>'; }).join('')
+      + letters.map(function(L){ return '<span class="chip" data-qx="'+i+'" data-opt-l="'+L+'">'+L+'</span>'; }).join('')
       + '</div>';
-  });
+  }
   h += '<div class="mt8">' + d.opts.map(function(o){ return '<p class="small muted">'+esc(o)+'</p>'; }).join('') + '</div>';
   h += '<div class="mt12"><button class="btn pri" data-pact="submit-objective" data-sec="qixuan">提交并查看解析</button></div>'
     + '<div id="pracResult-qixuan"></div>' + genRow('七选五 · 示例题') + '</div>';
@@ -2907,8 +2968,15 @@ function pracCheck(type, r){
     if(typeof r.passage !== 'string' || !r.passage) return '缺短文';
     if(!isArr(r.opts, 3)) return '选项不足 3 个';
     if(!r.ans || typeof r.ans !== 'object') return '缺答案';
-    /* 答案必须是 A/B/C 字母：模型给数字或空对象时判分会永远错，学生以为自己做错了 */
-    for(var j=1;j<=3;j++){ if('ABC'.indexOf(String(r.ans[String(j)]||'').slice(-1)) < 0) return '第 '+j+' 空答案不是 A/B/C'; }
+    /* 答案必须是选项字母：模型给数字或空对象时判分会永远错，学生以为自己做错了。
+       空数与可选字母都从数据推——高考七选五是 5 空 + 7 选项，写死 3 个 / ABC 会把正确答案判成非法。 */
+    var LETTERS = 'ABCDEFGH'.slice(0, Math.min(8, r.opts.length));
+    var akeys = Object.keys(r.ans);
+    if(akeys.length < 2) return '答案数量不足';
+    for(var ai = 0; ai < akeys.length; ai++){
+      var lv = String(r.ans[akeys[ai]] == null ? '' : r.ans[akeys[ai]]).slice(-1).toUpperCase();
+      if(LETTERS.indexOf(lv) < 0) return '第 '+akeys[ai]+' 空答案不在 '+LETTERS+' 之内';
+    }
   } else if(type === 'grammar'){
     if(typeof r.passage !== 'string' || !r.passage) return '缺短文';
     if(!isArr(r.blanks, 1)) return '缺空格';
@@ -2926,14 +2994,14 @@ async function pracGen(btn){
   if(!aiReady()){ aiHint(); return; }
   var doneSpin = btnSpin(btn, 'AI 出题中…');
   var P = {
-    reading:{ sys:'你是高中英语命题人，出题参照近5年全国卷/新课标卷与浙江模考卷 C 篇阅读风格。', usr:'请生成 1 篇高考阅读 C 篇风格短文（120-150词）和 3 道四选一阅读题。只输出 JSON：{"title":"","src":"本篇参照的卷别与篇目（例如 2024 全国甲卷 C 篇 / 2025 浙江模考 C 篇，只写卷别篇目）","passage":"","questions":[{"q":"","opts":["","","",""],"ans":0,"why":"","point":"考点（细节理解/推理判断/主旨大意/词义猜测 之一）"}]}', ap:function(r){ PD.reading = { title:r.title||'C 篇 · AI 出新题',
+    reading:{ sys:'你是高中英语命题人，出题参照近5年全国卷/新课标卷与浙江模考卷 C 篇阅读风格。', usr:'生成 1 篇高考阅读 C 篇：正文 300-350 词（说明文或议论文），配 4 道四选一题，设题顺序与行文顺序一致，考点分布在细节理解/推理判断/主旨大意/词义猜测之间。只输出 JSON：{"title":"","src":"素材出处说明","passage":"","questions":[{"q":"","opts":["","","",""],"ans":0,"why":"","point":"考点（细节理解/推理判断/主旨大意/词义猜测 之一）"}]}', ap:function(r){ PD.reading = { title:r.title||'C 篇 · AI 出新题',
       src:'AI 生成 · 仿 '+(r.src||'高考 C 篇')+' 风格',
       passage:r.passage, questions:r.questions||[] }; } },
-    grammar:{ sys:'你是高中英语命题人，语法填空命题参照高考真题考点分布。', usr:'按人教版高中范围生成 1 篇语法填空（5 个空，文中用 [[1]]..[[5]] 标记），避免出现超纲生词。只输出 JSON：{"title":"","passage":"","blanks":[{"ans":"","variants":[""],"hint":"提示词","why":"中文解析","point":"考点（时态语态/非谓语动词/词性转换/连词与从句/冠词与介词/固定搭配 之一）"}]}', ap:function(r){ PD.grammar = { title:r.title||'AI 生成 · 语法填空', passage:r.passage, blanks:r.blanks||[] }; } },
-    qixuan:{ sys:'你是高中英语命题人，七选五命题参照高考真题的逻辑衔接与代词指代特点。', usr:'生成 1 篇 180 词左右、挖 3 个空的短文（文中用 [[1]]..[[3]] 标记），再给 3 个选项 A/B/C（必须有 2 个是干扰项）。只输出 JSON：{"title":"","passage":"","opts":["A. ","B. ","C. "],"ans":{"1":"","2":"","3":""},"why":{"1":"","2":"","3":""},"points":{"1":"考点（逻辑关系/代词指代 之一）","2":"","3":""}}', ap:function(r){ PD.qixuan = { title:r.title||'AI 生成 · 七选五', passage:r.passage, opts:r.opts, ans:r.ans, why:r.why, points:r.points }; } },
-    cloze:{ sys:'你是高中英语命题人，完形填空命题参照高考真题考点分布（语境逻辑、词义辨析、固定搭配）。', usr:'生成 1 道 4 空的高考风格完形填空：每题给出一个带 ___n___（n 为 1-4）的句子和 4 个选项，四个选项要构成有效的词义辨析。只输出 JSON：{"title":"","items":[{"stem":"... ___1___ ...","opts":["","","",""],"ans":0,"why":"中文解析","point":"考点（语境逻辑/词义辨析/固定搭配 之一）"}]}', ap:function(r){ PD.cloze = { title:r.title||'AI 生成 · 完形填空', items:r.items }; } },
-    cont:{ sys:'你是高考英语读后续写命题人（浙江省标准）。', usr:'生成一道读后续写题：一段 120 词左右的英文故事（情节完整、留有悬念），以及两个段首句。只输出 JSON：{"title":"","story":"","starts":["",""]}', ap:function(r){ PD.cont = { title:r.title||'AI 生成 · 读后续写', story:r.story, starts:r.starts||['',''], model:'' }; } },
-    essay:{ sys:'你是高中英语作文命题人。', usr:'生成一道高中英语应用文写作题（含背景、要点、词数要求）。只输出 JSON：{"title":"","prompt":""}', ap:function(r){ PD.essay = { title:r.title||'AI 生成 · 作文', prompt:r.prompt, model:'' }; } }
+    grammar:{ sys:'你是高中英语命题人，语法填空命题参照高考真题考点分布。', usr:'按人教版高中范围生成 1 篇语法填空：正文 230 词左右，挖 10 个空（文中用 [[1]]..[[10]] 标记），其中约 7 个空给提示词（动词时态/语态、非谓语、词性转换、比较级）、3 个空无提示词（冠词、介词、连词、代词、关系词），避免超纲生词。只输出 JSON：{"title":"","passage":"","blanks":[{"ans":"","variants":[""],"hint":"提示词","why":"中文解析","point":"考点（时态语态/非谓语动词/词性转换/连词与从句/冠词与介词/固定搭配 之一）"}]}', ap:function(r){ PD.grammar = { title:r.title||'AI 生成 · 语法填空', passage:r.passage, blanks:r.blanks||[] }; } },
+    qixuan:{ sys:'你是高中英语命题人，七选五命题参照高考真题的逻辑衔接与代词指代特点。', usr:'生成 1 篇七选五：正文 300 词左右，挖 5 个空（文中用 [[1]]..[[5]] 标记），给 7 个选项 A-G（其中 2 个是多余的干扰项）。空要落在段首、段中、段末都要有，靠逻辑衔接与代词指代判断。只输出 JSON：{"title":"","src":"素材出处说明","passage":"","opts":["A. ","B. ","C. ","D. ","E. ","F. ","G. "],"ans":{"1":"","2":"","3":"","4":"","5":""},"why":{"1":"","2":"","3":"","4":"","5":""},"points":{"1":"考点（逻辑关系/代词指代 之一）","2":"","3":"","4":"","5":""}}', ap:function(r){ PD.qixuan = { title:r.title||'AI 生成 · 七选五', passage:r.passage, opts:r.opts, ans:r.ans, why:r.why, points:r.points }; } },
+    cloze:{ sys:'你是高中英语命题人，完形填空命题参照高考真题考点分布（语境逻辑、词义辨析、固定搭配）。', usr:'生成 1 篇高考完形填空：正文 220 词左右的一篇完整记叙文或夹叙夹议文，正文里挖 15 个空，用 ___1___ 到 ___15___ 标注；每题 4 个选项，同一题四个选项必须词性一致、能构成有效辨析。要给出完整正文（含空），每题再单独给出题干原文片段。只输出 JSON：{"title":"","src":"素材出处说明","passage":"含 ___1___..___15___ 的完整正文","items":[{"stem":"... ___1___ 所在的那一句 ...","opts":["","","",""],"ans":0,"why":"中文解析","point":"考点（语境逻辑/词义辨析/固定搭配 之一）"}]}', ap:function(r){ PD.cloze = { title:r.title||'AI 生成 · 完形填空', items:r.items }; } },
+    cont:{ sys:'你是高考英语读后续写命题人（浙江省标准）。', usr:'生成一道读后续写题：英文材料 300-350 词（情节完整、留有悬念，正好卡在冲突要解决的地方），并给两个段首句。题干要注明续写两段、共约 150 词。只输出 JSON：{"title":"","src":"素材出处说明","story":"","starts":["",""]}', ap:function(r){ PD.cont = { title:r.title||'AI 生成 · 读后续写', story:r.story, starts:r.starts||['',''], model:'' }; } },
+    essay:{ sys:'你是高中英语作文命题人。', usr:'生成一道高中英语应用文写作题：情境真实（书信/通知/投稿等），给出 3 条要点，词数要求 80 词左右。只输出 JSON：{"title":"","src":"素材出处说明","prompt":""}', ap:function(r){ PD.essay = { title:r.title||'AI 生成 · 作文', prompt:r.prompt, model:'' }; } }
   };
   var g = P[pracSel];
   if(!g){ doneSpin(); toast('该题型的 AI 生成将于正式版接入；当前请使用示例题'); return; }
@@ -2941,7 +3009,8 @@ async function pracGen(btn){
   try{
     var usr = g.usr + (pracPoint ? ('本套题请集中考查考点：'+pracPoint+'（题目和解析都要体现）。') : '');
     var kr = kbRef(g.sys + ' ' + usr + ' ' + pracPoint, 3);
-    var r = await dualLLM([{role:'system',content:g.sys + kr.text},{role:'user',content:usr}], {json:true, note:'题目必须无误、答案正确、无超纲生词、符合高考风格、每道题都要给出 point 考点标签'});
+    var r = await dualLLM([{role:'system',content:g.sys + kr.text},{role:'user',content:usr}], {json:true, note:'题目必须无误、答案正确、无超纲生词、符合高考风格、每道题都要给出 point 考点标签；'
+      +'正文若引用真实人物事迹、真实事件或他人文章，src 必须写明具体出处；若为完全自编，src 写「自编」；严禁编造出处'});
     doneSpin();   /* 校验完就还原按钮，后面的渲染不算等待 */
     var bad = pracCheck(pracSel, r);
     if(bad){ toast('AI 出的题结构不对（'+bad+'），已保留原题，可再点一次重试'); return; }
