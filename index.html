@@ -293,7 +293,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.22 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.23 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main>
@@ -472,7 +472,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.22 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.23 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1133,8 +1133,8 @@ const PD = {
 /* 演示内容全部按 2024 新课标卷实测规格写：阅读 C 篇 4 题约 350 词、七选五 5 空、完形 15 空约 220 词、
    语法填空 10 空约 230 词、读后续写材料 300-350 词、应用文 80 词。
    标「自编」的是完全虚构/通用知识，没有引用真实人物或文章——按素材来源规则，引用他人素材必须写出处。 */
- reading:{ title:"阅读理解 C 篇 · 示例（4 题）",
-  src:"自编（说明文，未引用真实人物或文章）",
+ reading:{ title:"阅读理解 C 篇 · 示例（单篇 4 题）",
+  sets:[ { label:"C 篇 · 说明文（4 题）", src:"自编（说明文，未引用真实人物或文章）",
   passage:"For most of the twentieth century, a library meant one thing: shelves of books and a rule of silence. People went there to borrow novels, look up facts in heavy reference books, or find a quiet desk to study. A librarian was expected to guard the collection and keep it in order.\n\nThat picture has changed quickly. In many cities the busiest part of a public library is no longer the book shelves but the ground floor, where visitors use computers, attend a free class, or simply sit with a cup of coffee. Some libraries lend tools, musical instruments and even seeds for a garden. Others run small recording rooms where teenagers produce music after school.\n\nWhy the change? Part of the answer is practical. When almost any fact can be found on a phone in seconds, a building that only stores information loses its purpose. The libraries that survive are the ones offering something a screen cannot: a warm place to be, equipment too expensive for one family to buy, and a person who can help.\n\nThere is a social reason too. As cities grow, public space shrinks. Cafes expect you to keep buying, and shopping centres close at night. The library stays open, costs nothing and asks no questions. For a student without a quiet room at home, or an older person who has not spoken to anyone all day, that matters more than the books.\n\nNone of this means books have become unimportant. Borrowing numbers are still high and reading groups are fuller than ever. What has changed is the balance: the collection is no longer the whole point of the building, but one service among several.\n\nCritics warn that libraries risk becoming everything to everyone and therefore nothing in particular. Supporters answer that this is exactly what a public institution should do - follow the needs of the people who pay for it. On the ground floor of a busy library on a Tuesday afternoon, it is hard to argue with them.",
   points:["细节理解","推理判断","推理判断","主旨大意"],
   questions:[
@@ -1142,8 +1142,36 @@ const PD = {
    {q:"Why do some libraries lend tools and musical instruments?", opts:["Because printed books are no longer borrowed.","Because local councils require them to do so.","Because such equipment is too expensive for one family to buy.","Because they want to compete with nearby cafes."], ans:2, why:"第三段列举“a screen cannot”给不了的东西，其中一项就是“equipment too expensive for one family to buy”。", point:"推理判断"},
    {q:"What does “asks no questions” suggest about the library?", opts:["It does not employ enough staff.","It has stopped lending books.","It is usually empty during the day.","It accepts everyone without conditions."], ans:3, why:"与前半句“costs nothing”并列，说明它不设门槛、不盘问来者。", point:"推理判断"},
    {q:"What is the passage mainly about?", opts:["How the role of public libraries has changed.","Why borrowing numbers are falling.","How to organise a successful reading group.","Why critics want libraries to close."], ans:0, why:"全文围绕图书馆从“只藏书”到“提供多种服务”的转变展开；其他三项都只是文中的细节或未提及。", point:"主旨大意"}
+  ]} ]},
+ /* ===== 四篇连做（阅读第一节完整形态）：A 篇 3 题 / B·C·D 篇各 4 题 = 15 题 =====
+   C 篇直接复用单篇那份，不把同样的正文写两遍（见文件末尾的 splice）。 */
+ readFull:{ title:"阅读理解 · 四篇连做（A 3 题 + B/C/D 各 4 题 = 15 题）",
+  sets:[
+   { label:"A 篇 · 活动通知（3 题）", src:"自编（活动通知类应用文，未引用真实机构或事件）",
+    passage:"The city of Riverton will hold its yearly Cycling Day on Saturday 12 April. The event is open to anyone who can ride a bicycle, and there is no age limit. Last year more than two thousand people took part.\n\nThree routes are offered. The Family Route is eight kilometres long and stays inside the park; it is flat and suitable for children, who must ride with an adult. The River Route is twenty-five kilometres and follows the river to the old bridge before turning back. The Long Route is sixty kilometres and includes two hills; riders must be at least sixteen and should be able to finish within four hours.\n\nRegistration is free for the Family Route. The River Route costs twenty yuan and the Long Route forty yuan; the money pays for the water stations along the way. Everyone who registers before 5 April will receive a free T-shirt. You can register at any city library or at the sports centre on Bridge Street.\n\nRiders should bring their own bicycle and a helmet. Helmets are required on all three routes, including the Family Route. Water and fruit will be provided at the checkpoints, but riders on the Long Route are advised to carry a second bottle.\n\nThe routes close at four in the afternoon. If you are still on the road after that time, a van will pick you up and take you to the finish. Please do not continue on your own.\n\nFor more information, call the sports centre or visit the city website.",
+    questions:[
+     {q:"Who must ride with an adult on Cycling Day?", opts:["Riders on the Long Route.","Riders who are at least sixteen.","Children taking the Family Route.","Anyone who registers after 5 April."], ans:2, why:"第二段说 Family Route “suitable for children, who must ride with an adult”。", point:"细节理解"},
+     {q:"What does the registration money pay for?", opts:["The free T-shirts.","Food at the finish.","The water stations along the way.","Hiring the van."], ans:2, why:"第三段破折号后直接说明：the money pays for the water stations along the way。T 恤是报名早的赠品，与报名费无关。", point:"细节理解"},
+     {q:"What can be inferred about a rider who is still on the road at four?", opts:["They will be asked to pay a fine.","They will be driven to the finish.","They will be allowed to continue alone.","They will lose their free T-shirt."], ans:1, why:"末段说四点后仍在路上，会有 van 来接到终点，并提醒“请勿独自继续”。", point:"推理判断"}
+    ]},
+   { label:"B 篇 · 人物记叙（4 题）", src:"自编（虚构人物故事，未引用真实人物或事件）",
+    passage:"For thirty years Ana Ruiz has worked in a small room behind a music shop, and almost nobody in the city knows her name. She repairs the instruments that schoolchildren play.\n\nAna began as a player. She studied the cello and hoped to join an orchestra, but an injury to her left hand ended that plan when she was twenty-three. For a year she did not touch an instrument at all. Then a neighbour asked her to look at a violin that had been in the family for fifty years. She fixed it, and something in her changed. “I could not play any more,” she says, “but I could still make sound possible for other people.”\n\nSchools send her their broken instruments by the box. Most are violins and flutes, and most have the same problems: a crack in the wood, a bent key, a bridge that has moved. A single repair can take three hours. Ana works slowly, and she refuses to hurry. “If I rush,” she says, “the instrument comes back in six months.”\n\nShe charges schools about half of what a commercial workshop would charge, and she often does not charge at all. When a head teacher asked why, Ana explained that a child given a broken instrument learns one lesson very quickly: that music is not for them. “I am not fixing wood,” she said. “I am keeping a door open.”\n\nLast year the city gave her an award. She did not go to the ceremony. She was working — a trumpet from a primary school needed a new valve, and a boy was waiting to play it.",
+    questions:[
+     {q:"Why did Ana stop playing the cello?", opts:["She lost interest in music.","She injured her left hand.","She could not afford a better cello.","She was too busy repairing instruments."], ans:1, why:"第二段明确：an injury to her left hand ended that plan。", point:"细节理解"},
+     {q:"Why does Ana refuse to hurry her repairs?", opts:["She is paid by the hour.","She has more work than she can do.","A rushed repair soon brings the instrument back.","The schools do not need them quickly."], ans:2, why:"第三段她原话：“If I rush, the instrument comes back in six months.”", point:"细节理解"},
+     {q:"What does Ana mean by “keeping a door open”?", opts:["She leaves the workshop door unlocked.","She keeps a place for children to learn music.","She wants the school to buy new instruments.","She hopes to play the cello again one day."], ans:1, why:"上一句说坏乐器会让小孩得出“音乐不是给我的”这一结论；她的修理事实在让这扇门继续开着。", point:"推理判断"},
+     {q:"Why did Ana miss the award ceremony?", opts:["She did not know about it.","She thought the award was for the school.","She was repairing an instrument a child was waiting for.","She had already moved to another city."], ans:2, why:"末段说授奖那天她在工作：一支小号要换活塞，有个男孩等着吹。", point:"推理判断"}
+    ]},
+   { label:"D 篇 · 议论文（4 题）", src:"自编（议论文，未引用真实研究或他人文章）",
+    passage:"Whenever a queue forms, a bus is late or a lesson ends two minutes early, the same thing happens: hands reach for phones. Filling these small gaps has become automatic.\n\nIt is easy to see why. A phone offers something to do, and doing something feels better than doing nothing. But the habit has a cost that is rarely counted, because the cost is invisible: we have quietly removed boredom from our lives.\n\nBoredom has a poor reputation. We treat it as a failure of the day, something to be cured. Yet many writers and teachers argue that boredom is not empty time at all. It is the time when the mind wanders, connects two ideas that had nothing to do with each other, and arrives somewhere unexpected. The solution to a difficult problem often appears in the shower, not at the desk.\n\nThere is a second cost. If every gap is filled, we never practise being alone with our own thoughts. That is a skill, and like every skill it needs practice. Students who cannot sit through five quiet minutes may find it hard to read a long novel, follow an argument, or sit with a difficult feeling until it settles.\n\nThis is not an argument against phones. The same device that fills a bus journey can also teach a student a language or let a family see each other's faces. The question is not whether to use it but who decides when. When we choose to look, we are in charge. When we look because a gap appeared, the device has chosen for us.\n\nThe practical suggestion is small. Try, once a day, to leave one gap alone. Stand in the queue. Walk without headphones. Let the mind be bored for five minutes and see where it goes. The first minutes will feel wasted. After that, something usually happens.",
+    questions:[
+     {q:"What cost of filling every gap does the writer say is rarely counted?", opts:["The money spent on phones.","The time lost from study.","The disappearance of boredom from our lives.","The effect on our eyesight."], ans:2, why:"第二段末句直接给出：we have quietly removed boredom from our lives。", point:"细节理解"},
+     {q:"According to the passage, why is boredom useful?", opts:["It makes us work faster.","It lets the mind connect unrelated ideas.","It teaches us to wait politely.","It helps us remember what we have read."], ans:1, why:"第三段说无聊时“the mind wanders, connects two ideas ... and arrives somewhere unexpected”。", point:"推理判断"},
+     {q:"What does “who decides when” mean in the fourth paragraph?", opts:["Families should set rules for children.","Schools should decide when phones are allowed.","We should choose to use the phone rather than let the gap choose for us.","We should use the phone only when we are alone."], ans:2, why:"下一句解释得很清楚：主动看手机是我们做主，因为出现空隙才看是设备替我们做了主。", point:"推理判断"},
+     {q:"What is the writer's main point?", opts:["Phones should be banned during lessons.","Students should read more long novels.","We should leave some empty moments unfilled.","Boredom is a sign of a badly planned day."], ans:2, why:"全文并非反手机，而是主张留一点空隙不给填满；末段的建议也是这个。", point:"主旨大意"}
+    ]}
   ]},
- qixuan:{ title:"七选五 · 示例（5 空 / 7 选项）",
+qixuan:{ title:"七选五 · 示例（5 空 / 7 选项）",
   src:"自编（方法建议类短文，未引用真实人物或文章）",
   passage:"Most people do not put things off because they are lazy. They delay because the task in front of them feels too large to begin. [[1]] The trick is not to force yourself to feel motivated; it is to make the first step so small that refusing it seems silly. Nothing about the task has changed; only the size of the first step has.\n\nStart by writing the task down in a form you can finish in one sitting. “Prepare for the English exam” is not a task; it is a wish. [[2]] A good version might be “review Unit 3 vocabulary for twenty minutes”. Now you know exactly when you are done. Vague goals cannot be finished, so they can always be postponed.\n\nNext, decide where and when you will do it. [[3]] Research on habit formation keeps finding the same thing: a fixed time and place does more for follow-through than any amount of enthusiasm. The decision is made once, and after that you no longer have to argue with yourself.\n\nIt also helps to remove one small obstacle in advance. If you plan to study in the morning, put the book on the kitchen table the night before. [[4]] Every step you remove from the beginning makes the beginning more likely. The same is true of distractions: put the phone in another room before you sit down.\n\nFinally, accept that the first attempt will be imperfect. [[5]] What matters is that the task has stopped being something you are avoiding and become something you are doing. Momentum, not perfection, is what carries you to the end. Two messy paragraphs written tonight are worth more than a perfect plan for tomorrow.",
   opts:["A. Some people find that background music helps them concentrate.",
@@ -1206,6 +1234,9 @@ const PD = {
   prompt:"假定你是李华，你校英语社团将举办一场以“我的家乡”为主题的摄影展，请你给外教 Chris 写一封邮件，内容包括：\n1. 邀请他参加展览的开幕式；\n2. 简要介绍展览的内容与时间地点；\n3. 询问他是否愿意为展览写一段英文介绍。\n注意：\n（1）写作词数应为 80 个左右；\n（2）可以适当增加细节，使行文连贯；\n（3）不得使用真实姓名与校名。",
   model:""}
 };
+/* 四篇连做里的 C 篇直接用单篇那一份，避免把同样 330 词的正文写两遍 */
+PD.readFull.sets.splice(2, 0, PD.reading.sets[0]);
+
 const LSKEY='elw.v01';
 const DB = { words:[], wrong:[], book:[], stats:{days:{},checkin:[]}, ielts:[], practice:[], settings:{goal:20, voice:'', rate:0.95, ai:{base:'',key:'',model:'',dual:true}}, seeded:false };
 const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);
@@ -2622,7 +2653,9 @@ function renderMock(){
   pracData = { answers:{}, inputs:{} };
   el2('<div class="card"><b>整套模考 · 按浙江卷顺序</b><p class="small muted">阅读 → 七选五 → 完形 → 语法填空 → 读后续写。每节做完点它自己的「提交并查看解析」，底部会实时汇总客观题得分；读后续写不自动判分，可单独提交 AI 批改。</p></div>');
   pracMockAppend = true;
-  renderReading(); renderQixuan(); renderCloze(); renderGrammar();
+  var keepRm = readMode; readMode = 'full';      /* 整套模考里的阅读就该是第一节完整形态 */
+  renderReading(); readMode = keepRm;
+  renderQixuan(); renderCloze(); renderGrammar();
   var keep = pracSel; pracSel = 'cont'; renderWriting(); pracSel = keep;
   pracMockAppend = false;
   $('#practiceBody').insertAdjacentHTML('beforeend', '<div class="card"><b>客观题合计</b><div id="mockTotal" class="mt8">还没提交任何一节。</div></div>');
@@ -2702,6 +2735,8 @@ function renderPractice(){
   renderPracticeHistory();
 }
 function pracClick(e){
+  var rm = e.target.closest('[data-rm]');
+  if(rm){ readMode = rm.getAttribute('data-rm'); pracData = { answers:{}, inputs:{} }; renderPracticeBody(); return; }
   var sw = e.target.closest('[data-sec]');
   if(sw) mockSwitch(sw.getAttribute('data-sec'));
   var pp = e.target.closest('[data-pp]');
@@ -2759,14 +2794,31 @@ function genRow(note){
   return '<div class="row"><span class="small muted">'+esc(note)+'</span><div class="grow"></div>'
     + '<button class="btn" data-pact="gen">'+icon('sparkle')+' AI 出新题'+(aiReady()?'':'（需配置AI）')+'</button></div>';
 }
+/* 阅读有单篇 / 四篇连做两种模式。数据形状是同一套（sets 数组），单篇就是只有一项——
+   所以渲染只写一条分支，不按模式分家。 */
+var readMode = 'single';
+function readData(){ return readMode === 'full' ? PD.readFull : PD.reading; }
 function renderReading(){
-  var d = PD.reading;
+  var d = readData();
+  var MODES = [['single','单篇（1 篇 · 4 题）'],['full','四篇连做（A3+B4+C4+D4 = 15 题）']];
   var h = '<div class="card" data-sec="reading"><b>'+esc(d.title)+'</b>'
-    + '<p class="small muted">'+srcLine(d.src)+'点击文中任意单词可查看释义并加入生词本。</p>'
-    + '<p class="psg">'+renderPassage(d.passage)+'</p>';
-  d.questions.forEach(function(q,qi){
-    h += '<p>'+pointBadge(ptOf(d,qi,q))+'<b>'+(qi+1)+'.</b> '+esc(q.q)+'</p><div class="opts">';
-    q.opts.forEach(function(o,oi){ h += '<div class="opt" data-q="'+qi+'" data-o="'+oi+'">'+String.fromCharCode(65+oi)+'. '+esc(o)+'</div>'; });
+    + '<div class="row mt8"><span class="small muted">模式</span>'
+    + MODES.map(function(m){ return '<span class="chip'+(readMode===m[0]?' on':'')+'" data-rm="'+m[0]+'">'+m[1]+'</span>'; }).join('')
+    + '</div>'
+    + '<p class="small muted mt8">点击文中任意单词可查看释义并加入生词本。</p>';
+  var gi = 0;
+  (d.sets || []).forEach(function(st){
+    h += '<div class="mt12"><b>'+esc(st.label || '')+'</b>'
+      + '<p class="small muted">'+srcLine(st.src)+'</p>'
+      + '<p class="psg">'+renderPassage(st.passage)+'</p>';
+    (st.questions || []).forEach(function(q){
+      h += '<p>'+pointBadge(ptOf(st, 0, q))+'<b>'+(gi+1)+'.</b> '+esc(q.q)+'</p><div class="opts">';
+      (q.opts || []).forEach(function(o, oi){
+        h += '<div class="opt" data-q="'+gi+'" data-o="'+oi+'">'+String.fromCharCode(65+oi)+'. '+esc(o)+'</div>';
+      });
+      h += '</div>';
+      gi++;
+    });
     h += '</div>';
   });
   h += '<div class="mt12"><button class="btn pri" data-pact="submit-objective" data-sec="reading">提交并查看解析</button></div>'
@@ -2851,11 +2903,19 @@ function countWords(t){ return (String(t).trim().match(/[A-Za-z][A-Za-z'\-]*/g)|
 function pracSubmit(){
   var out = '', score = 0, total = 0, wrong = [];
   if(pracSel==='reading' || pracSel==='cloze'){
-    var sec = pracSel==='reading' ? PD.reading : PD.cloze;
-    var qs = sec === PD.reading ? sec.questions : sec.items;
-    qs.forEach(function(q,qi){
+    /* 阅读是多篇结构，先摊平成一条题目列表——顺序必须与渲染时给的 data-q 完全一致 */
+    var flat = [];
+    if(pracSel==='reading'){
+      (readData().sets || []).forEach(function(st){
+        (st.questions || []).forEach(function(q){ flat.push({ q:q, owner:st }); });
+      });
+    } else {
+      flat = (PD.cloze.items || []).map(function(it){ return { q:it, owner:PD.cloze }; });
+    }
+    flat.forEach(function(item, qi){
+      var q = item.q;
       total++;
-      var pt = ptOf(sec, qi, q);
+      var pt = ptOf(item.owner, qi, q);
       var ua = pracData.answers[qi];
       var ok = (ua===q.ans); if(ok) score++; else pointWrong(pt);
       out += '<div class="report-item '+(ok?'ok':'bad')+'">'+pointBadge(pt)+'<b>'+(qi+1)+'.</b> '+(ok?'<span class="ok-t">正确</span>':'<span class="bad-t">错误</span>')
@@ -2955,15 +3015,33 @@ function pracCheck(type, r){
   var isArr = function(x, n){ return Array.isArray(x) && x.length >= n; };
   var optOk = function(o, n){ return o && typeof o === 'object' && Array.isArray(o.opts) && o.opts.length >= (n||2); };
   if(!r || typeof r !== 'object') return '返回的不是对象';
-  if(type === 'reading' || type === 'cloze'){
-    var qs = type === 'reading' ? r.questions : r.items;
-    if(!isArr(qs, 1)) return '缺少题目数组';
-    for(var i = 0; i < qs.length; i++){
-      if(!optOk(qs[i])) return '第 ' + (i+1) + ' 题缺选项';
-      if(typeof qs[i].ans !== 'number' || qs[i].ans < 0 || qs[i].ans >= qs[i].opts.length) return '第 ' + (i+1) + ' 题答案下标越界';
-      if(typeof qs[i].q !== 'string' && typeof qs[i].stem !== 'string') return '第 ' + (i+1) + ' 题缺题干';
+  if(type === 'reading'){
+    /* 阅读是多篇结构：sets=[{label,src,passage,questions}]。单篇就是只有一项。 */
+    if(!isArr(r.sets, 1)) return '缺少篇目数组';
+    var tq = 0;
+    for(var si = 0; si < r.sets.length; si++){
+      var st = r.sets[si] || {}, tag = '第 ' + (si+1) + ' 篇';
+      if(typeof st.passage !== 'string' || !st.passage) return tag + '缺正文';
+      if(st.src != null && typeof st.src !== 'string') return tag + '素材来源类型不对';
+      if(!isArr(st.questions, 1)) return tag + '缺题目数组';
+      for(var qi = 0; qi < st.questions.length; qi++){
+        var qq = st.questions[qi];
+        if(!optOk(qq)) return tag + '第 ' + (qi+1) + ' 题缺选项';
+        if(typeof qq.ans !== 'number' || qq.ans < 0 || qq.ans >= qq.opts.length) return tag + '第 ' + (qi+1) + ' 题答案下标越界';
+        if(typeof qq.q !== 'string') return tag + '第 ' + (qi+1) + ' 题缺题干';
+      }
+      tq += st.questions.length;
     }
-    if(type === 'reading' && r.src != null && typeof r.src !== 'string') return '素材来源字段类型不对';
+    /* 四篇连做必须正好 15 题（A3 + B4 + C4 + D4），否则就不是高考第一节的形态 */
+    if(r.sets.length === 4 && tq !== 15) return '四篇连做应有 15 题，实际 ' + tq + ' 题';
+  } else if(type === 'cloze'){
+    var qs = r.items;
+    if(!isArr(qs, 1)) return '缺少题目数组';
+    for(var ci = 0; ci < qs.length; ci++){
+      if(!optOk(qs[ci])) return '第 ' + (ci+1) + ' 题缺选项';
+      if(typeof qs[ci].ans !== 'number' || qs[ci].ans < 0 || qs[ci].ans >= qs[ci].opts.length) return '第 ' + (ci+1) + ' 题答案下标越界';
+      if(typeof qs[ci].q !== 'string' && typeof qs[ci].stem !== 'string') return '第 ' + (ci+1) + ' 题缺题干';
+    }
   } else if(type === 'qixuan'){
     if(typeof r.passage !== 'string' || !r.passage) return '缺短文';
     if(!isArr(r.opts, 3)) return '选项不足 3 个';
@@ -2994,16 +3072,18 @@ async function pracGen(btn){
   if(!aiReady()){ aiHint(); return; }
   var doneSpin = btnSpin(btn, 'AI 出题中…');
   var P = {
-    reading:{ sys:'你是高中英语命题人，出题参照近5年全国卷/新课标卷与浙江模考卷 C 篇阅读风格。', usr:'生成 1 篇高考阅读 C 篇：正文 300-350 词（说明文或议论文），配 4 道四选一题，设题顺序与行文顺序一致，考点分布在细节理解/推理判断/主旨大意/词义猜测之间。只输出 JSON：{"title":"","src":"素材出处说明","passage":"","questions":[{"q":"","opts":["","","",""],"ans":0,"why":"","point":"考点（细节理解/推理判断/主旨大意/词义猜测 之一）"}]}', ap:function(r){ PD.reading = { title:r.title||'C 篇 · AI 出新题',
-      src:'AI 生成 · 仿 '+(r.src||'高考 C 篇')+' 风格',
-      passage:r.passage, questions:r.questions||[] }; } },
+    readingFull:{ sys:'你是高中英语命题人，按高考英语新课标卷「阅读理解第一节」的完整形态组一套题：四篇 A/B/C/D，合计 15 题。',
+      usr:'生成高考阅读第一节的四篇：A 篇 260-290 词（活动通知/信息类应用文，3 道题）；B 篇 280-320 词（人物记叙，4 道题）；C 篇 300-350 词（说明文或议论文，4 道题）；D 篇 300-350 词（议论文或科普，4 道题）。合计必须正好 15 题。每篇设题顺序与行文顺序一致，四篇考点合起来要覆盖细节理解、推理判断、主旨大意、词义猜测。只输出 JSON：{"title":"","sets":[{"label":"A 篇","src":"素材出处说明","passage":"","questions":[{"q":"","opts":["","","",""],"ans":0,"why":"中文解析","point":"考点（细节理解/推理判断/主旨大意/词义猜测 之一）"}]}]}',
+      ap:function(r){ PD.readFull = { title:r.title||'阅读理解 · 四篇连做（AI 出新题）', sets:r.sets }; } },
+    reading:{ sys:'你是高中英语命题人，出题参照近5年全国卷/新课标卷与浙江模考卷 C 篇阅读风格。', usr:'生成 1 篇高考阅读 C 篇：正文 300-350 词（说明文或议论文），配 4 道四选一题，设题顺序与行文顺序一致，考点分布在细节理解/推理判断/主旨大意/词义猜测之间。只输出 JSON：{"title":"","sets":[{"label":"C 篇","src":"素材出处说明","passage":"","questions":[{"q":"","opts":["","","",""],"ans":0,"why":"中文解析","point":"考点（细节理解/推理判断/主旨大意/词义猜测 之一）"}]}]}', ap:function(r){ PD.reading = { title:r.title||'C 篇 · AI 出新题', sets:r.sets||[] }; } },
     grammar:{ sys:'你是高中英语命题人，语法填空命题参照高考真题考点分布。', usr:'按人教版高中范围生成 1 篇语法填空：正文 230 词左右，挖 10 个空（文中用 [[1]]..[[10]] 标记），其中约 7 个空给提示词（动词时态/语态、非谓语、词性转换、比较级）、3 个空无提示词（冠词、介词、连词、代词、关系词），避免超纲生词。只输出 JSON：{"title":"","passage":"","blanks":[{"ans":"","variants":[""],"hint":"提示词","why":"中文解析","point":"考点（时态语态/非谓语动词/词性转换/连词与从句/冠词与介词/固定搭配 之一）"}]}', ap:function(r){ PD.grammar = { title:r.title||'AI 生成 · 语法填空', passage:r.passage, blanks:r.blanks||[] }; } },
     qixuan:{ sys:'你是高中英语命题人，七选五命题参照高考真题的逻辑衔接与代词指代特点。', usr:'生成 1 篇七选五：正文 300 词左右，挖 5 个空（文中用 [[1]]..[[5]] 标记），给 7 个选项 A-G（其中 2 个是多余的干扰项）。空要落在段首、段中、段末都要有，靠逻辑衔接与代词指代判断。只输出 JSON：{"title":"","src":"素材出处说明","passage":"","opts":["A. ","B. ","C. ","D. ","E. ","F. ","G. "],"ans":{"1":"","2":"","3":"","4":"","5":""},"why":{"1":"","2":"","3":"","4":"","5":""},"points":{"1":"考点（逻辑关系/代词指代 之一）","2":"","3":"","4":"","5":""}}', ap:function(r){ PD.qixuan = { title:r.title||'AI 生成 · 七选五', passage:r.passage, opts:r.opts, ans:r.ans, why:r.why, points:r.points }; } },
     cloze:{ sys:'你是高中英语命题人，完形填空命题参照高考真题考点分布（语境逻辑、词义辨析、固定搭配）。', usr:'生成 1 篇高考完形填空：正文 220 词左右的一篇完整记叙文或夹叙夹议文，正文里挖 15 个空，用 ___1___ 到 ___15___ 标注；每题 4 个选项，同一题四个选项必须词性一致、能构成有效辨析。要给出完整正文（含空），每题再单独给出题干原文片段。只输出 JSON：{"title":"","src":"素材出处说明","passage":"含 ___1___..___15___ 的完整正文","items":[{"stem":"... ___1___ 所在的那一句 ...","opts":["","","",""],"ans":0,"why":"中文解析","point":"考点（语境逻辑/词义辨析/固定搭配 之一）"}]}', ap:function(r){ PD.cloze = { title:r.title||'AI 生成 · 完形填空', items:r.items }; } },
     cont:{ sys:'你是高考英语读后续写命题人（浙江省标准）。', usr:'生成一道读后续写题：英文材料 300-350 词（情节完整、留有悬念，正好卡在冲突要解决的地方），并给两个段首句。题干要注明续写两段、共约 150 词。只输出 JSON：{"title":"","src":"素材出处说明","story":"","starts":["",""]}', ap:function(r){ PD.cont = { title:r.title||'AI 生成 · 读后续写', story:r.story, starts:r.starts||['',''], model:'' }; } },
     essay:{ sys:'你是高中英语作文命题人。', usr:'生成一道高中英语应用文写作题：情境真实（书信/通知/投稿等），给出 3 条要点，词数要求 80 词左右。只输出 JSON：{"title":"","src":"素材出处说明","prompt":""}', ap:function(r){ PD.essay = { title:r.title||'AI 生成 · 作文', prompt:r.prompt, model:'' }; } }
   };
-  var g = P[pracSel];
+  /* 阅读的两种模式用不同提示词：单篇 1 篇 4 题，四篇连做按 A3+B4+C4+D4 组一套 15 题 */
+  var g = P[(pracSel === 'reading' && readMode === 'full') ? 'readingFull' : pracSel];
   if(!g){ doneSpin(); toast('该题型的 AI 生成将于正式版接入；当前请使用示例题'); return; }
   toast('AI 出题中（双侧互检）…');
   try{
