@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#110f0c">
+<meta name="theme-color" content="#0c0d0f">
 <meta name="description" content="人教版高中英语词汇闭环（生词本 · 默写 · 听写 · 错题本）＋ 雅思口语陪练 ＋ 练习场">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -16,44 +16,44 @@
 <style>
 :root{
   color-scheme: dark;
-  /* 纸：暖石墨。锚定色相 75°（暖黄轴）——不纯黑、不发蓝紫。
-     色相对了，中性灰才会"暖"；暖底才配得上暖强调色。 */
-  --bg:oklch(17% 0.008 75);                 /* 桌面 */
-  --card:oklch(21% 0.009 75);               /* 抬一层：卡片 */
-  --panel:oklch(25% 0.010 75);              /* 再抬一层：输入框、次级面 */
-  --ink:oklch(93% 0.008 75);                /* 暖纸白，不是纯白 */
-  --muted:oklch(70% 0.010 75);
-  --line:oklch(93% 0.008 75 / .11);          /* 发丝描边：由墨色派生，跨三层暗面都成立 */
-  --ink-strong:oklch(96% 0.006 75);          /* 提示条等"反相"面 */
-  /* 强调色：黄铜。全站只当荧光笔用——活动项、聚焦环、下划线、小方块，
-     永不铺满按钮。面积上限约 3%。 */
-  --accent:oklch(80% 0.105 82);
-  /* 主操作填充＝暖纸白 + 近黑字。深色主题下"亮底深字"比"彩色大块"高级得多 */
-  --pri:oklch(93% 0.008 75);
-  --pri-2:oklch(80% 0.105 82);
-  --pri-weak:oklch(80% 0.105 82 / .13);
-  --pri-line:oklch(80% 0.105 82 / .40);
-  --pri-ink:oklch(16% 0.008 75);             /* 暖白底上的字 */
-  --hover:oklch(93% 0.008 75 / .06);
-  --hairline:oklch(93% 0.008 75 / .22);
-  --track:oklch(93% 0.008 75 / .10);
-  --focus-line:oklch(80% 0.105 82 / .65);
-  --skel:oklch(93% 0.008 75 / .09);
-  --chip-bg:oklch(93% 0.008 75 / .06);
-  --ok:oklch(78% 0.110 152); --okbg:oklch(78% 0.110 152 / .13); --ok-line:oklch(78% 0.110 152 / .38);
-  --bad:oklch(70% 0.145 28); --badbg:oklch(70% 0.145 28 / .14); --bad-line:oklch(70% 0.145 28 / .40);
-  --amber:oklch(80% 0.105 82);
-  --shadow-modal:0 24px 70px oklch(8% 0.010 75 / .66);
-  --shadow-drawer:12px 0 40px oklch(8% 0.010 75 / .55);
-  --scrim:oklch(8% 0.010 75 / .68);
-  --appbar:oklch(15% 0.007 75 / .88);
+  /* 纸：中性石墨。基本不带色相（只带一丝冷）。
+     上一版把中性灰全部往暖黄轴偏，结果整页成了棕泥地——底色要中性，重色才能当焦点。 */
+  --bg:oklch(16% 0.004 250);                /* 桌面 */
+  --card:oklch(20% 0.005 250);              /* 抬一层：卡片 */
+  --panel:oklch(24% 0.006 250);             /* 再抬一层：输入框、次级面 */
+  --ink:oklch(94% 0.003 250);               /* 近白，不是纯白 */
+  --muted:oklch(71% 0.006 250);
+  --line:oklch(94% 0.003 250 / .12);         /* 发丝描边：由墨色派生，跨三层暗面都成立 */
+  --ink-strong:oklch(96% 0.003 250);         /* 提示条等反相面 */
+  /* 焦点色：琥珀。全站只当荧光笔用——活动项、聚焦环、下划线、进度条、小方块，
+     永不铺满按钮。面积上限约 5%。 */
+  --accent:oklch(79% 0.145 78);
+  /* 主操作填充＝近白 + 近黑字。深色主题下"亮底深字"比"彩色大块"干净得多 */
+  --pri:oklch(94% 0.003 250);
+  --pri-2:oklch(79% 0.145 78);
+  --pri-weak:oklch(79% 0.145 78 / .14);
+  --pri-line:oklch(79% 0.145 78 / .40);
+  --pri-ink:oklch(17% 0.004 250);            /* 亮底上的字 */
+  --hover:oklch(94% 0.003 250 / .06);
+  --hairline:oklch(94% 0.003 250 / .22);
+  --track:oklch(94% 0.003 250 / .12);
+  --focus-line:oklch(79% 0.145 78 / .65);
+  --skel:oklch(94% 0.003 250 / .09);
+  --chip-bg:oklch(94% 0.003 250 / .06);
+  --ok:oklch(80% 0.130 150); --okbg:oklch(80% 0.130 150 / .13); --ok-line:oklch(80% 0.130 150 / .38);
+  --bad:oklch(71% 0.160 25); --badbg:oklch(71% 0.160 25 / .14); --bad-line:oklch(71% 0.160 25 / .40);
+  --amber:oklch(79% 0.145 78);
+  --shadow-modal:0 24px 70px oklch(8% 0.005 250 / .66);
+  --shadow-drawer:12px 0 40px oklch(8% 0.005 250 / .55);
+  --scrim:oklch(8% 0.005 250 / .68);
+  --appbar:oklch(16% 0.004 250 / .88);
   --radius:14px;
 }
 /* finesse · register=product · A=indigo+slate-tinted · B=type 12-40 · C=card+grid
- * D=CSS-only(no lib) · E=warm-graphite+brass · SOUL=6 SPECTACLE=2 DENSITY=7 */
+ * D=CSS-only(no lib) · E=neutral-graphite+amber · SOUL=6 SPECTACLE=2 DENSITY=7 */
 
 *{box-sizing:border-box}
-::selection{background:oklch(80% 0.105 82 / .30);color:var(--ink)}
+::selection{background:oklch(79% 0.145 78 / .32);color:var(--ink)}
 html,body{margin:0;padding:0}
 body{font-family:"Segoe UI","Microsoft YaHei",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6;-webkit-tap-highlight-color:transparent}
 button{font-family:inherit}
@@ -176,7 +176,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 .bub.u{background:var(--pri);color:var(--pri-ink);align-self:flex-end;border-bottom-right-radius:8px}
 .bub.u .tw:hover{background:rgba(0,0,0,.14);color:var(--pri-ink)}
 .bub .mini{font-size:12px;opacity:.75;margin-top:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.bub.u .mini{color:oklch(16% 0.008 75 / .66)}
+.bub.u .mini{color:oklch(17% 0.004 250 / .66)}
 .empty{color:var(--muted);font-size:13px;text-align:center;padding:18px 6px}
 /* 空状态：图标 + 缺什么/为什么/下一步 + 动作，而不是一行灰字 */
 .emptybox{text-align:center;padding:26px 16px 22px}
@@ -252,7 +252,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 .appbar{padding-top:calc(9px + env(safe-area-inset-top));padding-left:calc(14px + env(safe-area-inset-left));padding-right:calc(14px + env(safe-area-inset-right))}
 .drawer{padding-top:calc(14px + env(safe-area-inset-top));padding-left:calc(12px + env(safe-area-inset-left))}
 /* 聚焦环用柔和的品牌色环，而不是浏览器默认描边 */
-:root{--ring:0 0 0 3px oklch(80% 0.105 82 / .28)}
+:root{--ring:0 0 0 3px oklch(79% 0.145 78 / .28)}
 button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visible,.opt:focus-visible{outline:2px solid transparent;box-shadow:var(--ring)}
 @media(max-width:640px){
   /* iOS Safari 对 16px 以下的输入框会在聚焦时自动放大页面 */
@@ -298,7 +298,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.16 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.17 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main id="main">
@@ -454,7 +454,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.16 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.17 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
