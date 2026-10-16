@@ -293,7 +293,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.20 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.21 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main>
@@ -472,7 +472,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.20 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.21 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1130,7 +1130,8 @@ const IELTS_LEVELS = [
  {id:'high', name:'高级', range:'8-10 分', brief:'抽象社会话题，深入追问，高强度对练'}
 ];
 const PD = {
- reading:{ title:'C 篇 · 示例（正式版按近5年全国卷、新课标卷与浙江模考卷特点生成）',
+ reading:{ title:'C 篇 · 示例',
+  src:'示例文本（按 2025 浙江模考 C 篇风格编写，非真题原文）',
   passage:'Many people believe that learning a musical instrument is only for children. However, research tells a different story. In a study at a university in California, scientists followed 120 adults aged between 60 and 80. Half of them learned to play the piano for six months, while the others kept their usual routines. During the study, the piano group showed clearer improvements in memory and attention than the other group. Researchers explain that reading notes and moving fingers at the same time gives the brain a full workout. The results do not mean everyone must buy a piano. Simple activities such as dancing or singing in a group may also help. The key message is simple: it is never too late to challenge your brain.',
   questions:[
    {q:'What did the study at the university find?', opts:['Older adults who learned piano improved memory and attention.','Older adults disliked playing the piano.','Children learn music much faster than adults.','Dancing is better for the brain than singing.'], ans:0, why:'第三句起：the piano group showed clearer improvements in memory and attention。'},
@@ -2698,6 +2699,13 @@ function renderPracticeBody(){
   if(pracSel==='grammar'){ renderGrammar(); return; }
   renderWriting();
 }
+/* 素材来源的展示口径：C/D 篇正文是"按真题风格生成"的，不是真题原文。
+   所以一律拼成「AI 生成 · 仿 XX 风格」或「示例文本（…非真题原文）」——
+   不能让它看起来像真的选自某套卷子，那是假出处。 */
+function srcLine(src){
+  if(!src) return '';
+  return '素材来源：' + esc(src) + '　·　';
+}
 function genRow(note){
   return '<div class="row"><span class="small muted">'+esc(note)+'</span><div class="grow"></div>'
     + '<button class="btn" data-pact="gen">'+icon('sparkle')+' AI 出新题'+(aiReady()?'':'（需配置AI）')+'</button></div>';
@@ -2705,7 +2713,7 @@ function genRow(note){
 function renderReading(){
   var d = PD.reading;
   var h = '<div class="card" data-sec="reading"><b>'+esc(d.title)+'</b>'
-    + '<p class="small muted">点击文中任意单词可查看释义并加入生词本。</p>'
+    + '<p class="small muted">'+srcLine(d.src)+'点击文中任意单词可查看释义并加入生词本。</p>'
     + '<p class="psg">'+renderPassage(d.passage)+'</p>';
   d.questions.forEach(function(q,qi){
     h += '<p>'+pointBadge(ptOf(d,qi,q))+'<b>'+(qi+1)+'.</b> '+esc(q.q)+'</p><div class="opts">';
@@ -2713,7 +2721,7 @@ function renderReading(){
     h += '</div>';
   });
   h += '<div class="mt12"><button class="btn pri" data-pact="submit-objective" data-sec="reading">提交并查看解析</button></div>'
-    + '<div id="pracResult-reading"></div>' + genRow('素材：近5年全国卷/新课标卷/浙江模考风格（示例题）') + '</div>';
+    + '<div id="pracResult-reading"></div>' + genRow('素材取自近 5 年全国卷 / 新课标卷 / 浙江模考卷的风格，正文由 AI 仿写，不是真题原文') + '</div>';
   el2(h);
 }
 function renderCloze(){
@@ -2894,6 +2902,7 @@ function pracCheck(type, r){
       if(typeof qs[i].ans !== 'number' || qs[i].ans < 0 || qs[i].ans >= qs[i].opts.length) return '第 ' + (i+1) + ' 题答案下标越界';
       if(typeof qs[i].q !== 'string' && typeof qs[i].stem !== 'string') return '第 ' + (i+1) + ' 题缺题干';
     }
+    if(type === 'reading' && r.src != null && typeof r.src !== 'string') return '素材来源字段类型不对';
   } else if(type === 'qixuan'){
     if(typeof r.passage !== 'string' || !r.passage) return '缺短文';
     if(!isArr(r.opts, 3)) return '选项不足 3 个';
@@ -2917,7 +2926,9 @@ async function pracGen(btn){
   if(!aiReady()){ aiHint(); return; }
   var doneSpin = btnSpin(btn, 'AI 出题中…');
   var P = {
-    reading:{ sys:'你是高中英语命题人，出题参照近5年全国卷/新课标卷与浙江模考卷 C 篇阅读风格。', usr:'请生成 1 篇高考阅读 C 篇风格短文（120-150词）和 3 道四选一阅读题。只输出 JSON：{"title":"","passage":"","questions":[{"q":"","opts":["","","",""],"ans":0,"why":"","point":"考点（细节理解/推理判断/主旨大意/词义猜测 之一）"}]}', ap:function(r){ PD.reading = { title:r.title||'AI 生成 · C篇', passage:r.passage, questions:r.questions||[] }; } },
+    reading:{ sys:'你是高中英语命题人，出题参照近5年全国卷/新课标卷与浙江模考卷 C 篇阅读风格。', usr:'请生成 1 篇高考阅读 C 篇风格短文（120-150词）和 3 道四选一阅读题。只输出 JSON：{"title":"","src":"本篇参照的卷别与篇目（例如 2024 全国甲卷 C 篇 / 2025 浙江模考 C 篇，只写卷别篇目）","passage":"","questions":[{"q":"","opts":["","","",""],"ans":0,"why":"","point":"考点（细节理解/推理判断/主旨大意/词义猜测 之一）"}]}', ap:function(r){ PD.reading = { title:r.title||'C 篇 · AI 出新题',
+      src:'AI 生成 · 仿 '+(r.src||'高考 C 篇')+' 风格',
+      passage:r.passage, questions:r.questions||[] }; } },
     grammar:{ sys:'你是高中英语命题人，语法填空命题参照高考真题考点分布。', usr:'按人教版高中范围生成 1 篇语法填空（5 个空，文中用 [[1]]..[[5]] 标记），避免出现超纲生词。只输出 JSON：{"title":"","passage":"","blanks":[{"ans":"","variants":[""],"hint":"提示词","why":"中文解析","point":"考点（时态语态/非谓语动词/词性转换/连词与从句/冠词与介词/固定搭配 之一）"}]}', ap:function(r){ PD.grammar = { title:r.title||'AI 生成 · 语法填空', passage:r.passage, blanks:r.blanks||[] }; } },
     qixuan:{ sys:'你是高中英语命题人，七选五命题参照高考真题的逻辑衔接与代词指代特点。', usr:'生成 1 篇 180 词左右、挖 3 个空的短文（文中用 [[1]]..[[3]] 标记），再给 3 个选项 A/B/C（必须有 2 个是干扰项）。只输出 JSON：{"title":"","passage":"","opts":["A. ","B. ","C. "],"ans":{"1":"","2":"","3":""},"why":{"1":"","2":"","3":""},"points":{"1":"考点（逻辑关系/代词指代 之一）","2":"","3":""}}', ap:function(r){ PD.qixuan = { title:r.title||'AI 生成 · 七选五', passage:r.passage, opts:r.opts, ans:r.ans, why:r.why, points:r.points }; } },
     cloze:{ sys:'你是高中英语命题人，完形填空命题参照高考真题考点分布（语境逻辑、词义辨析、固定搭配）。', usr:'生成 1 道 4 空的高考风格完形填空：每题给出一个带 ___n___（n 为 1-4）的句子和 4 个选项，四个选项要构成有效的词义辨析。只输出 JSON：{"title":"","items":[{"stem":"... ___1___ ...","opts":["","","",""],"ans":0,"why":"中文解析","point":"考点（语境逻辑/词义辨析/固定搭配 之一）"}]}', ap:function(r){ PD.cloze = { title:r.title||'AI 生成 · 完形填空', items:r.items }; } },
