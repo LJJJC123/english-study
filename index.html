@@ -163,6 +163,9 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 .qcn{font-size:24px;font-weight:600;text-align:center;margin:10px 0 4px}
 .qph{text-align:center;color:var(--muted);font-size:15px}
 .qa-center{text-align:center;color:var(--muted);font-size:13px;margin-bottom:8px}
+/* 答题页顶部：题号居中，右上角留一个退出入口（否则中途想停只能刷页） */
+.qa-top{display:flex;align-items:center;gap:8px}
+.qa-top .qa-center{flex:1 1 auto;min-width:0;margin:0}
 .pulseok{animation:okp .55s ease}
 @keyframes okp{0%{transform:scale(1)}40%{transform:scale(1.035)}100%{transform:scale(1)}}
 .pulsebad{animation:badp .5s ease}
@@ -295,7 +298,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.15 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.16 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main id="main">
@@ -451,7 +454,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.15 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.16 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1729,10 +1732,27 @@ function startSession(kind, qs, scope){
   card.style.display = 'block'; rep.style.display = 'none';
   renderQuestion();
 }
+/* 答题页/判定页共用的顶部：第 N / M 题 · 题型，右上角一个退出 */
+function qaTop(n, total, label){
+  return '<div class="qa-top"><div class="qa-center">第 '+n+' / '+total+' 题 · '+esc(label)+'</div>'
+    + '<button class="btn small ghost" data-qact="quit">退出</button></div>';
+}
+function quitSession(){
+  if(!Q) return;
+  var cur = Q.qs[Q.i];
+  if(cur && cur._t){ clearTimeout(cur._t); cur._t = 0; }   /* 别让还没触发的自动朗读在退出后响一声 */
+  var left = Q.qs.length - Q.i - (cur && cur.answered ? 1 : 0);
+  var kind = Q.kind;
+  confirmModal('退出本次练习', '已答过的题会保留在统计与错题本里，剩下 '+left+' 题不再继续。确定退出吗？', function(){
+    Q = null;
+    renderSetup(kind);
+    toast('已退出本次练习');
+  }, '退出');
+}
 function renderQuestion(){
   var q = Q.qs[Q.i]; if(!q) return;
   var total = Q.qs.length, n = Q.i+1;
-  var head = '<div class="qa-center">第 '+n+' / '+total+' 题 · '+(Q.kind==='listen' ? '听写' : (q.mode==='en2cn' ? '英选中' : '中默英'))+'</div>'
+  var head = qaTop(n, total, Q.kind==='listen' ? '听写' : (q.mode==='en2cn' ? '英选中' : '中默英'))
     + '<div class="prog"><i style="width:'+Math.round((Q.i+1)/total*100)+'%"></i></div><div class="mt12"></div>';
   var body = '';
   if(Q.kind==='write' && q.mode==='en2cn'){
@@ -1762,6 +1782,7 @@ function renderQuestion(){
     window.__qBound = true;
     document.addEventListener('click', function(e){
       var t = e.target.closest('[data-qact],[data-opt]'); if(!t || !Q) return;
+      if(t.getAttribute('data-qact')==='quit'){ quitSession(); return; }
       var q = Q.qs[Q.i]; if(!q) return;
       if(t.hasAttribute('data-opt')){
         if(q.answered) return;
@@ -1817,7 +1838,7 @@ function judgeCurrent(){
 }
 function renderFeedback(){
   var q = Q.qs[Q.i]; var total = Q.qs.length, n = Q.i+1;
-  var html = '<div class="qa-center">第 '+n+' / '+total+' 题 · 结果</div><div class="prog"><i style="width:'+Math.round(n/total*100)+'%"></i></div><div class="mt12"></div>';
+  var html = qaTop(n, total, '结果') + '<div class="prog"><i style="width:'+Math.round(n/total*100)+'%"></i></div><div class="mt12"></div>';
   if(q.ok){
     html += '<div class="center pulseok"><div class="score-big" style="color:var(--ok)">✓ 正确</div></div>';
   } else {
