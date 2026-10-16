@@ -185,7 +185,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="ic">⚙️</span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.5 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.6 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main id="main">
@@ -293,7 +293,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
 
 <section class="view" id="view-ielts">
   <h2 class="page">雅思口语</h2>
-  <div class="sub">选择难度后由不同角色 Agent 模拟真人对练；每次进入生成不同话题与情境；对话记录可回看、可删除。</div>
+  <div class="sub">选择难度后由不同角色 Agent 模拟真人对练；每次进入生成不同话题与情境；对话记录可回看、可删除。也可直接开「全真模考」：Part1 → Part2（1 分钟准备 + 2 分钟陈述）→ Part3 全程计时。</div>
   <div class="card" id="ieltsHome"></div>
   <div class="card" id="ieltsChatCard" style="display:none"></div>
   <div id="ieltsRecords"></div>
@@ -301,8 +301,9 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
 
 <section class="view" id="view-practice">
   <h2 class="page">练习场</h2>
-  <div class="sub">阅读 A/B/C/D 篇专题 · 七选五 · 完形填空 · 语法填空 · 读后续写 · 作文练习</div>
+  <div class="sub">阅读 · 七选五 · 完形填空 · 语法填空 · 读后续写 · 作文练习 · <b>整套模考</b>（按浙江卷顺序组卷、自动批改）；每道题标注考点，可按考点专项练习</div>
   <div class="tabs" id="practiceTabs"></div>
+  <div id="practicePoints"></div>
   <div id="practiceBody"></div>
   <div id="practiceHistory" class="mt12"></div>
 </section>
@@ -342,7 +343,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.5 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.6 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1005,20 +1006,23 @@ const PD = {
   questions:[
    {q:'What did the study at the university find?', opts:['Older adults who learned piano improved memory and attention.','Older adults disliked playing the piano.','Children learn music much faster than adults.','Dancing is better for the brain than singing.'], ans:0, why:'第三句起：the piano group showed clearer improvements in memory and attention。'},
    {q:'What does "gives the brain a full workout" mean?', opts:['Makes the brain tired quickly.','Exercises the brain in a thorough way.','Makes the brain slow down.','Harms the brain over time.'], ans:1, why:'workout 指锻炼；此处意为让大脑得到充分锻炼。'},
-   {q:'What is the main message of the passage?', opts:['Only children can learn music.','Everyone should buy a piano.','It is never too late to challenge your brain.','Dancing is the best exercise.'], ans:2, why:'末句：it is never too late to challenge your brain。'}]},
+   {q:'What is the main message of the passage?', opts:['Only children can learn music.','Everyone should buy a piano.','It is never too late to challenge your brain.','Dancing is the best exercise.'], ans:2, why:'末句：it is never too late to challenge your brain。'}],
+   points:['细节理解','词义猜测','主旨大意']},
  qixuan:{ title:'七选五 · 示例（正式版按真题选项特征生成）',
   passage:'How to Build a Reading Habit\nReading every day is easier said than done. [[1]] Fifteen minutes a day is enough at the beginning. Second, keep your book where you can see it. [[2]] Finally, share what you read. Talking about a book with friends makes you want to keep going. [[3]]',
   opts:['A. A book on your desk is a quiet reminder.','B. Do not plan to read for two hours on day one.','C. It also helps you remember the story better.'],
-  ans:{'1':'B','2':'A','3':'C'}, why:{'1':'空1后紧接"十五分钟就够"，说明前面是"别一上来两小时"，选B。','2':'空2在"把书放在看得见的地方"之后，A"桌上的书是无声的提醒"承接最顺。','3':'空3在"和朋友讨论"之后，C"It also helps…"承接朋友讨论的另一个好处。'}},
+  ans:{'1':'B','2':'A','3':'C'}, points:{'1':'逻辑关系','2':'逻辑关系','3':'代词指代'}, why:{'1':'空1后紧接"十五分钟就够"，说明前面是"别一上来两小时"，选B。','2':'空2在"把书放在看得见的地方"之后，A"桌上的书是无声的提醒"承接最顺。','3':'空3在"和朋友讨论"之后，C"It also helps…"承接朋友讨论的另一个好处。'}},
  cloze:{ title:'完形填空 · 示例（正式版按真题考点分布生成）',
   items:[
    {stem:'Last winter, I joined a volunteer program in my community. At first, I was ___1___ about talking to strangers.', opts:['nervous','excited','proud','bored'], ans:0, why:'由后文 But…kind 的转折及 At first 可知最初是"紧张"，选 nervous。'},
    {stem:'I helped the elderly people ___2___ their phones.', opts:['use','break','buy','draw'], ans:0, why:'志愿者帮老人"使用"手机最符合语境。'},
    {stem:'By the end of the month, I became much more ___3___ in myself.', opts:['confident','silent','lazy','careless'], ans:0, why:'经历之后变得"更自信"，confident 符合语境。'},
-   {stem:'Volunteering taught me that small acts of ___4___ can warm a whole neighborhood.', opts:['kindness','money','luck','speed'], ans:0, why:'"小小的善意能温暖整个社区"，kindness 与 warm 呼应。'}]},
+   {stem:'Volunteering taught me that small acts of ___4___ can warm a whole neighborhood.', opts:['kindness','money','luck','speed'], ans:0, why:'"小小的善意能温暖整个社区"，kindness 与 warm 呼应。'}],
+   points:['语境逻辑','词义辨析','固定搭配','语境逻辑']},
  grammar:{ title:'语法填空 · 示例（正式版按你的当前学习进度出题，避免陌生词）',
   passage:'Liu Wei lost his arms in an accident when he was ten. However, he refused [[1]] (give) up. He learned [[2]] (play) the piano with his toes. In 2010, he [[3]] (win) the first prize in a TV talent show. His story shows that difficulties can [[4]] (overcome) with a strong will. Today, he often tells young people, "Nothing is [[5]] (possible) if you keep trying."',
-  blanks:[{ans:'to give', variants:['to give'], hint:'give', why:'refuse to do sth. 固定搭配。'},{ans:'to play', variants:['to play'], hint:'play', why:'learn to do sth. 固定搭配。'},{ans:'won', variants:['won'], hint:'win', why:'2010 年，一般过去时。'},{ans:'be overcome', variants:['be overcome'], hint:'overcome', why:'困难"被克服"，情态动词后接被动语态。'},{ans:'impossible', variants:['impossible'], hint:'possible', why:'"没有什么不可能"，用反义词 impossible。'}]},
+  blanks:[{ans:'to give', variants:['to give'], hint:'give', why:'refuse to do sth. 固定搭配。'},{ans:'to play', variants:['to play'], hint:'play', why:'learn to do sth. 固定搭配。'},{ans:'won', variants:['won'], hint:'win', why:'2010 年，一般过去时。'},{ans:'be overcome', variants:['be overcome'], hint:'overcome', why:'困难"被克服"，情态动词后接被动语态。'},{ans:'impossible', variants:['impossible'], hint:'possible', why:'"没有什么不可能"，用反义词 impossible。'}],
+   points:['固定搭配','非谓语动词','时态语态','时态语态','词性转换']},
  cont:{ title:'读后续写 · 示例（满分 25 分；正式版按浙江省评分标准批改）',
   story:'Emma walked to the bus stop with her little brother, Tom. It was his first day at the new school. Tom held her hand tightly and looked at the ground. When the school bus arrived, he suddenly stopped. "I can\'t do this," he whispered. Emma looked at his pale face. She remembered her own first day, when a kind girl had smiled at her and showed her the way. She took a deep breath.',
   starts:['Emma took Tom\'s hand and said, "…"','After school, Tom ran to Emma with a big smile.'],
@@ -1767,7 +1771,132 @@ var IELTS_SCRIPT = {
     'Could you give a specific example to support your point?',
     'What role should governments play in protecting culture?',
     'One last question: do you think privacy and public safety can both be protected? How?'] }
+
 };
+/* ================= 雅思全真模考：Part1 → Part2（1分钟准备+2分钟陈述）→ Part3，全程计时 ================= */
+const IELTS_MOCK = {
+  beginner:{ p1:[
+      'What is your name, and where are you from?',
+      'Do you study or work? What do you like about it?',
+      'What do you usually do at the weekend?',
+      'Do you prefer tea or coffee? Why?'],
+    p2:{ topic:'Describe a place you like to go to in your free time.',
+      bullets:['where it is','how often you go there','what you do there','and explain why you like it'] },
+    p3:[
+      'Why do people need free time?',
+      'Is it easy for students to relax in your country?',
+      'Do you think hobbies are important for young people? Why?',
+      'How do people usually spend their holidays in your country?'] },
+  mid:{ p1:[
+      'What kind of music do you enjoy most, and why?',
+      'How do you usually get to school or work?',
+      'Do you think it is important to keep a daily routine?',
+      'Have you changed any of your habits in the last year?'],
+    p2:{ topic:'Describe a skill you would like to learn in the future.',
+      bullets:['what the skill is','why you want to learn it','how you would learn it','and explain how it would help you'] },
+    p3:[
+      'Why do some people find it hard to learn new skills as they get older?',
+      'Should schools teach more practical skills? Why?',
+      'How has technology changed the way people learn?',
+      'Do you think talent or practice matters more? Why?'] },
+  high:{ p1:[
+      'How do you think your hometown has changed in the last ten years?',
+      'What role do you think reading plays in a person\u2019s life?',
+      'Do you think people today are busier than before? Why?',
+      'How do you decide what is worth spending your time on?'],
+    p2:{ topic:'Describe a decision you made that changed your life.',
+      bullets:['what the decision was','why you made it','what happened afterwards','and explain what you learned from it'] },
+    p3:[
+      'Should governments spend more on public transport than on new roads?',
+      'How can society help young people make better decisions?',
+      'Do you think technology makes people less independent? Why?',
+      'What values do you think matter most in modern society?'] }
+};
+var ieltsMock = null;
+function mockFmt(s){ s = Math.max(0, s|0); return Math.floor(s/60) + ':' + String(s%60).padStart(2,'0'); }
+function mockSteps(sc){
+  var a = [];
+  sc.p1.forEach(function(q){ a.push({k:'p1', q:q, sec:45}); });
+  a.push({k:'prep', sec:60, bullets:function(){ return sc.p2.bullets; }});
+  a.push({k:'talk', sec:120});
+  sc.p3.forEach(function(q){ a.push({k:'p3', q:q, sec:60}); });
+  return a;
+}
+function startIeltsMock(){
+  var L = IELTS_LEVELS.find(function(x){ return x.id===ieltsSel; }) || IELTS_LEVELS[0];
+  var sc = IELTS_MOCK[ieltsSel] || IELTS_MOCK.beginner;
+  ieltsSess = { level:ieltsSel, levelName:L.name, range:L.range, topic:sc.p2.topic, msgs:[], turns:0, mock:true, report:'' };
+  ieltsMock = { sc:sc, steps:mockSteps(sc), i:0, left:0, timer:null };
+  ieltsMock.left = ieltsMock.steps[0].sec;
+  ieltsSess.msgs.push({role:'a', text:ieltsMock.steps[0].q});
+  $('#ieltsHome').style.display = 'none';
+  var card = $('#ieltsChatCard'); card.style.display = 'block';
+  if(!window.__mockBound){
+    window.__mockBound = true;
+    card.addEventListener('click', function(e){
+      var b = e.target.closest('[data-mock]'); if(!b || !ieltsMock) return;
+      var a = b.getAttribute('data-mock');
+      if(a === 'quit') mockQuit(); else mockNext();
+    });
+  }
+  renderIeltsMock(); speakAgent(ieltsMock.steps[0].q);
+  ieltsMock.timer = setInterval(mockTick, 1000);
+}
+function renderIeltsMock(){
+  if(!ieltsMock || !ieltsSess) return;
+  var st = ieltsMock.steps[ieltsMock.i], total = ieltsMock.steps.length;
+  var name = st.k==='prep' ? 'Part 2 · 准备' : st.k==='talk' ? 'Part 2 · 陈述' : st.k==='p1' ? 'Part 1 · 日常问答' : 'Part 3 · 深入讨论';
+  var h = '<div class="row"><b>全真模考 · '+esc(ieltsSess.levelName)+'（'+esc(ieltsSess.range)+'）</b><span class="badge">'+esc(name)+'</span>'
+    + '<div class="grow"></div><span class="timer" id="mockTimer">'+mockFmt(ieltsMock.left)+'</span></div>'
+    + '<div class="prog mt8"><i id="mockBar" style="width:'+Math.round(ieltsMock.i/total*100)+'%"></i></div>'
+    + '<p class="small muted mt8">第 '+(ieltsMock.i+1)+' / '+total+' 步 · 时间到会自动进入下一步</p>';
+  if(st.k === 'prep'){
+    h += '<div class="card accent"><b>准备 1 分钟</b><p class="small muted">题目：'+esc(ieltsSess.topic)+'</p>'
+      + '<ul class="small">'+st.bullets().map(function(b){ return '<li>'+esc(b)+'</li>'; }).join('')+'</ul></div>'
+      + '<p class="small muted">准备好就点「提前开始陈述」，系统不会替你说话。</p>';
+  } else if(st.k === 'talk'){
+    h += '<div class="card accent"><b>请就上面这张卡片陈述 1-2 分钟</b><p class="small muted">正式考试是口头陈述；这里可以先写下你要说的要点，方便最后评分时参考。</p></div>';
+  } else {
+    h += '<div class="bub a" style="max-width:100%">'+esc(st.q)+'</div>';
+  }
+  h += '<textarea id="mockInput" placeholder="'+(st.k==='prep' ? '准备阶段不用写，直接等时间或点「提前开始陈述」' : '用英文回答…')+'"'+(st.k==='prep' ? ' disabled' : '')+'></textarea>'
+    + '<div class="row mt8"><button class="btn" data-mock="quit">退出模考</button><div class="grow"></div>'
+    + '<button class="btn" data-mock="skip">跳过这步</button>'
+    + '<button class="btn pri" data-mock="next">'+(st.k==='prep' ? '提前开始陈述' : '提交并进入下一步')+'</button></div>';
+  $('#ieltsChatCard').innerHTML = h;
+}
+function mockTick(){
+  if(!ieltsMock) return;
+  ieltsMock.left--;
+  var el = $('#mockTimer'); if(el) el.textContent = mockFmt(ieltsMock.left);
+  if(ieltsMock.left <= 0) mockNext(true);
+}
+function mockNext(){
+  if(!ieltsMock || !ieltsSess) return;
+  var st = ieltsMock.steps[ieltsMock.i];
+  var ta = $('#mockInput');
+  var val = ta ? String(ta.value).trim() : '';
+  if(st.k !== 'prep' && val){ ieltsSess.msgs.push({role:'u', text:val}); ieltsSess.turns++; }
+  ieltsMock.i++;
+  if(ieltsMock.i >= ieltsMock.steps.length) return mockFinish();
+  var nx = ieltsMock.steps[ieltsMock.i];
+  if(nx.q) ieltsSess.msgs.push({role:'a', text:nx.q});
+  ieltsMock.left = nx.sec;
+  renderIeltsMock();
+  if(nx.q) speakAgent(nx.q);
+}
+function mockFinish(){
+  if(ieltsMock && ieltsMock.timer) clearInterval(ieltsMock.timer);
+  ieltsMock = null;
+  if(!ieltsSess || !ieltsSess.turns){ toast('这次模考没有作答记录'); ieltsSess = null; renderIelts(); return; }
+  toast('模考结束，正在生成评分…');
+  ieltsEnd();
+}
+function mockQuit(){
+  if(ieltsMock && ieltsMock.timer) clearInterval(ieltsMock.timer);
+  ieltsMock = null; ieltsSess = null;
+  renderIelts(); toast('已退出模考');
+}
 function renderIelts(){
   if(ieltsSess) renderIeltsChat(); else renderIeltsHome();
   renderIeltsRecords();
@@ -1782,6 +1911,7 @@ function renderIeltsHome(){
     + '<b class="mt12" style="display:block">本难度话题（每次进入随机不同）</b>'
     + '<p class="small muted">'+IELTS_TOPICS[ieltsSel].join(' · ')+'</p>'
     + '<div class="row mt12"><button class="btn pri big" id="btnStartIelts">开始训练</button>'
+    + '<button class="btn big" id="btnMockIelts">🎧 全真模考（Part1→2→3 计时）</button>'
     + '<span class="small muted">'+(aiReady()? 'AI 模式：考官由大模型扮演，支持逐句纠错与四项评分' : '离线模式：内置示例考官脚本；配置 AI 后体验完整对练')+'</span></div>'
     + '<p class="small muted mt8">支持语音对话：点 🎤 说话（需麦克风权限与联网），考官回复会自动朗读（美音）；也可直接打字。</p>';
   var el = $('#ieltsHome'); el.innerHTML = h; el.style.display = 'block';
@@ -1791,6 +1921,7 @@ function renderIeltsHome(){
       var c = e.target.closest('[data-lvl]');
       if(c){ ieltsSel = c.getAttribute('data-lvl'); renderIelts(); return; }
       if(e.target.id==='btnStartIelts'){ startIelts(); }
+      if(e.target.id==='btnMockIelts'){ startIeltsMock(); }
     });
   }
 }
@@ -1978,7 +2109,7 @@ async function ieltsEnd(){
   } else {
     s.report = buildIeltsReportHTML(null, true);
   }
-  DB.ielts.unshift({ id:uid(), level:s.levelName, topic:s.topic, ts:Date.now(),
+  DB.ielts.unshift({ id:uid(), level:s.levelName + (s.mock ? ' · 全真模考' : ''), topic:s.topic, ts:Date.now(),
     msgs:s.msgs.filter(function(m){ return !m.pending; }).map(function(m){ return {role:m.role, text:m.text}; }),
     reportHTML:s.report });
   save(); renderIelts();
@@ -2025,12 +2156,68 @@ var PRACTICE_TYPES = [
   ['cloze','完形填空'],
   ['grammar','语法填空'],
   ['cont','读后续写'],
-  ['essay','作文练习']
+  ['essay','作文练习'],
+  ['mock','📝 整套模考']
 ];
 var pracSel = 'reading';
 var pracData = { answers:{}, inputs:{} };
+/* ================= 考点标签 ================= */
+const POINTS = ['细节理解','推理判断','主旨大意','词义猜测','逻辑关系','代词指代','词义辨析','固定搭配','语境逻辑','时态语态','非谓语动词','词性转换','连词与从句','冠词与介词'];
+const POINT_TYPE = { '细节理解':'reading','推理判断':'reading','主旨大意':'reading','词义猜测':'reading',
+  '逻辑关系':'qixuan','代词指代':'qixuan','词义辨析':'cloze','固定搭配':'cloze','语境逻辑':'cloze',
+  '时态语态':'grammar','非谓语动词':'grammar','词性转换':'grammar','连词与从句':'grammar','冠词与介词':'grammar' };
+var pracPoint = '';
+/* ---- 整套模考：把各节按顺序铺在一页，各自提交、底部汇总 ---- */
+var pracMockOn = false, pracMockAppend = false, pracMockSum = {}, pracDataMap = {};
+function mockSwitch(sec){
+  if(!pracMockOn || !sec || sec === pracSel) return;
+  pracDataMap[pracSel] = pracData;
+  pracData = pracDataMap[sec] || { answers:{}, inputs:{} };
+  pracSel = sec;
+}
+function renderMock(){
+  pracMockOn = true; pracMockAppend = false; pracMockSum = {}; pracDataMap = {};
+  pracData = { answers:{}, inputs:{} };
+  el2('<div class="card"><b>整套模考 · 按浙江卷顺序</b><p class="small muted">阅读 → 七选五 → 完形 → 语法填空 → 读后续写。每节做完点它自己的「提交并查看解析」，底部会实时汇总客观题得分；读后续写不自动判分，可单独提交 AI 批改。</p></div>');
+  pracMockAppend = true;
+  renderReading(); renderQixuan(); renderCloze(); renderGrammar();
+  var keep = pracSel; pracSel = 'cont'; renderWriting(); pracSel = keep;
+  pracMockAppend = false;
+  $('#practiceBody').insertAdjacentHTML('beforeend', '<div class="card"><b>客观题合计</b><div id="mockTotal" class="mt8">还没提交任何一节。</div></div>');
+}
+function renderMockTotal(){
+  var el = $('#mockTotal'); if(!el) return;
+  var order = [['reading','阅读'],['qixuan','七选五'],['cloze','完形'],['grammar','语法填空']];
+  var s = 0, t = 0, parts = [];
+  order.forEach(function(x){
+    var r = pracMockSum[x[0]];
+    if(r){ s += r.s; t += r.t; parts.push(x[1] + ' ' + r.s + '/' + r.t); } else parts.push(x[1] + ' 未提交');
+  });
+  el.innerHTML = parts.join(' · ') + (t ? ('<div class="mt8"><b>客观题合计：' + s + ' / ' + t + '（正确率 ' + Math.round(s / t * 100) + '%）</b></div>') : '');
+}
+function ptOf(d, i, item){
+  if(item && item.point) return item.point;
+  if(!d || !d.points) return '';
+  var p = d.points[i]; if(p === undefined) p = d.points[String(i)];
+  return p || '';
+}
+function pointBadge(p){ return p ? '<span class="badge">'+esc(p)+'</span> ' : ''; }
+function pointWrong(p){ if(!p) return; DB.stats.pointWrong = DB.stats.pointWrong || {}; DB.stats.pointWrong[p] = (DB.stats.pointWrong[p]||0) + 1; }
+function topPointWrong(n){
+  var m = DB.stats.pointWrong || {};
+  return Object.keys(m).map(function(k){ return [k, m[k]]; }).sort(function(a,b){ return b[1]-a[1]; }).slice(0, n||3);
+}
+function renderPointBar(){
+  var el = $('#practicePoints'); if(!el) return;
+  el.innerHTML = '<div class="card" style="padding:10px 12px"><b class="small">考点专项</b>'
+    + '<span class="small muted">（点一个考点会跳到对应题型；配了 AI 就按该考点出新题）</span><div class="mt8">'
+    + '<span class="chip'+(pracPoint?'':' on')+'" data-pp="">全部</span>'
+    + POINTS.map(function(p){ return '<span class="chip'+(pracPoint===p?' on':'')+'" data-pp="'+esc(p)+'">'+esc(p)+'</span>'; }).join('')
+    + '</div></div>';
+}
 function pracLabel(){ var t = PRACTICE_TYPES.find(function(x){ return x[0]===pracSel; }); return t ? t[1] : pracSel; }
 function renderPractice(){
+  renderPointBar();
   var tabs = '';
   PRACTICE_TYPES.forEach(function(t){
     tabs += '<div class="tab'+(pracSel===t[0]?' on':'')+'" data-pt="'+t[0]+'">'+t[1]+'</div>';
@@ -2043,11 +2230,23 @@ function renderPractice(){
       if(t){ pracSel = t.getAttribute('data-pt'); pracData = { answers:{}, inputs:{} }; renderPractice(); }
     });
     $('#practiceBody').addEventListener('click', pracClick);
+    $('#practicePoints').addEventListener('click', pracClick);   /* 考点条在 practiceBody 之外 */
   }
   renderPracticeBody();
   renderPracticeHistory();
 }
 function pracClick(e){
+  var sw = e.target.closest('[data-sec]');
+  if(sw) mockSwitch(sw.getAttribute('data-sec'));
+  var pp = e.target.closest('[data-pp]');
+  if(pp){
+    pracPoint = pp.getAttribute('data-pp') || '';
+    if(pracPoint && POINT_TYPE[pracPoint] && POINT_TYPE[pracPoint] !== pracSel) pracSel = POINT_TYPE[pracPoint];
+    pracData = { answers:{}, inputs:{} };
+    renderPractice();
+    if(pracPoint && !aiReady()) toast('已定位到考点「'+pracPoint+'」：示例题里带这个标签的会高亮；配置 AI 可按该考点出新题');
+    return;
+  }
   var o = e.target.closest('.opt');
   if(o && (pracSel==='reading' || pracSel==='cloze')){
     var qi = o.getAttribute('data-q'), oi = o.getAttribute('data-o');
@@ -2073,6 +2272,8 @@ function pracClick(e){
   if(a==='gen'){ pracGen(); }
 }
 function renderPracticeBody(){
+  if(pracSel === 'mock'){ renderMock(); return; }
+  pracMockOn = false;
   var el = $('#practiceBody');
   if(pracSel==='reading'){ renderReading(); return; }
   if(pracSel==='qixuan'){ renderQixuan(); return; }
@@ -2086,42 +2287,42 @@ function genRow(note){
 }
 function renderReading(){
   var d = PD.reading;
-  var h = '<div class="card"><b>'+esc(d.title)+'</b>'
+  var h = '<div class="card" data-sec="reading"><b>'+esc(d.title)+'</b>'
     + '<p class="small muted">点击文中任意单词可查看释义并加入生词本。</p>'
     + '<p class="psg">'+renderPassage(d.passage)+'</p>';
   d.questions.forEach(function(q,qi){
-    h += '<p><b>'+(qi+1)+'.</b> '+esc(q.q)+'</p><div class="opts">';
+    h += '<p>'+pointBadge(ptOf(d,qi,q))+'<b>'+(qi+1)+'.</b> '+esc(q.q)+'</p><div class="opts">';
     q.opts.forEach(function(o,oi){ h += '<div class="opt" data-q="'+qi+'" data-o="'+oi+'">'+String.fromCharCode(65+oi)+'. '+esc(o)+'</div>'; });
     h += '</div>';
   });
-  h += '<div class="mt12"><button class="btn pri" data-pact="submit-objective">提交并查看解析</button></div>'
-    + '<div id="pracResult"></div>' + genRow('素材：近5年全国卷/新课标卷/浙江模考风格（示例题）') + '</div>';
+  h += '<div class="mt12"><button class="btn pri" data-pact="submit-objective" data-sec="reading">提交并查看解析</button></div>'
+    + '<div id="pracResult-reading"></div>' + genRow('素材：近5年全国卷/新课标卷/浙江模考风格（示例题）') + '</div>';
   el2(h);
 }
 function renderCloze(){
   var d = PD.cloze;
-  var h = '<div class="card"><b>'+esc(d.title)+'</b>';
+  var h = '<div class="card" data-sec="cloze"><b>'+esc(d.title)+'</b>';
   d.items.forEach(function(q,qi){
-    h += '<p>'+esc(q.stem).replace(/___(\d+)___/g,'<b>（$1）</b>')+'</p><div class="opts">';
+    h += '<p>'+pointBadge(ptOf(d,qi,q))+esc(q.stem).replace(/___(\d+)___/g,'<b>（$1）</b>')+'</p><div class="opts">';
     q.opts.forEach(function(o,oi){ h += '<div class="opt" data-q="'+qi+'" data-o="'+oi+'">'+String.fromCharCode(65+oi)+'. '+esc(o)+'</div>'; });
     h += '</div>';
   });
-  h += '<div class="mt12"><button class="btn pri" data-pact="submit-objective">提交并查看解析</button></div>'
-    + '<div id="pracResult"></div>' + genRow('完形填空 · 示例题') + '</div>';
+  h += '<div class="mt12"><button class="btn pri" data-pact="submit-objective" data-sec="cloze">提交并查看解析</button></div>'
+    + '<div id="pracResult-cloze"></div>' + genRow('完形填空 · 示例题（AI 按高考考点分布出题）') + '</div>';
   el2(h);
 }
 function renderQixuan(){
   var d = PD.qixuan;
-  var h = '<div class="card"><b>'+esc(d.title)+'</b>'
+  var h = '<div class="card" data-sec="qixuan"><b>'+esc(d.title)+'</b>'
     + '<p class="psg">'+renderPassage(d.passage, function(i){ return '<span class="blank">（'+i+'）</span>'; })+'</p>';
   [1,2,3].forEach(function(i){
-    h += '<div class="opt-row"><b class="small">空 '+i+'：</b>'
+    h += '<div class="opt-row">'+pointBadge(ptOf(d,i))+'<b class="small">空 '+i+'：</b>'
       + ['A','B','C'].map(function(L){ return '<span class="chip" data-qx="'+i+'" data-opt-l="'+L+'">'+L+'</span>'; }).join('')
       + '</div>';
   });
   h += '<div class="mt8">' + d.opts.map(function(o){ return '<p class="small muted">'+esc(o)+'</p>'; }).join('') + '</div>';
-  h += '<div class="mt12"><button class="btn pri" data-pact="submit-objective">提交并查看解析</button></div>'
-    + '<div id="pracResult"></div>' + genRow('七选五 · 示例题（AI 生成将于正式版接入）') + '</div>';
+  h += '<div class="mt12"><button class="btn pri" data-pact="submit-objective" data-sec="qixuan">提交并查看解析</button></div>'
+    + '<div id="pracResult-qixuan"></div>' + genRow('七选五 · 示例题') + '</div>';
   el2(h);
 }
 function renderGrammar(){
@@ -2130,17 +2331,18 @@ function renderGrammar(){
     var b = d.blanks[i-1] || {};
     return '<input class="blank-in" data-bi="'+i+'" placeholder="'+esc(b.hint||'')+'" autocomplete="off" spellcheck="false">';
   });
-  var h = '<div class="card"><b>'+esc(d.title)+'</b>'
+  var h = '<div class="card" data-sec="grammar"><b>'+esc(d.title)+'</b>'
     + '<p class="psg">'+ph+'</p>'
+    + (d.points ? '<p class="small muted">本套考点：'+d.points.map(function(x){ return esc(x); }).join(' / ')+'</p>' : '')
     + '<div class="row mt8"><span class="small muted">学习进度：</span><span class="chip on">人教版 · 示例进度（正式版按你的单元进度生成，避免陌生词）</span></div>'
-    + '<div class="mt12"><button class="btn pri" data-pact="submit-objective">提交并查看解析</button></div>'
-    + '<div id="pracResult"></div>' + genRow('语法填空 · 示例题（按当前学习进度出题）') + '</div>';
+    + '<div class="mt12"><button class="btn pri" data-pact="submit-objective" data-sec="grammar">提交并查看解析</button></div>'
+    + '<div id="pracResult-grammar"></div>' + genRow('语法填空 · 示例题（按当前学习进度出题）') + '</div>';
   el2(h);
 }
 function renderWriting(){
   var isCont = (pracSel==='cont');
   var d = isCont ? PD.cont : PD.essay;
-  var h = '<div class="card"><b>'+esc(d.title)+'</b>';
+  var h = '<div class="card" data-sec="'+(isCont?'cont':'essay')+'"><b>'+esc(d.title)+'</b>';
   if(isCont){
     h += '<p class="small muted">阅读下面的材料，根据两段段首句续写。</p><p class="psg">'+renderPassage(d.story)+'</p>';
     d.starts.forEach(function(s,i){ h += '<p class="small muted">段首句 '+(i+1)+'：'+esc(s)+'</p>'; });
@@ -2153,36 +2355,39 @@ function renderWriting(){
     + (d.model ? '<button class="btn" data-pact="toggle-model">查看参考范文</button>' : '')
     + '<button class="btn pri" data-pact="submit-writing">提交批改</button></div>'
     + (d.model ? '<div id="pracModel" style="display:none" class="mt8"><b class="small">参考范文</b><p class="psg small" style="white-space:pre-wrap">'+esc(d.model)+'</p></div>' : '')
-    + '<div id="pracResult"></div>'
+    + '<div id="pracResult-'+(isCont?'cont':'essay')+'"></div>'
     + genRow(isCont ? '评分参照：浙江省读后续写（满分25）' : '批改维度：内容要点 / 词汇语法 / 连贯性') + '</div>';
   el2(h);
   var ta = $('#pracText'); if(ta){ ta.addEventListener('input', function(){ var n = countWords(ta.value); var c = $('#pracCount'); if(c) c.textContent = n + ' 词'; }); }
 }
-function el2(h){ $('#practiceBody').innerHTML = h; }
+function el2(h){ if(pracMockAppend){ $('#practiceBody').insertAdjacentHTML('beforeend', h); } else { $('#practiceBody').innerHTML = h; } }
 function countWords(t){ return (String(t).trim().match(/[A-Za-z][A-Za-z'\-]*/g)||[]).length; }
 function pracSubmit(){
   var out = '', score = 0, total = 0, wrong = [];
   if(pracSel==='reading' || pracSel==='cloze'){
-    var qs = pracSel==='reading' ? PD.reading.questions : PD.cloze.items;
+    var sec = pracSel==='reading' ? PD.reading : PD.cloze;
+    var qs = sec === PD.reading ? sec.questions : sec.items;
     qs.forEach(function(q,qi){
       total++;
+      var pt = ptOf(sec, qi, q);
       var ua = pracData.answers[qi];
-      var ok = (ua===q.ans); if(ok) score++;
-      out += '<div class="report-item '+(ok?'ok':'bad')+'"><b>'+(qi+1)+'.</b> '+(ok?'<span class="ok-t">正确</span>':'<span class="bad-t">错误</span>')
+      var ok = (ua===q.ans); if(ok) score++; else pointWrong(pt);
+      out += '<div class="report-item '+(ok?'ok':'bad')+'">'+pointBadge(pt)+'<b>'+(qi+1)+'.</b> '+(ok?'<span class="ok-t">正确</span>':'<span class="bad-t">错误</span>')
         + '（正确答案：'+String.fromCharCode(65+q.ans)+(ok?'':'；你选了：'+(ua==null?'未作答':String.fromCharCode(65+ua)))+'）'
         + '<div class="small muted">解析：'+esc(q.why||'')+'</div></div>';
-      if(!ok) wrong.push({stem:(q.q||q.stem), right:q.opts[q.ans], user:(ua==null?'未作答':q.opts[ua]), why:q.why});
+      if(!ok) wrong.push({stem:(q.q||q.stem), right:q.opts[q.ans], user:(ua==null?'未作答':q.opts[ua]), why:q.why, point:pt});
     });
   }
   if(pracSel==='qixuan'){
     var d = PD.qixuan;
     [1,2,3].forEach(function(i){
       total++;
-      var ua = pracData.answers['qx'+i]; var ok = (ua === d.ans[String(i)]); if(ok) score++;
-      out += '<div class="report-item '+(ok?'ok':'bad')+'"><b>空 '+i+'：</b>'+(ok?'<span class="ok-t">正确</span>':'<span class="bad-t">错误</span>')
+      var pt = ptOf(d, i);
+      var ua = pracData.answers['qx'+i]; var ok = (ua === d.ans[String(i)]); if(ok) score++; else pointWrong(pt);
+      out += '<div class="report-item '+(ok?'ok':'bad')+'">'+pointBadge(pt)+'<b>空 '+i+'：</b>'+(ok?'<span class="ok-t">正确</span>':'<span class="bad-t">错误</span>')
         + '（正确：'+d.ans[String(i)]+(ok?'':'；你选了：'+(ua||'未作答'))+'）'
         + '<div class="small muted">解析：'+esc(d.why[String(i)]||'')+'</div></div>';
-      if(!ok) wrong.push({stem:'空 '+i, right:d.ans[String(i)], user:(ua||'未作答'), why:d.why[String(i)]});
+      if(!ok) wrong.push({stem:'空 '+i, right:d.ans[String(i)], user:(ua||'未作答'), why:d.why[String(i)], point:pt});
     });
   }
   if(pracSel==='grammar'){
@@ -2192,19 +2397,22 @@ function pracSubmit(){
       total++;
       var b = dg.blanks[idx] || {};
       var v = norm(inp.value);
+      var pt = ptOf(dg, idx, b);
       var ok = v && (b.variants||[b.ans]).some(function(x){ return norm(x)===v; });
-      if(ok) score++;
-      out += '<div class="report-item '+(ok?'ok':'bad')+'"><b>空 '+(idx+1)+'：</b>'+(ok?'<span class="ok-t">正确</span>':'<span class="bad-t">错误</span>')
+      if(ok) score++; else pointWrong(pt);
+      out += '<div class="report-item '+(ok?'ok':'bad')+'">'+pointBadge(pt)+'<b>空 '+(idx+1)+'：</b>'+(ok?'<span class="ok-t">正确</span>':'<span class="bad-t">错误</span>')
         + '（正确：'+esc(b.ans||'')+(ok?'':'；你填了：'+(inp.value?esc(inp.value):'未作答'))+'）'
         + '<div class="small muted">解析：'+esc(b.why||'')+'</div></div>';
-      if(!ok) wrong.push({stem:'空 '+(idx+1)+'（提示词：'+(b.hint||'')+'）', right:b.ans, user:inp.value, why:b.why});
+      if(!ok) wrong.push({stem:'空 '+(idx+1)+'（提示词：'+(b.hint||'')+'）', right:b.ans, user:inp.value, why:b.why, point:pt});
     });
   }
   var html = '<hr class="hr"><div class="center"><b>得分：'+score+' / '+total+'</b></div>' + out
     + '<div class="row mt8" style="justify-content:center"><button class="btn" data-pact="reset">重做本场</button></div>'
+    + (function(){ var tp = topPointWrong(3); return tp.length ? ('<p class="small muted">累计错得最多的考点：' + tp.map(function(x){ return esc(x[0]) + '（' + x[1] + ' 次）'; }).join('、') + '</p>') : ''; })()
     + '<p class="small muted">练习场错题不进错题本；如需巩固，可点击文中/题目中的生词加入生词本后再默写。</p>';
-  $('#pracResult').innerHTML = html;
-  $('#pracResult').scrollIntoView({behavior:'smooth', block:'nearest'});
+  $('#pracResult-'+pracSel).innerHTML = html;
+  $('#pracResult-'+pracSel).scrollIntoView({behavior:'smooth', block:'nearest'});
+  if(pracMockOn){ pracMockSum[pracSel] = { s:score, t:total }; renderMockTotal(); }
   DB.practice.unshift({ id:uid(), type:pracLabel(), ts:Date.now(), score:score, total:total, wrong:wrong });
   save(); renderPracticeHistory();
 }
@@ -2216,7 +2424,7 @@ async function pracWriting(){
   if(n < 20){ toast('至少写 20 词再提交批改'); return; }
   var links = ['however','therefore','although','because','finally','suddenly','besides','in addition','as a result','for example','moreover','meanwhile','in fact','on the other hand','what is more'];
   var found = links.filter(function(l){ return t.toLowerCase().indexOf(l)>=0; });
-  $('#pracResult').innerHTML = '<hr class="hr"><b>批改结果</b><p class="small muted">'+(aiReady()?'AI 批改中…':'当前为离线模式（未配置 AI），生成基础反馈…')+'</p>';
+  $('#pracResult-'+pracSel).innerHTML = '<hr class="hr"><b>批改结果</b><p class="small muted">'+(aiReady()?'AI 批改中…':'当前为离线模式（未配置 AI），生成基础反馈…')+'</p>';
   var out = '<hr class="hr"><b>批改结果'+(aiReady()?'（AI）':'（离线基础反馈）')+'</b>';
   if(aiReady()){
     try{
@@ -2237,7 +2445,7 @@ async function pracWriting(){
   } else {
     out += basicWritingFeedback(n, found, isCont);
   }
-  $('#pracResult').innerHTML = out;
+  $('#pracResult-'+pracSel).innerHTML = out;
   DB.practice.unshift({ id:uid(), type:(isCont?'读后续写':'作文练习'), ts:Date.now(), score:null, total:null, words:n });
   save(); renderPracticeHistory();
 }
@@ -2257,8 +2465,10 @@ function basicWritingFeedback(n, found, isCont){
 async function pracGen(){
   if(!aiReady()){ aiHint(); return; }
   var P = {
-    reading:{ sys:'你是高中英语命题人，出题参照近5年全国卷/新课标卷与浙江模考卷 C 篇阅读风格。', usr:'请生成 1 篇高考阅读 C 篇风格短文（120-150词）和 3 道四选一阅读题。只输出 JSON：{"title":"","passage":"","questions":[{"q":"","opts":["","","",""],"ans":0,"why":""}]}', ap:function(r){ PD.reading = { title:r.title||'AI 生成 · C篇', passage:r.passage, questions:r.questions||[] }; } },
-    grammar:{ sys:'你是高中英语命题人，语法填空命题参照高考真题考点分布。', usr:'按人教版高中范围生成 1 篇语法填空（5 个空，文中用 [[1]]..[[5]] 标记），避免出现超纲生词。只输出 JSON：{"title":"","passage":"","blanks":[{"ans":"","variants":[""],"hint":"提示词","why":"中文解析"}]}', ap:function(r){ PD.grammar = { title:r.title||'AI 生成 · 语法填空', passage:r.passage, blanks:r.blanks||[] }; } },
+    reading:{ sys:'你是高中英语命题人，出题参照近5年全国卷/新课标卷与浙江模考卷 C 篇阅读风格。', usr:'请生成 1 篇高考阅读 C 篇风格短文（120-150词）和 3 道四选一阅读题。只输出 JSON：{"title":"","passage":"","questions":[{"q":"","opts":["","","",""],"ans":0,"why":"","point":"考点（细节理解/推理判断/主旨大意/词义猜测 之一）"}]}', ap:function(r){ PD.reading = { title:r.title||'AI 生成 · C篇', passage:r.passage, questions:r.questions||[] }; } },
+    grammar:{ sys:'你是高中英语命题人，语法填空命题参照高考真题考点分布。', usr:'按人教版高中范围生成 1 篇语法填空（5 个空，文中用 [[1]]..[[5]] 标记），避免出现超纲生词。只输出 JSON：{"title":"","passage":"","blanks":[{"ans":"","variants":[""],"hint":"提示词","why":"中文解析","point":"考点（时态语态/非谓语动词/词性转换/连词与从句/冠词与介词/固定搭配 之一）"}]}', ap:function(r){ PD.grammar = { title:r.title||'AI 生成 · 语法填空', passage:r.passage, blanks:r.blanks||[] }; } },
+    qixuan:{ sys:'你是高中英语命题人，七选五命题参照高考真题的逻辑衔接与代词指代特点。', usr:'生成 1 篇 180 词左右、挖 3 个空的短文（文中用 [[1]]..[[3]] 标记），再给 3 个选项 A/B/C（必须有 2 个是干扰项）。只输出 JSON：{"title":"","passage":"","opts":["A. ","B. ","C. "],"ans":{"1":"","2":"","3":""},"why":{"1":"","2":"","3":""},"points":{"1":"考点（逻辑关系/代词指代 之一）","2":"","3":""}}', ap:function(r){ PD.qixuan = { title:r.title||'AI 生成 · 七选五', passage:r.passage, opts:r.opts, ans:r.ans, why:r.why, points:r.points }; } },
+    cloze:{ sys:'你是高中英语命题人，完形填空命题参照高考真题考点分布（语境逻辑、词义辨析、固定搭配）。', usr:'生成 1 道 4 空的高考风格完形填空：每题给出一个带 ___n___（n 为 1-4）的句子和 4 个选项，四个选项要构成有效的词义辨析。只输出 JSON：{"title":"","items":[{"stem":"... ___1___ ...","opts":["","","",""],"ans":0,"why":"中文解析","point":"考点（语境逻辑/词义辨析/固定搭配 之一）"}]}', ap:function(r){ PD.cloze = { title:r.title||'AI 生成 · 完形填空', items:r.items }; } },
     cont:{ sys:'你是高考英语读后续写命题人（浙江省标准）。', usr:'生成一道读后续写题：一段 120 词左右的英文故事（情节完整、留有悬念），以及两个段首句。只输出 JSON：{"title":"","story":"","starts":["",""]}', ap:function(r){ PD.cont = { title:r.title||'AI 生成 · 读后续写', story:r.story, starts:r.starts||['',''], model:'' }; } },
     essay:{ sys:'你是高中英语作文命题人。', usr:'生成一道高中英语应用文写作题（含背景、要点、词数要求）。只输出 JSON：{"title":"","prompt":""}', ap:function(r){ PD.essay = { title:r.title||'AI 生成 · 作文', prompt:r.prompt, model:'' }; } }
   };
@@ -2266,8 +2476,9 @@ async function pracGen(){
   if(!g){ toast('该题型的 AI 生成将于正式版接入；当前请使用示例题'); return; }
   toast('AI 出题中（双侧互检）…');
   try{
-    var kr = kbRef(g.sys + ' ' + g.usr, 3);
-    var r = await dualLLM([{role:'system',content:g.sys + kr.text},{role:'user',content:g.usr}], {json:true, note:'题目必须无误、答案正确、无超纲生词、符合高考风格'});
+    var usr = g.usr + (pracPoint ? ('本套题请集中考查考点：'+pracPoint+'（题目和解析都要体现）。') : '');
+    var kr = kbRef(g.sys + ' ' + usr + ' ' + pracPoint, 3);
+    var r = await dualLLM([{role:'system',content:g.sys + kr.text},{role:'user',content:usr}], {json:true, note:'题目必须无误、答案正确、无超纲生词、符合高考风格、每道题都要给出 point 考点标签'});
     g.ap(r); pracData = { answers:{}, inputs:{} }; renderPracticeBody();
     toast('新题已生成 ✓ 已互检，参考知识库 '+kr.titles.length+' 条');
   }catch(e){ toast('生成失败：'+e.message); }
@@ -2292,7 +2503,7 @@ function renderPracticeHistory(){
       if(!r || !r.wrong) return;
       var hh = '<h3>本场错题回顾</h3>';
       r.wrong.forEach(function(w){
-        hh += '<div class="report-item bad"><div class="small">'+esc(w.stem||'')+'</div>'
+        hh += '<div class="report-item bad">'+pointBadge(w.point)+'<div class="small">'+esc(w.stem||'')+'</div>'
           + '<b class="ok-t">正确答案：'+esc(w.right||'')+'</b>'
           + (w.user && w.user!=='未作答' ? '<div class="small muted">你的答案：'+esc(w.user)+'</div>' : '<div class="small muted">未作答</div>')
           + '<div class="small muted">解析：'+esc(w.why||'')+'</div></div>';
