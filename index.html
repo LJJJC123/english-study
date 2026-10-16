@@ -33,13 +33,21 @@ main{max-width:1080px;margin:0 auto;padding:14px 14px 96px}
 .view{display:none}
 .view.active{display:block;animation:fade .22s ease}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:0 1px 2px rgba(16,24,40,.04);margin:10px0}
-h2.page{font-size:20px;margin:4px0 2px}
-.sub{color:var(--muted);font-size:13px;margin:2px0 10px}
+/* 描边与阴影二选一：常驻内容用描边（阴影留给弹窗、抽屉这类浮层），避免"框套框" */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin:12px 0}
+.grid>.card{margin:0}
+h2.page{font-size:20px;margin:4px 0 2px}
+.sub{color:var(--muted);font-size:13px;margin:2px 0 10px}
 .grid{display:grid;gap:10px}
 .g2{grid-template-columns:repeat(2,1fr)}
 .g3{grid-template-columns:repeat(3,1fr)}
 .g4{grid-template-columns:repeat(4,1fr)}
+/* 看板统计：同类信息等宽排布；窄屏两列，避免六张卡竖着拉一长条 */
+.stats6{grid-template-columns:repeat(6,1fr)}
+@media(max-width:900px){.stats6{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.stats6{grid-template-columns:repeat(2,1fr)}}
+.card.stat.accent{background:var(--pri-weak);border-color:var(--pri-line)}
+.card.stat.accent b,.card.stat.accent span{color:var(--pri)}
 @media(max-width:820px){.g3{grid-template-columns:1fr}.g4{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:640px){.g2{grid-template-columns:1fr}}
 .stat{text-align:center;padding:10px 6px}
@@ -54,7 +62,7 @@ h2.page{font-size:20px;margin:4px0 2px}
 .btn.ghost{border-color:transparent;background:transparent;color:var(--pri)}
 .btn.small{padding:4px 10px;font-size:13px;border-radius:8px}
 .btn:disabled{opacity:.5;cursor:not-allowed}
-.chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;margin:2px 4px 2px0;background:#fff;transition:.15s}
+.chip{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;margin:2px 4px 2px 0;background:#fff;transition:.15s}
 .chip.on{background:var(--pri-weak);border-color:var(--pri-line);color:var(--pri);font-weight:600}
 input,textarea,select{font:inherit;border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%;background:#fff;color:var(--ink)}
 input:focus,textarea:focus,select:focus{outline:2px solid #dfe5ff;border-color:#a5b4fc}
@@ -84,8 +92,8 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 .opt.sel{border-color:var(--pri);background:var(--pri-weak)}
 .opt.ok{border-color:#86efac;background:var(--okbg)}
 .opt.bad{border-color:#fda4af;background:var(--badbg)}
-.qword{font-size:32px;font-weight:700;letter-spacing:.5px;text-align:center;margin:8px0 2px}
-.qcn{font-size:24px;font-weight:600;text-align:center;margin:10px0 4px}
+.qword{font-size:32px;font-weight:700;letter-spacing:.5px;text-align:center;margin:8px 0 2px}
+.qcn{font-size:24px;font-weight:600;text-align:center;margin:10px 0 4px}
 .qph{text-align:center;color:var(--muted);font-size:15px}
 .qa-center{text-align:center;color:var(--muted);font-size:13px;margin-bottom:8px}
 .pulseok{animation:okp .55s ease}
@@ -125,17 +133,18 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 .list-item .li-sub{color:var(--muted);font-size:13px;margin-top:2px}
 .kv{display:flex;gap:6px;align-items:baseline}
 .sparkwrap{margin-top:4px}
+.spark{display:block;width:100%;height:70px}
 .muted{color:var(--muted)}
 .small{font-size:13px}
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mb8{margin-bottom:8px}
 .center{text-align:center}
-.hr{height:1px;background:var(--line);margin:12px0;border:0}
+.hr{height:1px;background:var(--line);margin:12px 0;border:0}
 .score-big{font-size:40px;font-weight:800;color:var(--pri)}
-.opt-row{display:flex;gap:8px;align-items:center;margin:6px0}
+.opt-row{display:flex;gap:8px;align-items:center;margin:6px 0}
 .prog{height:8px;background:#eef0f6;border-radius:999px;overflow:hidden}
 .prog>i{display:block;height:100%;background:linear-gradient(90deg,#6366f1,#8b5cf6);width:0;transition:width .25s}
 .timer{font-variant-numeric:tabular-nums;font-weight:600}
-.report-item{border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:6px0;font-size:13px}
+.report-item{border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:6px 0;font-size:13px}
 .report-item.ok{border-color:#bbf7d0;background:var(--okbg)}
 .report-item.bad{border-color:#fecdd3;background:var(--badbg)}
 @media(max-width:640px){
@@ -145,7 +154,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
   main{padding:12px 10px 100px}
   .card{padding:12px 12px}
 }
-.footer-note{color:var(--muted);font-size:12px;text-align:center;padding:20px0 8px}
+.footer-note{color:var(--muted);font-size:12px;text-align:center;padding:20px 0 8px}
 /* ============ 移动端 / 无障碍优化（v1.2） ============ */
 .appbar{padding-top:calc(9px + env(safe-area-inset-top));padding-left:calc(14px + env(safe-area-inset-left));padding-right:calc(14px + env(safe-area-inset-right))}
 .drawer{padding-top:calc(14px + env(safe-area-inset-top));padding-left:calc(12px + env(safe-area-inset-left))}
@@ -194,7 +203,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="ic">⚙️</span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.9 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.10 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main id="main">
@@ -202,13 +211,11 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
 <section class="view" id="view-home">
   <h2 class="page">学习看板</h2>
   <div class="sub" id="homeDate">-</div>
-  <div class="grid g4">
+  <div class="grid stats6">
     <div class="card stat"><b id="stWords">0</b><span>生词总数</span></div>
     <div class="card stat"><b id="stDone">0</b><span>今日已默写</span></div>
-    <div class="card stat"><b id="stDue">0</b><span>今日待默写</span></div>
+    <div class="card stat accent" title="该做的事：今天还差多少词没默写"><b id="stDue">0</b><span>今日待默写</span></div>
     <div class="card stat"><b id="stWrong">0</b><span>错题数</span></div>
-  </div>
-  <div class="grid g2">
     <div class="card stat" title="近 7 天：新加入生词本的词数 − 这 7 天转为已掌握的词数"><b id="stNet">0</b><span>近 7 天生词净增</span></div>
     <div class="card stat" title="累计收进错题本的错词中，已有多少比例连续答对 2 次移出"><b id="stClear">—</b><span>错题消除率</span></div>
   </div>
@@ -352,7 +359,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.9 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.10 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1328,7 +1335,7 @@ async function openWordCard(w, src){
 }
 /* ================= 学习看板 ================= */
 function renderHome(){
-  $('#homeDate').textContent = '今天 · ' + todayStr() + '（连续打卡 ' + streak() + ' 天）';
+  $('#homeDate').textContent = '今天 · ' + todayStr() + ' · 数据保存在本机浏览器';
   $('#stWords').textContent = DB.words.length;
   var d = statDay(); d.mk = d.mk || {};
   $('#stDone').textContent = Object.keys(d.mk).length;
@@ -1364,6 +1371,7 @@ function renderHome(){
     $('#sparkNote').textContent = '完成一次默写/听写后，这里会显示你的正确率趋势。';
   }
   $('#spark').innerHTML = svg;
+  $('#spark').style.display = has ? 'block' : 'none';   /* 没数据就别摆空框 */
 }
 /* ================= 生词本 ================= */
 function renderVocab(){
