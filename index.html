@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f6f7fb">
+<meta name="description" content="人教版高中英语词汇闭环（生词本 · 默写 · 听写 · 错题本）＋ 雅思口语陪练 ＋ 练习场">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="英语助手">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
 <title>英语学习助手 · 高中同步 | 雅思口语</title>
 <style>
 :root{
@@ -177,7 +185,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="ic">⚙️</span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.4 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.5 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main id="main">
@@ -190,6 +198,10 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
     <div class="card stat"><b id="stDone">0</b><span>今日已默写</span></div>
     <div class="card stat"><b id="stDue">0</b><span>今日待默写</span></div>
     <div class="card stat"><b id="stWrong">0</b><span>错题数</span></div>
+  </div>
+  <div class="grid g2">
+    <div class="card stat" title="近 7 天：新加入生词本的词数 − 这 7 天转为已掌握的词数"><b id="stNet">0</b><span>近 7 天生词净增</span></div>
+    <div class="card stat" title="累计收进错题本的错词中，已有多少比例连续答对 2 次移出"><b id="stClear">—</b><span>错题消除率</span></div>
   </div>
   <div class="card">
     <div class="row"><b>近 7 天正确率</b><div class="grow"></div><span class="small muted" id="stStreak">连续打卡 0 天</span></div>
@@ -330,7 +342,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.4 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.5 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1021,6 +1033,7 @@ const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slic
 function save(){ try{ localStorage.setItem(LSKEY, JSON.stringify(DB)); }catch(e){ toast('保存失败：本机存储不可用'); } }
 function load(){
   try{ const s=localStorage.getItem(LSKEY); if(s){ const d=JSON.parse(s); Object.assign(DB,d); if(!DB.settings)DB.settings={goal:20,voice:'',rate:0.95,ai:{base:'',key:'',model:'',dual:true}}; } }catch(e){}
+  if(DB.stats){ if(DB.stats.wrongAdded==null) DB.stats.wrongAdded = (DB.wrong||[]).length; if(DB.stats.wrongCleared==null) DB.stats.wrongCleared = 0; }
   var BOOKVER = 'pep2019.2';
   if(!DB.book || !DB.book.length || DB.bookVer !== BOOKVER){
     var mine = (DB.book||[]).filter(function(x){ return x.src==='mine'; });
@@ -1076,6 +1089,91 @@ async function llm(messages,opts){ opts=opts||{}; const a=DB.settings.ai;
   return ((data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'').trim();
 }
 function parseJson(t){ const m=String(t).match(/\{[\s\S]*\}/); return JSON.parse(m?m[0]:t); }
+/* ================= 本地知识库（RAG：先检索，再连同问题一起给模型；不训练模型） =================
+   ponytail: 只有十来条教研要点 + 用户自己的错词，用汉字二元组关键词打分足够；
+   若知识库涨到几百条再换向量检索。 */
+const KB = [
+ {t:'高考英语题型结构（新课标卷）', tags:'高考 题型 结构 全国卷 新课标 分值',
+  x:'满分 150：听力 30、阅读理解（含七选五）50、语言知识运用（完形 30 + 语法填空 15）、写作（应用文 15 + 读后续写 25）。素材多为说明文、议论文、记叙文，话题贴近生活与文化。'},
+ {t:'阅读 C/D 篇特点', tags:'阅读 说明文 议论文 推断 主旨 词义猜测',
+  x:'C/D 篇多为说明文或议论文，约 300-350 词。常考：细节理解、推理判断、主旨大意、词义猜测、作者态度。设题顺序一般与行文顺序一致。'},
+ {t:'七选五解题线索', tags:'七选五 逻辑 衔接 代词 复现',
+  x:'看四类线索：①代词指代（it/they/this/such）②逻辑连接（however/therefore/besides/for example）③重复词或同义复现 ④句式结构对称（总分、并列、举例）。正确项话题一致、语义连贯。'},
+ {t:'完形填空解题线索', tags:'完形 语境 逻辑 搭配 辨析',
+  x:'以语篇为单位：先看逻辑关系（转折、因果、递进、让步）与上下文复现，再看固定搭配与词义辨析。选项多为近义词，须结合语境褒贬与搭配判断。'},
+ {t:'语法填空考点分布', tags:'语法填空 考点 时态 语态 非谓语 词性转换',
+  x:'每篇 10 空，通常 7 空有提示词（动词时态/语态、非谓语、词性转换、比较级）＋3 空无提示词（冠词、介词、连词、代词、关系词）。有提示词的空不能照抄原形，必须变形；无提示词的空多为虚词。'},
+ {t:'应用文写作评分维度', tags:'作文 应用文 写作 评分 要点',
+  x:'按「内容要点完成度 / 词汇与语法 / 连贯性」三维评分。要求：覆盖全部要点、格式得体（书信、通知、演讲稿）、约 80 词、准确优先于华丽。'},
+ {t:'读后续写评分标准（浙江）', tags:'读后续写 续写 浙江 评分 25 情节 衔接',
+  x:'满分 25，三维度：内容（情节衔接与逻辑，与原文情境融洽）、语言（词汇与语法的准确与丰富）、篇章（连贯与结构，与两段首句自然承接）。两段首句必须承接；人物性格与情节走向须与原文一致；要有合理细节与情感收束，不能另起炉灶。'},
+ {t:'读后续写情节推进手法', tags:'续写 情节 手法 转折 对话 呼应',
+  x:'常用推进：①意外转折后写主人公的心理与行动 ②由景入情（环境描写烘托心情）③用对话推动情节 ④细节呼应前文伏笔。首段结尾留一个通向第二段的钩子，第二段收尾落到情感或道理上。'},
+ {t:'应用文常见体裁要点', tags:'应用文 书信 通知 演讲稿 格式',
+  x:'书信：称呼、开场说明来意、正文要点、结尾期待与落款；通知：标题、时间地点对象、要求与联系方式；演讲稿：称呼、点题、分层论述、呼告收尾。语气要与身份匹配。'},
+ {t:'雅思口语四项评分', tags:'雅思 口语 评分 流利 连贯 词汇 语法 发音 band',
+  x:'四项独立计分：流利与连贯（Fluency and Coherence，含逻辑连接与语速）、词汇资源（Lexical Resource）、语法多样性与准确性（Grammatical Range and Accuracy）、发音（Pronunciation）。每项 1-9 分，总分取平均。'},
+ {t:'雅思口语三部分形式', tags:'雅思 Part1 Part2 Part3 口语 卡片 陈述',
+  x:'Part1 日常话题快问快答（每题 2-3 句）；Part2 个人陈述，准备 1 分钟、说 1-2 分钟，须覆盖卡片全部要点；Part3 就 Part2 话题展开抽象讨论，要有观点＋理由＋例子。'},
+ {t:'中国学生高频错误清单', tags:'错误 中式英语 时态 冠词 主谓一致 搭配 不可数',
+  x:'①时态与主谓一致（尤其一般过去时、第三人称单数）②冠词 a/an/the 滥用与漏用 ③可数不可数（information/advice/equipment 不可数）④中英直译搭配（open the light → turn on）⑤there be 与 have 混用 ⑥介词搭配（depend on、be interested in）。'},
+ {t:'题源与命题口径', tags:'题源 全国卷 新课标 浙江 模考 命题 来源',
+  x:'素材参照近 5 年全国卷与新课标卷，以及各省模考卷（重点浙江模考）；联考卷按浙江口径。题目不得标注来源。词汇不超纲，优先使用人教版高中词表内词汇。'},
+ {t:'听写与默写的记忆原理', tags:'记忆 听写 默写 间隔重复 复习 错词',
+  x:'听写（音→形）与默写（义→形）互为补充。间隔重复（当天、1、2、4、7、15 天）配合「错词优先重现」能显著提高长期保持率；答错的词应在 24 小时内重现一次。'}
+];
+/* 用户自己的资料也算知识库：错词、薄弱词、最近生词 */
+function kbUserDocs(){
+  var arr = [];
+  var wrongs = (DB.wrong||[]).slice(0,10).map(function(w){ return w.w; });
+  if(wrongs.length) arr.push({t:'我最近的错词（讲解与出题请优先覆盖）', tags:'错词 错题本 我的 薄弱', x:wrongs.join('、')});
+  var weak = (DB.words||[]).filter(function(w){ return (w.wrong||0)>0; }).slice(0,8).map(function(w){ return w.w+'（错'+w.wrong+'次）'; });
+  if(weak.length) arr.push({t:'我侧重练的词', tags:'生词本 我的 薄弱 错词', x:weak.join('、')});
+  var recent = (DB.words||[]).slice(0,12).map(function(w){ return w.w; });
+  if(recent.length) arr.push({t:'我最近加入的生词', tags:'生词本 我的 最近 新词', x:recent.join('、')});
+  return arr;
+}
+var KB_STOP = '的了是在和与我你他她它这那之个都也会要就不很把被让从对为以有用说好吃';   /* 虚词：含这些字的二元组不参与打分，否则「的词」这类会误命中 */
+function kbTerms(q){
+  var s = String(q||'').toLowerCase(), out = [], i;
+  (s.match(/[a-z'][a-z'-]{1,}/g)||[]).forEach(function(w){ out.push(w); });
+  s.replace(/[^\u4e00-\u9fa5]+/g,' ').split(/\s+/).forEach(function(seg){
+    for(i=0;i<seg.length-1;i++){
+      var g = seg.substr(i,2);
+      if(KB_STOP.indexOf(g.charAt(0))<0 && KB_STOP.indexOf(g.charAt(1))<0) out.push(g);
+    }
+  });
+  return out;
+}
+function kbSearch(q, k){
+  var terms = kbTerms(q); if(!terms.length) return [];
+  var docs = KB.concat(kbUserDocs()), N = docs.length, df = {};
+  /* IDF：越少见的词越重要，压掉「全国卷」这类到处都有的高频词 */
+  terms.forEach(function(w){
+    if(df[w] != null) return;
+    var n = 0;
+    docs.forEach(function(d){ if((d.t+' '+d.tags+' '+d.x).toLowerCase().indexOf(w) >= 0) n++; });
+    df[w] = n || 1;
+  });
+  var scored = docs.map(function(d){
+    var hay = (d.t+' '+d.tags+' '+d.x).toLowerCase(), til = d.t.toLowerCase(), s = 0;
+    terms.forEach(function(w){
+      var n = hay.split(w).length - 1; if(!n) return;
+      s += n * Math.log(1 + N/df[w]) * (til.indexOf(w) >= 0 ? 4 : 1);   /* 命中标题权重 ×4 */
+    });
+    return {d:d, s:s};
+  }).filter(function(o){ return o.s > 0; }).sort(function(a,b){ return b.s - a.s; });
+  return scored.slice(0, k||3).map(function(o){ return o.d; });
+}
+/* 检索后拼成可塞进提示词的参考资料 */
+function kbRef(q, k){
+  var hits = kbSearch(q, k||3);
+  if(!hits.length) return {text:'', titles:[]};
+  return { text:'\n\n【参考知识库（教研要点与我的学习资料，须遵照执行）】\n' +
+                 hits.map(function(d){ return '· '+d.t+'：'+d.x; }).join('\n'),
+           titles: hits.map(function(d){ return d.t; }) };
+}
+
 async function dualLLM(execMsgs,opts){ opts=opts||{};
   if(!aiReady()) throw new Error('未配置 AI（请到「数据与设置」填写接口与密钥）');
   let out=opts.json?parseJson(await llm(execMsgs,{json:true})):await llm(execMsgs);
@@ -1092,19 +1190,19 @@ async function dualLLM(execMsgs,opts){ opts=opts||{};
 function aiHint(){ toast('未配置 AI：到「数据与设置」填写接口与密钥后可用此功能'); }
 function findWord(w){ const k=norm(w); return DB.book.find(x=>norm(x.w)===k)||DB.words.find(x=>norm(x.w)===k)||null; }
 async function lookupWord(w){
-  const hit=findWord(w); if(hit) return {ok:true,w:hit.w,ph:hit.ph||'',cn:hit.cn||'',eg:hit.eg||'',from:'local'};
-  if(aiReady()){ try{ const r=await dualLLM([{role:'system',content:'你是英语词典助手。判断用户输入是否为合法英文单词。只输出JSON：合法时{"valid":true,"word":"规范拼写","ph":"美式音标","cn":"中文释义（含词性）","eg":"一个英文例句"}；非法时{"valid":false}'},{role:'user',content:w}],{json:true,note:'词典信息必须准确；音标用美式 IPA'}); if(r&&r.valid) return {ok:true,w:r.word||w,ph:r.ph||'',cn:r.cn||'',eg:r.eg||'',from:'ai'}; return {ok:false,reason:'不存在该单词（请检查拼写）'}; }catch(e){ return {ok:false,reason:'AI 查询失败：'+e.message}; } }
+  const hit=findWord(w); if(hit) return {ok:true,w:hit.w,ph:hit.ph||'',cn:hit.cn||'',eg:hit.eg||'',eg2:hit.eg2||'',coll:hit.coll||'',tip:hit.tip||'',from:'local'};
+  if(aiReady()){ try{ const r=await dualLLM([{role:'system',content:'你是英语词典助手。判断用户输入是否为合法英文单词。只输出JSON：合法时{"valid":true,"word":"规范拼写","ph":"美式音标","cn":"中文释义（含词性）","eg":"一个英文例句","eg2":"另一个不同语境的英文例句","coll":"2-3 个常见搭配，英文，用；分隔","tip":"一句中文助记或词根词缀提示"}；非法时{"valid":false}'},{role:'user',content:w}],{json:true,note:'词典信息必须准确；音标用美式 IPA'}); if(r&&r.valid) return {ok:true,w:r.word||w,ph:r.ph||'',cn:r.cn||'',eg:r.eg||'',from:'ai'}; return {ok:false,reason:'不存在该单词（请检查拼写）'}; }catch(e){ return {ok:false,reason:'AI 查询失败：'+e.message}; } }
   return {ok:false,reason:'词表里没有这个词。可在「数据与设置」配置 AI 后联网查询，或手动填写释义。'};
 }
 function addWordEntry(o){ const k=norm(o.w); if(DB.words.some(x=>norm(x.w)===k)) return {dup:true};
-  DB.words.unshift({id:uid(),w:o.w.trim(),ph:o.ph||'',cn:o.cn||'',eg:o.eg||'',src:o.src||'手动',ts:Date.now(),mastered:false,wrong:0,right:0,due:Date.now(),last:0});
+  DB.words.unshift({id:uid(),w:o.w.trim(),ph:o.ph||'',cn:o.cn||'',eg:o.eg||'',eg2:o.eg2||'',coll:o.coll||'',tip:o.tip||'',src:o.src||'手动',ts:Date.now(),mastered:false,wrong:0,right:0,due:Date.now(),last:0});
   save(); return {ok:true}; }
 function addWrong(word,type){ const k=norm(word.w); let it=DB.wrong.find(x=>norm(x.w)===k);
   if(it){ it.count++; it.streak=0; it.type=type; it.last=Date.now(); }
-  else{ DB.wrong.unshift({id:uid(),w:word.w,ph:word.ph||'',cn:word.cn||'',type:type,count:1,streak:0,ts:Date.now(),last:Date.now()}); }
+  else{ DB.wrong.unshift({id:uid(),w:word.w,ph:word.ph||'',cn:word.cn||'',type:type,count:1,streak:0,ts:Date.now(),last:Date.now()}); DB.stats.wrongAdded=(DB.stats.wrongAdded||0)+1; }
   save(); }
 function wrongOnCorrect(word){ const it=DB.wrong.find(x=>norm(x.w)===norm(word.w)); if(!it) return false; it.streak=(it.streak||0)+1;
-  if(it.streak>=2){ DB.wrong=DB.wrong.filter(x=>x!==it); save(); toast('连续答对 2 次，「'+word.w+'」已移出错题本 ✓'); return true; } save(); return false; }
+  if(it.streak>=2){ DB.wrong=DB.wrong.filter(x=>x!==it); DB.stats.wrongCleared=(DB.stats.wrongCleared||0)+1; save(); toast('连续答对 2 次，「'+word.w+'」已移出错题本 ✓'); return true; } save(); return false; }
 const INTERVALS=[0,1,2,4,7,15];
 function reSchedule(w){ const r=Math.min(w.right||0,INTERVALS.length-1); w.due=Date.now()+INTERVALS[r]*86400000; w.last=Date.now(); }
 function dueWords(){ const now=Date.now(); return DB.words.filter(w=>!w.mastered&&(w.due||0)<=now); }
@@ -1167,7 +1265,10 @@ async function openWordCard(w, src){
   var html = '<h3 class="center">'+esc(r.w||w)+'</h3>';
   if(r.ok){
     html += '<div class="qph">'+esc(r.ph||'')+'</div><p class="center">'+esc(r.cn||'')+'</p>';
-    html += r.eg ? ('<p class="center small muted">例：'+esc(r.eg)+'</p>') : '<p class="center small muted">（未收录例句；配置 AI 后可自动生成例句与助记）</p>';
+    html += r.eg ? ('<p class="center small muted">例：'+esc(r.eg)+'</p>') : '<p class="center small muted">（未收录例句；配置 AI 后可自动生成例句、搭配与助记）</p>';
+    if(r.eg2) html += '<p class="center small muted">例：'+esc(r.eg2)+'</p>';
+    if(r.coll) html += '<p class="center small">搭配：'+esc(r.coll)+'</p>';
+    if(r.tip) html += '<p class="center small muted">助记：'+esc(r.tip)+'</p>';
   }else{
     html += '<p class="center small muted">'+esc(r.reason||'未找到该单词')+'</p>';
   }
@@ -1178,7 +1279,7 @@ async function openWordCard(w, src){
   openModal(html);
   var p = $('#wcPlay'); if(p) p.onclick = function(){ TTS.speak(r.w||w); };
   var a = $('#wcAdd'); if(a) a.onclick = function(){
-    var res = addWordEntry({ w: (r.ok && r.w) ? r.w : w, ph: r.ph||'', cn: r.cn||'', eg: r.eg||'', src: src||'手动' });
+    var res = addWordEntry({ w: (r.ok && r.w) ? r.w : w, ph: r.ph||'', cn: r.cn||'', eg: r.eg||'', eg2: r.eg2||'', coll: r.coll||'', tip: r.tip||'', src: src||'手动' });
     if(res.dup){ toast('已在生词本中'); }
     else { toast('已加入生词本 ✓'); a.disabled = true; a.textContent = '已加入'; }
   };
@@ -1192,6 +1293,13 @@ function renderHome(){
   $('#stDue').textContent = dueWords().length;
   $('#stWrong').textContent = DB.wrong.length;
   $('#stStreak').textContent = '连续打卡 ' + streak() + ' 天';
+  var wkAgo = Date.now() - 7*86400000;
+  var added = DB.words.filter(function(w){ return (w.ts||0) >= wkAgo; }).length;
+  var learned = DB.words.filter(function(w){ return w.mastered && (w.mts||0) >= wkAgo; }).length;
+  var net = added - learned;
+  $('#stNet').textContent = (net > 0 ? '+' : '') + net;
+  var wa = (DB.stats.wrongAdded||0);
+  $('#stClear').textContent = wa ? Math.round((DB.stats.wrongCleared||0) / wa * 100) + '%' : '—';
   $('#goalInput').value = DB.settings.goal || 20;
   /* 近7天正确率折线 */
   var days = [];
@@ -1230,7 +1338,7 @@ function renderVocab(){
       var w = DB.words.find(function(x){ return x.id===id; }); if(!w) return;
       var act = b.getAttribute('data-act');
       if(act==='play'){ TTS.speak(w.w); }
-      else if(act==='master'){ w.mastered = !w.mastered; save(); renderVocabList(); toast(w.mastered?('「'+w.w+'」已标记为掌握'):('「'+w.w+'」恢复复习')); }
+      else if(act==='master'){ w.mastered = !w.mastered; if(w.mastered){ w.mts = Date.now(); } else { delete w.mts; } save(); renderVocabList(); toast(w.mastered?('「'+w.w+'」已标记为掌握'):('「'+w.w+'」恢复复习')); }
       else if(act==='del'){ DB.words = DB.words.filter(function(x){ return x.id!==id; }); save(); renderVocabList(); renderVocab(); toast('已删除'); }
     });
   }
@@ -1566,65 +1674,45 @@ function retryWrongOnly(){
   startSession(Q.kind, buildQuestions(wrongs, 'mix', wrongs.length), '错词');
 }
 /* ================= 默写 / 听写 设置页 ================= */
-function renderQuizHome(){
-  $('#quizCard').style.display='none'; $('#quizReport').style.display='none';
-  var s = '<b>范围</b><div class="mt8">'+chipUI('scope','vocab','生词本',''+quizSetupSel.scope)+chipUI('scope','book','高中全册',quizSetupSel.scope)+'</div>'
-    + (quizSetupSel.scope==='book' ? bookScopeChips(quizSetupSel,'bbk','bunit') : '')
-    + '<b class="mt12" style="display:block">题型</b><div class="mt8">'+chipUI('type','en2cn','英选中',quizSetupSel.type)+chipUI('type','cn2en','中默英',quizSetupSel.type)+chipUI('type','mix','混合出题',quizSetupSel.type)+'</div>'
-    + '<b class="mt12" style="display:block">题量</b><div class="mt8">'+[10,20,30].map(function(n){ return chipUI('count',n,n+' 题',quizSetupSel.count); }).join('')+'</div>'
-    + '<div class="row mt12"><button class="btn pri big" id="btnStartQuiz">开始默写</button><span class="small muted" id="quizPoolNote"></span></div>';
-  $('#quizSetup').innerHTML = s; $('#quizSetup').style.display='block';
-  var pool = scopePool(quizSetupSel.scope, quizSetupSel.bk, quizSetupSel.unit);
-  $('#quizPoolNote').textContent = '当前范围可用：'+pool.length+' 词（优先到期复习词，错词在错题本中单独重练）';
-  if(!window.__quizSetupBound){
-    window.__quizSetupBound = true;
-    $('#quizSetup').addEventListener('click', function(e){
-      var c = e.target.closest('.chip');
-      if(c){ var g=c.getAttribute('data-g'), v=c.getAttribute('data-v');
-        if(g==='scope') quizSetupSel.scope = v;
-        if(g==='type') quizSetupSel.type = v;
-        if(g==='count') quizSetupSel.count = parseInt(v,10);
-        if(g==='bbk'){ quizSetupSel.bk = v; quizSetupSel.unit = 'all'; }
-        if(g==='bunit'){ quizSetupSel.unit = v; }
-        if(g==='bbk' || g==='bunit'){ DB.settings.bookSel = { bk:quizSetupSel.bk, unit:quizSetupSel.unit }; save(); }
-        renderQuizHome(); return; }
-      if(e.target.id==='btnStartQuiz'){
-        var pool = scopePool(quizSetupSel.scope, quizSetupSel.bk, quizSetupSel.unit);
-        if(!pool.length){ toast('该范围暂无单词'); return; }
-        startSession('write', buildQuestions(pool, quizSetupSel.type, quizSetupSel.count), quizSetupSel.scope);
-      }
-    });
-  }
+/* 默写 / 听写设置页结构完全一致，只有「题型」一行与文案不同 —— 合并成一个渲染函数 */
+function renderSetup(kind){
+  var isQ = (kind === 'write');
+  var sel = isQ ? quizSetupSel : listenSetupSel;
+  var ID  = isQ ? 'quiz' : 'listen';                 /* 元素前缀：quizCard / listenCard */
+  var BTN = isQ ? 'Quiz' : 'Listen';                 /* 开始按钮：btnStartQuiz / btnStartListen */
+  var el  = function(sfx){ return $('#' + ID + sfx); };
+  el('Card').style.display = 'none'; el('Report').style.display = 'none';
+  var s = '<b>范围</b><div class="mt8">' + chipUI('scope','vocab','生词本',sel.scope) + chipUI('scope','book','高中全册',sel.scope) + '</div>'
+    + (sel.scope === 'book' ? bookScopeChips(sel, 'bbk', 'bunit') : '')
+    + (isQ ? ('<b class="mt12" style="display:block">题型</b><div class="mt8">' + chipUI('type','en2cn','英选中',sel.type) + chipUI('type','cn2en','中默英',sel.type) + chipUI('type','mix','混合出题',sel.type) + '</div>') : '')
+    + '<b class="mt12" style="display:block">题量</b><div class="mt8">' + [10,20,30].map(function(n){ return chipUI('count', n, n + ' 题', sel.count); }).join('') + '</div>'
+    + '<div class="row mt12"><button class="btn pri big" id="btnStart' + BTN + '">' + (isQ ? '开始默写' : '开始听写') + '</button><span class="small muted" id="' + ID + 'PoolNote"></span></div>';
+  el('Setup').innerHTML = s; el('Setup').style.display = 'block';
+  el('PoolNote').textContent = '当前范围可用：' + scopePool(sel.scope, sel.bk, sel.unit).length + ' 词'
+    + (isQ ? '（优先到期复习词，错词在错题本中单独重练）' : '');
+  if(window['__' + ID + 'SetupBound']) return;
+  window['__' + ID + 'SetupBound'] = true;
+  el('Setup').addEventListener('click', function(e){
+    var c = e.target.closest('.chip');
+    if(c){
+      var g = c.getAttribute('data-g'), v = c.getAttribute('data-v');
+      if(g === 'scope') sel.scope = v;
+      if(g === 'type')  sel.type  = v;
+      if(g === 'count') sel.count = parseInt(v, 10);
+      if(g === 'bbk'){ sel.bk = v; sel.unit = 'all'; }
+      if(g === 'bunit'){ sel.unit = v; }
+      if(g === 'bbk' || g === 'bunit'){ DB.settings.bookSel = { bk: sel.bk, unit: sel.unit }; save(); }
+      renderSetup(kind); return;
+    }
+    if(e.target.id === 'btnStart' + BTN){
+      var pool = scopePool(sel.scope, sel.bk, sel.unit);
+      if(!pool.length){ toast('该范围暂无单词'); return; }
+      startSession(kind, buildQuestions(pool, isQ ? sel.type : 'cn2en', sel.count), sel.scope);
+    }
+  });
 }
-function renderListenHome(){
-  $('#listenCard').style.display='none'; $('#listenReport').style.display='none';
-  var s = '<b>范围</b><div class="mt8">'+chipUI('lscope','vocab','生词本',listenSetupSel.scope)+chipUI('lscope','book','高中全册',listenSetupSel.scope)+'</div>'
-    + (listenSetupSel.scope==='book' ? bookScopeChips(listenSetupSel,'bbk','bunit') : '')
-    + '<b class="mt12" style="display:block">题量</b><div class="mt8">'+[10,20,30].map(function(n){ return chipUI('lcount',n,n+' 题',listenSetupSel.count); }).join('')+'</div>'
-    + '<div class="row mt12"><button class="btn pri big" id="btnStartListen">开始听写</button><span class="small muted" id="listenPoolNote"></span></div>';
-  $('#listenSetup').innerHTML = s; $('#listenSetup').style.display='block';
-  var pool = scopePool(listenSetupSel.scope, listenSetupSel.bk, listenSetupSel.unit);
-  $('#listenPoolNote').textContent = '当前范围可用：'+pool.length+' 词';
-  if(!window.__listenSetupBound){
-    window.__listenSetupBound = true;
-    $('#listenSetup').addEventListener('click', function(e){
-      var c = e.target.closest('.chip');
-      if(c){ var g=c.getAttribute('data-g'), v=c.getAttribute('data-v');
-        if(g==='lscope') listenSetupSel.scope = v;
-        if(g==='lcount') listenSetupSel.count = parseInt(v,10);
-        if(g==='bbk'){ listenSetupSel.bk = v; listenSetupSel.unit = 'all'; }
-        if(g==='bunit'){ listenSetupSel.unit = v; }
-        if(g==='bbk' || g==='bunit'){ DB.settings.bookSel = { bk:listenSetupSel.bk, unit:listenSetupSel.unit }; save(); }
-        renderListenHome(); return; }
-      if(e.target.id==='btnStartListen'){
-        var pool = scopePool(listenSetupSel.scope, listenSetupSel.bk, listenSetupSel.unit);
-        if(!pool.length){ toast('该范围暂无单词'); return; }
-        var qs = buildQuestions(pool, 'cn2en', listenSetupSel.count);
-        startSession('listen', qs, listenSetupSel.scope);
-      }
-    });
-  }
-}
+function renderQuizHome(){ renderSetup('write'); }
+function renderListenHome(){ renderSetup('listen'); }
 /* ================= 错题本 ================= */
 function renderWrong(){
   if(!window.__wrongBound){
@@ -1880,11 +1968,12 @@ async function ieltsEnd(){
     renderIeltsChat();
     var transcript = s.msgs.filter(function(m){ return !m.pending; }).map(function(m){ return (m.role==='a'?'Examiner: ':'Student: ')+m.text; }).join('\n');
     try{
+      var kr = kbRef('雅思口语 四项评分 流利与连贯 词汇 语法 发音 评分标准 中国学生常见错误', 3);
       var rep = await dualLLM([
-        {role:'system', content:'你是雅思口语考官与教练。根据对话记录输出：四项评分（流利与连贯、词汇、语法、发音，1-9 分；发音按文本可推断程度给出近似值）、逐句纠错（orig=学生原句, fix=更自然/正确的表达, why=中文说明）、提升建议。只输出JSON：{"scores":{"fluency":0,"vocabulary":0,"grammar":0,"pronunciation":0},"errors":[{"orig":"","fix":"","why":""}],"advice":""}'},
+        {role:'system', content:'你是雅思口语考官与教练。根据对话记录输出：四项评分（流利与连贯、词汇、语法、发音，1-9 分；发音按文本可推断程度给出近似值）、逐句纠错（orig=学生原句, fix=更自然/正确的表达, why=中文说明）、提升建议。只输出JSON：{"scores":{"fluency":0,"vocabulary":0,"grammar":0,"pronunciation":0},"errors":[{"orig":"","fix":"","why":""}],"advice":""}' + kr.text},
         {role:'user', content:transcript.slice(0,6000)}
       ],{json:true, note:'评分与纠错必须基于对话记录本身'});
-      s.report = buildIeltsReportHTML(rep, false);
+      s.report = buildIeltsReportHTML(rep, false) + (kr.titles.length ? ('<p class="small muted">📚 已参考知识库：'+esc(kr.titles.join('、'))+'</p>') : '');
     }catch(e){ s.report = buildIeltsReportHTML(null, true, e.message); }
   } else {
     s.report = buildIeltsReportHTML(null, true);
@@ -2135,11 +2224,13 @@ async function pracWriting(){
         ? '你是浙江省高考英语读后续写阅卷老师。请按“内容（情节衔接与逻辑）/ 语言（词汇与语法）/ 篇章（连贯与结构）”三个维度批改学生的续写，指出具体衔接问题与语言错误，给出升级表达建议，最后给出满分25的预估分数。用中文讲评，条理清晰。'
         : '你是高中英语作文老师。请按“内容要点完成度 / 词汇与语法 / 连贯性”三个维度批改，指出错误、给出升级表达与总体建议。用中文讲评，条理清晰。';
       var task = isCont ? ('故事材料：\n'+d.story+'\n段首句：\n'+d.starts.join('\n')) : d.prompt;
+      var kr = kbRef(sys + ' ' + task, 3);
       var r = await dualLLM([
-        {role:'system', content:sys},
+        {role:'system', content:sys + kr.text},
         {role:'user', content:'题目/材料：\n'+task+'\n\n学生作文：\n'+t}
       ], {note:'必须基于学生原文批改，指出真实存在的问题'});
       out += '<div class="small" style="white-space:pre-wrap">'+esc(r)+'</div>';
+      if(kr.titles.length) out += '<p class="small muted">📚 已参考知识库：'+esc(kr.titles.join('、'))+'</p>';
     }catch(e){
       out += '<p class="small muted">AI 批改失败（'+esc(e.message)+'）。</p>' + basicWritingFeedback(n, found, isCont);
     }
@@ -2175,9 +2266,10 @@ async function pracGen(){
   if(!g){ toast('该题型的 AI 生成将于正式版接入；当前请使用示例题'); return; }
   toast('AI 出题中（双侧互检）…');
   try{
-    var r = await dualLLM([{role:'system',content:g.sys},{role:'user',content:g.usr}], {json:true, note:'题目必须无误、答案正确、无超纲生词、符合高考风格'});
+    var kr = kbRef(g.sys + ' ' + g.usr, 3);
+    var r = await dualLLM([{role:'system',content:g.sys + kr.text},{role:'user',content:g.usr}], {json:true, note:'题目必须无误、答案正确、无超纲生词、符合高考风格'});
     g.ap(r); pracData = { answers:{}, inputs:{} }; renderPracticeBody();
-    toast('新题已生成 ✓ 提交前已做互检');
+    toast('新题已生成 ✓ 已互检，参考知识库 '+kr.titles.length+' 条');
   }catch(e){ toast('生成失败：'+e.message); }
 }
 function renderPracticeHistory(){
