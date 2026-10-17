@@ -325,7 +325,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.27 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.28 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main>
@@ -510,7 +510,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.27 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2396 词，含美式音标（已剔除人名、地名、作品名等专有名词 129 条）；词典级音频、双 Agent 服务将在后续阶段接入。本版加固：本地存储只留用户数据（词表不再重复落盘）、导入备份有结构校验、AI 调用可超时/重试/取消、支持离线缓存（装到桌面后断网可用）、密钥可经 proxy/ 里的自建代理下发。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.28 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2396 词，含美式音标（已剔除人名、地名、作品名等专有名词 129 条）；词典级音频、双 Agent 服务将在后续阶段接入。本版加固：本地存储只留用户数据（词表不再重复落盘）、导入备份有结构校验、AI 调用可超时/重试/取消、支持离线缓存（装到桌面后断网可用）、密钥可经 proxy/ 里的自建代理下发。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1561,10 +1561,19 @@ function kbRef(q, k){
            titles: hits.map(function(d){ return d.t; }) };
 }
 
-async function dualLLM(execMsgs,opts){ opts=opts||{};
+/* 超时分级：出题/批改这类长任务本来就可能跑两三分钟，用 60 秒的默认值会把它掐了，
+   用户看到的就是「一直转圈然后失败」——比慢更糟。查词和连接测试则要快速失败。 */
+const TMO={ gen:240000, chat:60000, lookup:30000, probe:15000 };
+/* 互检拆成两步：长任务先渲染执行结果、质检放后台（最终结果一致，等待时间少一半）。
+   质检依赖执行结果，两个调用没法并发——能省的是「不让用户等第二次」。 */
+async function execLLM(execMsgs,opts){ opts=opts||{};
   if(!aiReady()) throw new Error('未配置 AI（请到「数据与设置」填写接口与密钥）');
-  let out=opts.json?parseJson(await llm(execMsgs,{json:true,timeout:opts.timeout,signal:opts.signal})):await llm(execMsgs,{timeout:opts.timeout,signal:opts.signal});
-  if(!DB.settings.ai.dual) return out;
+  return opts.json
+    ? parseJson(await llm(execMsgs,{json:true,timeout:opts.timeout,signal:opts.signal}))
+    : await llm(execMsgs,{timeout:opts.timeout,signal:opts.signal});
+}
+async function checkLLM(out,opts){ opts=opts||{};
+  if(!DB.settings.ai.dual) return null;
   try{
     const chk=parseJson(await llm([
       {role:'system',content:'你是质检Agent。检查【执行结果】是否准确、合规、无事实错误、符合要求。只输出JSON：{"ok":true或false,"issues":"问题说明","fixed":"修改后的完整结果，若无需修改则为空字符串"}'},
@@ -1575,13 +1584,14 @@ async function dualLLM(execMsgs,opts){ opts=opts||{};
     /* 用户点了「取消」要一路抛上去终止任务；质检自身超时/失败则降级为未互检结果，不影响主流程 */
     if(e && e.message==='已取消') throw e;
   }
-  return out;
+  return null;
 }
+async function dualLLM(execMsgs,opts){ const out=await execLLM(execMsgs,opts); const fixed=await checkLLM(out,opts); return fixed||out; }
 function aiHint(){ toast('未配置 AI：到「数据与设置」填写接口与密钥后可用此功能'); }
 function findWord(w){ const k=norm(w); return DB.book.find(x=>norm(x.w)===k)||DB.words.find(x=>norm(x.w)===k)||null; }
 async function lookupWord(w){
   const hit=findWord(w); if(hit) return {ok:true,w:hit.w,ph:hit.ph||'',cn:hit.cn||'',eg:hit.eg||'',eg2:hit.eg2||'',coll:hit.coll||'',tip:hit.tip||'',from:'local'};
-  if(aiReady()){ try{ const r=await dualLLM([{role:'system',content:'你是英语词典助手。判断用户输入是否为合法英文单词。只输出JSON：合法时{"valid":true,"word":"规范拼写","ph":"美式音标","cn":"中文释义（含词性）","eg":"一个英文例句","eg2":"另一个不同语境的英文例句","coll":"2-3 个常见搭配，英文，用；分隔","tip":"一句中文助记或词根词缀提示"}；非法时{"valid":false}'},{role:'user',content:w}],{json:true,note:'词典信息必须准确；音标用美式 IPA'}); if(r&&r.valid) return {ok:true,w:r.word||w,ph:r.ph||'',cn:r.cn||'',eg:r.eg||'',from:'ai'}; return {ok:false,reason:'不存在该单词（请检查拼写）'}; }catch(e){ return {ok:false,reason:'AI 查询失败：'+e.message}; } }
+  if(aiReady()){ try{ const r=await dualLLM([{role:'system',content:'你是英语词典助手。判断用户输入是否为合法英文单词。只输出JSON：合法时{"valid":true,"word":"规范拼写","ph":"美式音标","cn":"中文释义（含词性）","eg":"一个英文例句","eg2":"另一个不同语境的英文例句","coll":"2-3 个常见搭配，英文，用；分隔","tip":"一句中文助记或词根词缀提示"}；非法时{"valid":false}'},{role:'user',content:w}],{json:true, timeout:TMO.lookup, note:'词典信息必须准确；音标用美式 IPA'}); if(r&&r.valid) return {ok:true,w:r.word||w,ph:r.ph||'',cn:r.cn||'',eg:r.eg||'',from:'ai'}; return {ok:false,reason:'不存在该单词（请检查拼写）'}; }catch(e){ return {ok:false,reason:'AI 查询失败：'+e.message}; } }
   return {ok:false,reason:'词表里没有这个词。可在「数据与设置」配置 AI 后联网查询，或手动填写释义。'};
 }
 function addWordEntry(o){ const k=norm(o.w); if(DB.words.some(x=>norm(x.w)===k)) return {dup:true};
@@ -2386,7 +2396,7 @@ function aiMockScript(L, signal){
     + 'p3 是 4 个与 p2 话题相关的深入讨论问题；难度贴合该档位；问题之间不得重复。'
     + (recent.length ? ('也不要重复这些已用过的话题：'+recent.join('；')+'。') : '');
   return dualLLM([{role:'system',content:sys},{role:'user',content:'请出题。'}],
-      {json:true, signal:signal, note:'必须是自然、地道的英文问题，四个 p3 问题要层层递进'})
+      {json:true, signal:signal, timeout:TMO.gen, note:'必须是自然、地道的英文问题，四个 p3 问题要层层递进'})
     .then(function(r){
       if(!r || !r.p1 || !r.p1.length || !r.p2 || !r.p3 || !r.p3.length) throw new Error('返回格式不完整');
       return r;
@@ -2722,7 +2732,7 @@ async function ieltsEnd(){
       var rep = await dualLLM([
         {role:'system', content:'你是雅思口语考官与教练。根据对话记录输出：四项评分（流利与连贯、词汇、语法、发音，1-9 分；发音按文本可推断程度给出近似值）、逐句纠错（orig=学生原句, fix=更自然/正确的表达, why=中文说明）、提升建议。只输出JSON：{"scores":{"fluency":0,"vocabulary":0,"grammar":0,"pronunciation":0},"errors":[{"orig":"","fix":"","why":""}],"advice":""}' + kr.text},
         {role:'user', content:transcript.slice(0,6000)}
-      ],{json:true, signal:sig, note:'评分与纠错必须基于对话记录本身'});
+      ],{json:true, signal:sig, timeout:TMO.gen, note:'评分与纠错必须基于对话记录本身'});
       aiTaskEnd();
       s.report = buildIeltsReportHTML(rep, false) + (kr.titles.length ? ('<p class="small muted">'+icon('book')+' 已参考知识库：'+esc(kr.titles.join('、'))+'</p>') : '');
     }catch(e){ aiTaskEnd(); s.report = buildIeltsReportHTML(null, true, e.message==='已取消' ? '已取消评分' : e.message); }
@@ -2928,6 +2938,8 @@ function renderPractice(){
 function pracClick(e){
   var rm = e.target.closest('[data-rm]');
   if(rm){ readMode = rm.getAttribute('data-rm'); pracData = { answers:{}, inputs:{} }; renderPracticeBody(); return; }
+  var rv = e.target.closest('[data-rv]');
+  if(rv){ readVariant = rv.getAttribute('data-rv'); pracData = { answers:{}, inputs:{} }; renderPracticeBody(); return; }
   var sw = e.target.closest('[data-sec]');
   if(sw) mockSwitch(sw.getAttribute('data-sec'));
   var pp = e.target.closest('[data-pp]');
@@ -2995,17 +3007,25 @@ function genRow(note){
 /* 阅读有单篇 / 四篇连做两种模式。数据形状是同一套（sets 数组），单篇就是只有一项——
    所以渲染只写一条分支，不按模式分家。 */
 var readMode = 'single';
+/* 单篇练习想练哪一篇由学生自己选：A/B/C/D 四种篇型都是独立的一套提示词，
+   题量按高考规格走（A 篇 3 题、B/C/D 各 4 题），不靠随机替他决定。 */
+var readVariant = 'C';
 /* 模考时强制用四篇：渲染用哪一份，判分就必须用同一份 ——
    否则模考里的阅读会拿 A 篇的作答去对 C 篇的答案（v0.23 引入的 bug）。 */
 function readData(){ return (pracMockOn || readMode === 'full') ? PD.readFull : PD.reading; }
 function renderReading(){
   var d = readData();
-  var MODES = [['single','单篇（1 篇 · 4 题）'],['full','四篇连做（A3+B4+C4+D4 = 15 题）']];
+  var MODES = [['single','单篇（1 篇）'],['full','四篇连做（A3+B4+C4+D4 = 15 题）']];
   var h = '<div class="card" data-sec="reading"><b>'+esc(d.title)+'</b>'
     + (pracMockOn ? '' :
         '<div class="row mt8"><span class="small muted">模式</span>'
         + MODES.map(function(m){ return '<span class="chip'+(readMode===m[0]?' on':'')+'" data-rm="'+m[0]+'">'+m[1]+'</span>'; }).join('')
         + '</div>')
+    /* 单篇模式：想练哪一篇自己选，选中哪篇「AI 出新题」就出哪篇 */
+    + (pracMockOn || readMode !== 'single' ? '' :
+        '<div class="row mt8"><span class="small muted">篇型</span>'
+        + READ_VARIANTS.map(function(v){ return '<span class="chip'+(readVariant===v.k?' on':'')+'" data-rv="'+v.k+'">'+v.k+' 篇 · '+v.name+'（'+v.n+' 题）</span>'; }).join('')
+        + '<span class="small muted">点「AI 出新题」就按选中的篇型出</span></div>')
     + '<p class="small muted mt8">点击文中任意单词可查看释义并加入生词本。</p>';
   var gi = 0;
   (d.sets || []).forEach(function(st){
@@ -3189,7 +3209,7 @@ async function pracWriting(btn){
       var r = await dualLLM([
         {role:'system', content:sys + kr.text},
         {role:'user', content:'题目/材料：\n'+task+'\n\n学生作文：\n'+t}
-      ], {note:'必须基于学生原文批改，指出真实存在的问题', signal:sig});
+      ], {note:'必须基于学生原文批改，指出真实存在的问题', signal:sig, timeout:TMO.gen});
       aiTaskEnd();
       out += '<div class="small" style="white-space:pre-wrap">'+esc(r)+'</div>';
       if(kr.titles.length) out += '<p class="small muted">'+icon('book')+' 已参考知识库：'+esc(kr.titles.join('、'))+'</p>';
@@ -3276,6 +3296,23 @@ function pracCheck(type, r){
   }
   return '';
 }
+/* 阅读单篇：高考 A/B/C/D 四种篇型体裁差别很大，固定只出一种等于只练了一种文本。
+   四种篇型各配一套提示词，学生在卡片上自己选要练哪一篇；题量按高考规格走。 */
+const READ_VARIANTS=[
+  {k:'A', name:'活动通知 · 应用文', n:3, sys:'你是高中英语命题人。A 篇体裁为活动通知 / 信息类应用文，参照近 5 年全国卷 / 新课标卷 A 篇风格。', body:'正文 260-290 词的活动通知或信息类应用文，含时间、地点、参与方式与联系方式等实用信息'},
+  {k:'B', name:'人物记叙', n:4, sys:'你是高中英语命题人。B 篇体裁为人物记叙，参照近 5 年全国卷 / 新课标卷的人物类文本风格。', body:'正文 280-320 词的人物记叙文，要有具体的时间地点线索与体现人物性格转变的细节'},
+  {k:'C', name:'说明文 · 议论文', n:4, sys:'你是高中英语命题人。C 篇体裁为说明文或议论文，参照近 5 年全国卷 / 新课标卷与浙江模考卷 C 篇风格。', body:'正文 300-350 词的说明文或议论文'},
+  {k:'D', name:'议论文 · 科普', n:4, sys:'你是高中英语命题人。D 篇体裁为议论文或科普说明，参照近 5 年全国卷 / 新课标卷 D 篇风格。', body:'正文 300-350 词的议论文或科普说明文，论证要有层次、观点明确'}
+];
+function readSingleGen(key){
+  var v = READ_VARIANTS.filter(function(x){ return x.k === (key||readVariant); })[0] || READ_VARIANTS[2];
+  var shape = '只输出 JSON：{"title":"","sets":[{"label":"'+v.k+' 篇","src":"素材出处说明","passage":"","questions":[{"q":"","opts":["","","",""],"ans":0,"why":"中文解析","point":"考点（细节理解/推理判断/主旨大意/词义猜测 之一）"}]}]}';
+  return {
+    sys: v.sys,
+    usr: '生成 1 篇高考阅读 '+v.k+' 篇：'+v.body+'，配 '+v.n+' 道四选一题，设题顺序与行文顺序一致，考点覆盖细节理解、推理判断、主旨大意、词义猜测。'+shape,
+    ap: function(r){ PD.reading = { title:(r.title||(v.k+' 篇 · '+v.name))+'（AI 出新题）', sets:(r.sets||[]).map(function(s){ if(!s.label) s.label=v.k+' 篇 · '+v.name; return s; }) }; }
+  };
+}
 async function pracGen(btn){
   if(!aiReady()){ aiHint(); return; }
   var doneSpin = btnSpin(btn, 'AI 出题中…');
@@ -3283,29 +3320,42 @@ async function pracGen(btn){
     readingFull:{ sys:'你是高中英语命题人，按高考英语新课标卷「阅读理解第一节」的完整形态组一套题：四篇 A/B/C/D，合计 15 题。',
       usr:'生成高考阅读第一节的四篇：A 篇 260-290 词（活动通知/信息类应用文，3 道题）；B 篇 280-320 词（人物记叙，4 道题）；C 篇 300-350 词（说明文或议论文，4 道题）；D 篇 300-350 词（议论文或科普，4 道题）。合计必须正好 15 题。每篇设题顺序与行文顺序一致，四篇考点合起来要覆盖细节理解、推理判断、主旨大意、词义猜测。只输出 JSON：{"title":"","sets":[{"label":"A 篇","src":"素材出处说明","passage":"","questions":[{"q":"","opts":["","","",""],"ans":0,"why":"中文解析","point":"考点（细节理解/推理判断/主旨大意/词义猜测 之一）"}]}]}',
       ap:function(r){ PD.readFull = { title:r.title||'阅读理解 · 四篇连做（AI 出新题）', sets:r.sets }; } },
-    reading:{ sys:'你是高中英语命题人，出题参照近5年全国卷/新课标卷与浙江模考卷 C 篇阅读风格。', usr:'生成 1 篇高考阅读 C 篇：正文 300-350 词（说明文或议论文），配 4 道四选一题，设题顺序与行文顺序一致，考点分布在细节理解/推理判断/主旨大意/词义猜测之间。只输出 JSON：{"title":"","sets":[{"label":"C 篇","src":"素材出处说明","passage":"","questions":[{"q":"","opts":["","","",""],"ans":0,"why":"中文解析","point":"考点（细节理解/推理判断/主旨大意/词义猜测 之一）"}]}]}', ap:function(r){ PD.reading = { title:r.title||'C 篇 · AI 出新题', sets:r.sets||[] }; } },
     grammar:{ sys:'你是高中英语命题人，语法填空命题参照高考真题考点分布。', usr:'按人教版高中范围生成 1 篇语法填空：正文 230 词左右，挖 10 个空（文中用 [[1]]..[[10]] 标记），其中约 7 个空给提示词（动词时态/语态、非谓语、词性转换、比较级）、3 个空无提示词（冠词、介词、连词、代词、关系词），避免超纲生词。只输出 JSON：{"title":"","passage":"","blanks":[{"ans":"","variants":[""],"hint":"提示词","why":"中文解析","point":"考点（时态语态/非谓语动词/词性转换/连词与从句/冠词与介词/固定搭配 之一）"}]}', ap:function(r){ PD.grammar = { title:r.title||'AI 生成 · 语法填空', passage:r.passage, blanks:r.blanks||[] }; } },
     qixuan:{ sys:'你是高中英语命题人，七选五命题参照高考真题的逻辑衔接与代词指代特点。', usr:'生成 1 篇七选五：正文 300 词左右，挖 5 个空（文中用 [[1]]..[[5]] 标记），给 7 个选项 A-G（其中 2 个是多余的干扰项）。空要落在段首、段中、段末都要有，靠逻辑衔接与代词指代判断。只输出 JSON：{"title":"","src":"素材出处说明","passage":"","opts":["A. ","B. ","C. ","D. ","E. ","F. ","G. "],"ans":{"1":"","2":"","3":"","4":"","5":""},"why":{"1":"","2":"","3":"","4":"","5":""},"points":{"1":"考点（逻辑关系/代词指代 之一）","2":"","3":"","4":"","5":""}}', ap:function(r){ PD.qixuan = { title:r.title||'AI 生成 · 七选五', passage:r.passage, opts:r.opts, ans:r.ans, why:r.why, points:r.points }; } },
     cloze:{ sys:'你是高中英语命题人，完形填空命题参照高考真题考点分布（语境逻辑、词义辨析、固定搭配）。', usr:'生成 1 篇高考完形填空：正文 220 词左右的一篇完整记叙文或夹叙夹议文，正文里挖 15 个空，用 ___1___ 到 ___15___ 标注；每题 4 个选项，同一题四个选项必须词性一致、能构成有效辨析。要给出完整正文（含空），每题再单独给出题干原文片段。只输出 JSON：{"title":"","src":"素材出处说明","passage":"含 ___1___..___15___ 的完整正文","items":[{"stem":"... ___1___ 所在的那一句 ...","opts":["","","",""],"ans":0,"why":"中文解析","point":"考点（语境逻辑/词义辨析/固定搭配 之一）"}]}', ap:function(r){ PD.cloze = { title:r.title||'AI 生成 · 完形填空', items:r.items }; } },
     cont:{ sys:'你是高考英语读后续写命题人（浙江省标准）。', usr:'生成一道读后续写题：英文材料 300-350 词（情节完整、留有悬念，正好卡在冲突要解决的地方），并给两个段首句。题干要注明续写两段、共约 150 词。只输出 JSON：{"title":"","src":"素材出处说明","story":"","starts":["",""]}', ap:function(r){ PD.cont = { title:r.title||'AI 生成 · 读后续写', story:r.story, starts:r.starts||['',''], model:'' }; } },
     essay:{ sys:'你是高中英语作文命题人。', usr:'生成一道高中英语应用文写作题：情境真实（书信/通知/投稿等），给出 3 条要点，词数要求 80 词左右。只输出 JSON：{"title":"","src":"素材出处说明","prompt":""}', ap:function(r){ PD.essay = { title:r.title||'AI 生成 · 作文', prompt:r.prompt, model:'' }; } }
   };
-  /* 阅读的两种模式用不同提示词：单篇 1 篇 4 题，四篇连做按 A3+B4+C4+D4 组一套 15 题 */
-  var g = P[(pracSel === 'reading' && readMode === 'full') ? 'readingFull' : pracSel];
+  /* 阅读的两种模式用不同提示词：四篇连做按 A3+B4+C4+D4 组一套 15 题；单篇随机取 B/C/D 一种 */
+  var g = pracSel === 'reading' ? (readMode === 'full' ? P.readingFull : readSingleGen()) : P[pracSel];
   if(!g){ doneSpin(); toast('该题型的 AI 生成将于正式版接入；当前请使用示例题'); return; }
-  toast('AI 出题中（双侧互检）…');
-  var sig = aiTaskStart('AI 出题中（双侧互检，约 10-20 秒）');
+  var NOTE = '题目必须无误、答案正确、无超纲生词、符合高考风格、每道题都要给出 point 考点标签；'
+    + '正文若引用真实人物事迹、真实事件或他人文章，src 必须写明具体出处；若为完全自编，src 写「自编」；严禁编造出处';
+  var sig = aiTaskStart('AI 出题中…（出完就能直接做题，互检在后台）');
   try{
     var usr = g.usr + (pracPoint ? ('本套题请集中考查考点：'+pracPoint+'（题目和解析都要体现）。') : '');
     var kr = kbRef(g.sys + ' ' + usr + ' ' + pracPoint, 3);
-    var r = await dualLLM([{role:'system',content:g.sys + kr.text},{role:'user',content:usr}], {json:true, signal:sig, note:'题目必须无误、答案正确、无超纲生词、符合高考风格、每道题都要给出 point 考点标签；'
-      +'正文若引用真实人物事迹、真实事件或他人文章，src 必须写明具体出处；若为完全自编，src 写「自编」；严禁编造出处'});
-    doneSpin();   /* 校验完就还原按钮，后面的渲染不算等待 */
+    var r = await execLLM([{role:'system',content:g.sys + kr.text},{role:'user',content:usr}], {json:true, signal:sig, timeout:TMO.gen});
+    doneSpin();
     aiTaskEnd();
     var bad = pracCheck(pracSel, r);
     if(bad){ toast('AI 出的题结构不对（'+bad+'），已保留原题，可再点一次重试'); return; }
     g.ap(r); pracData = { answers:{}, inputs:{} }; renderPracticeBody();
-    toast('新题已生成 ✓ 已互检，参考知识库 '+kr.titles.length+' 条');
+    toast('新题已生成 ✓ 参考知识库 '+kr.titles.length+' 条' + (DB.settings.ai.dual ? '（互检在后台进行）' : ''));
+    /* 互检放后台：题已经能做了，不用陪着等第二次调用。
+       质检若给出修正版，只在「还没开始作答」时静默替换——不能把学生选好的答案冲掉。
+       最终结果与串行互检一致，区别只是先看到未互检的那一版。 */
+    if(DB.settings.ai.dual){
+      checkLLM(r,{json:true, timeout:TMO.gen, note:NOTE}).then(function(fixed){
+        if(!fixed) return;
+        var bad2 = pracCheck(pracSel, fixed);
+        if(bad2){ console.warn('互检修正版结构异常，保留原题：'+bad2); return; }
+        var answered = Object.keys(pracData.answers||{}).length || Object.keys(pracData.inputs||{}).length;
+        if(answered){ toast('互检发现 1 处问题，但你已作答，本次不替换（可重新生成一次）', 3600); return; }
+        g.ap(fixed); pracData = { answers:{}, inputs:{} }; renderPracticeBody();
+        toast('互检修正了 1 处问题，已自动更新 ✓');
+      }).catch(function(){});
+    }
   }catch(e){ doneSpin(); aiTaskEnd(); if(e.message==='已取消'){ toast('已取消出题'); return; } toast('生成失败：'+e.message); }
 }
 function renderPracticeHistory(){
