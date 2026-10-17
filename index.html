@@ -325,7 +325,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.28 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.29 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main>
@@ -510,7 +510,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.28 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2396 词，含美式音标（已剔除人名、地名、作品名等专有名词 129 条）；词典级音频、双 Agent 服务将在后续阶段接入。本版加固：本地存储只留用户数据（词表不再重复落盘）、导入备份有结构校验、AI 调用可超时/重试/取消、支持离线缓存（装到桌面后断网可用）、密钥可经 proxy/ 里的自建代理下发。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.29 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2396 词，含美式音标（已剔除人名、地名、作品名等专有名词 129 条）；词典级音频、双 Agent 服务将在后续阶段接入。本版加固：本地存储只留用户数据（词表不再重复落盘）、导入备份有结构校验、AI 调用可超时/重试/取消、支持离线缓存（装到桌面后断网可用）、密钥可经 proxy/ 里的自建代理下发。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -1274,6 +1274,16 @@ qixuan:{ title:"七选五 · 示例（5 空 / 7 选项）",
 };
 /* 四篇连做里的 C 篇直接用单篇那一份，避免把同样 330 词的正文写两遍 */
 PD.readFull.sets.splice(2, 0, PD.reading.sets[0]);
+/* 单篇模式不另写示例：直接借用四篇连做里的 A/B/C/D 四篇。
+   否则选了「A 篇」却摆着一篇 C 篇的示例，学生会以为自己选错了。
+   每种篇型的 AI 新题分别记在 PD.readingVar 里，切来切去不会互相顶掉。 */
+PD.readingVar={};
+['A','B','C','D'].forEach(function(k){
+  var set = PD.readFull.sets.filter(function(s){ return String(s.label||'').indexOf(k+' 篇') === 0; })[0];
+  if(!set) return;                 /* 按 label 找而不是按下标：以后往 readFull 里加篇目也不会错位 */
+  PD.readingVar[k] = { title:'阅读理解 '+k+' 篇 · 示例（单篇 '+(set.questions||[]).length+' 题）', sets:[set] };
+});
+PD.reading = PD.readingVar.C || PD.reading;
 
 const LSKEY='elw.v01';
 const BOOKVER='pep2019.3';
@@ -2420,11 +2430,17 @@ function startIeltsMock(){
   var token = ++mockToken;
   var sig = aiReady() ? aiTaskStart('AI 出题中（约 10-20 秒）…') : null;
   var p = aiReady()
-    ? aiMockScript(L, sig).catch(function(e){ aiTaskEnd(); if(e.message==='已取消'){ toast('已取消出题'); return null; } toast('AI 出题失败，改用内置题目：'+e.message); return null; })
+    ? aiMockScript(L, sig).catch(function(e){
+        aiTaskEnd();
+        /* 返回 false 是「用户主动取消」的哨兵：不能再拿内置题目把模考开起来，
+           否则点了取消，Part1 计时照样开始。失败才回落到内置题目。 */
+        if(e.message==='已取消'){ toast('已取消出题'); return false; }
+        toast('AI 出题失败，改用内置题目：'+e.message); return null; })
     : Promise.resolve(null);
   p.then(function(sc){
     aiTaskEnd();
     if(token !== mockToken) return;                      /* 期间已退出或重开 */
+    if(sc === false) return;                              /* 已取消，不开考 */
     beginMock(sc || IELTS_MOCK[ieltsSel] || IELTS_MOCK.beginner, L);
   });
 }
@@ -3012,7 +3028,7 @@ var readMode = 'single';
 var readVariant = 'C';
 /* 模考时强制用四篇：渲染用哪一份，判分就必须用同一份 ——
    否则模考里的阅读会拿 A 篇的作答去对 C 篇的答案（v0.23 引入的 bug）。 */
-function readData(){ return (pracMockOn || readMode === 'full') ? PD.readFull : PD.reading; }
+function readData(){ return (pracMockOn || readMode === 'full') ? PD.readFull : ((PD.readingVar && PD.readingVar[readVariant]) || PD.reading); }
 function renderReading(){
   var d = readData();
   var MODES = [['single','单篇（1 篇）'],['full','四篇连做（A3+B4+C4+D4 = 15 题）']];
@@ -3310,9 +3326,15 @@ function readSingleGen(key){
   return {
     sys: v.sys,
     usr: '生成 1 篇高考阅读 '+v.k+' 篇：'+v.body+'，配 '+v.n+' 道四选一题，设题顺序与行文顺序一致，考点覆盖细节理解、推理判断、主旨大意、词义猜测。'+shape,
-    ap: function(r){ PD.reading = { title:(r.title||(v.k+' 篇 · '+v.name))+'（AI 出新题）', sets:(r.sets||[]).map(function(s){ if(!s.label) s.label=v.k+' 篇 · '+v.name; return s; }) }; }
+    ap: function(r){ if(!PD.readingVar) PD.readingVar={};
+      var obj = { title:(r.title||(v.k+' 篇 · '+v.name))+'（AI 出新题）', sets:(r.sets||[]).map(function(s){ if(!s.label) s.label=v.k+' 篇 · '+v.name; return s; }) };
+      PD.readingVar[v.k] = obj; PD.reading = obj;   /* 写进当前篇型；切到别篇再切回来，这套新题还在 */
+    }
   };
 }
+/* 生成序号：后台互检是异步的，学生可能在这期间又点了一次「AI 出新题」，
+   旧的那次质检结果这时回来会把新题覆盖掉。用递增序号做「我还是最新一次吗」的判据。 */
+let pracGenSeq = 0;
 async function pracGen(btn){
   if(!aiReady()){ aiHint(); return; }
   var doneSpin = btnSpin(btn, 'AI 出题中…');
@@ -3326,11 +3348,13 @@ async function pracGen(btn){
     cont:{ sys:'你是高考英语读后续写命题人（浙江省标准）。', usr:'生成一道读后续写题：英文材料 300-350 词（情节完整、留有悬念，正好卡在冲突要解决的地方），并给两个段首句。题干要注明续写两段、共约 150 词。只输出 JSON：{"title":"","src":"素材出处说明","story":"","starts":["",""]}', ap:function(r){ PD.cont = { title:r.title||'AI 生成 · 读后续写', story:r.story, starts:r.starts||['',''], model:'' }; } },
     essay:{ sys:'你是高中英语作文命题人。', usr:'生成一道高中英语应用文写作题：情境真实（书信/通知/投稿等），给出 3 条要点，词数要求 80 词左右。只输出 JSON：{"title":"","src":"素材出处说明","prompt":""}', ap:function(r){ PD.essay = { title:r.title||'AI 生成 · 作文', prompt:r.prompt, model:'' }; } }
   };
-  /* 阅读的两种模式用不同提示词：四篇连做按 A3+B4+C4+D4 组一套 15 题；单篇随机取 B/C/D 一种 */
+  /* 阅读的两种模式用不同提示词：四篇连做按 A3+B4+C4+D4 组一套 15 题；单篇按学生选中的篇型（A/B/C/D）出 */
   var g = pracSel === 'reading' ? (readMode === 'full' ? P.readingFull : readSingleGen()) : P[pracSel];
   if(!g){ doneSpin(); toast('该题型的 AI 生成将于正式版接入；当前请使用示例题'); return; }
   var NOTE = '题目必须无误、答案正确、无超纲生词、符合高考风格、每道题都要给出 point 考点标签；'
     + '正文若引用真实人物事迹、真实事件或他人文章，src 必须写明具体出处；若为完全自编，src 写「自编」；严禁编造出处';
+  var my = ++pracGenSeq;                 /* 本次生成的序号：后台互检回来时用它判断自己是不是过期了 */
+  var mySel = pracSel;                   /* 本次生成的题型：await 期间学生可能切了题型，校验必须按发起时那一科来做 */
   var sig = aiTaskStart('AI 出题中…（出完就能直接做题，互检在后台）');
   try{
     var usr = g.usr + (pracPoint ? ('本套题请集中考查考点：'+pracPoint+'（题目和解析都要体现）。') : '');
@@ -3338,17 +3362,19 @@ async function pracGen(btn){
     var r = await execLLM([{role:'system',content:g.sys + kr.text},{role:'user',content:usr}], {json:true, signal:sig, timeout:TMO.gen});
     doneSpin();
     aiTaskEnd();
-    var bad = pracCheck(pracSel, r);
+    var bad = pracCheck(mySel, r);
     if(bad){ toast('AI 出的题结构不对（'+bad+'），已保留原题，可再点一次重试'); return; }
     g.ap(r); pracData = { answers:{}, inputs:{} }; renderPracticeBody();
     toast('新题已生成 ✓ 参考知识库 '+kr.titles.length+' 条' + (DB.settings.ai.dual ? '（互检在后台进行）' : ''));
     /* 互检放后台：题已经能做了，不用陪着等第二次调用。
-       质检若给出修正版，只在「还没开始作答」时静默替换——不能把学生选好的答案冲掉。
-       最终结果与串行互检一致，区别只是先看到未互检的那一版。 */
+       质检若给出修正版，只在「这还是最新一次生成」且「学生还没开始作答」时才替换——
+       前者防的是学生又点了一次生成、旧的质检结果把新题覆盖掉；
+       后者防的是把学生已经选好的答案冲掉。 */
     if(DB.settings.ai.dual){
       checkLLM(r,{json:true, timeout:TMO.gen, note:NOTE}).then(function(fixed){
         if(!fixed) return;
-        var bad2 = pracCheck(pracSel, fixed);
+        if(my !== pracGenSeq){ console.info('已开启新一轮生成，丢弃过期的互检结果'); return; }
+        var bad2 = pracCheck(mySel, fixed);
         if(bad2){ console.warn('互检修正版结构异常，保留原题：'+bad2); return; }
         var answered = Object.keys(pracData.answers||{}).length || Object.keys(pracData.inputs||{}).length;
         if(answered){ toast('互检发现 1 处问题，但你已作答，本次不替换（可重新生成一次）', 3600); return; }
