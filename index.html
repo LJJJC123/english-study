@@ -3,6 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- 本页是单文件应用，脚本与样式都内联，script/style 只能放开 'unsafe-inline'；
+     这条策略真正拦的是另外三件事：① 外链脚本（object-src/base-uri 'none' 挡注入与 <base> 劫持）
+     ② 非 HTTPS、非本机的外联（AI 接口只能是 https 或 localhost，明文 http 网关会被挡）
+     ③ 外部脚本与 <base> 劫持（object-src / base-uri 'none'）。
+     已知限制：frame-ancestors 在 <meta> 下不生效（必须是 HTTP 响应头），
+     GitHub Pages 不支持自定义响应头——换到自有域名/CDN 时把它挪到响应头才真正生效。 -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob: data:; font-src 'self' data:; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; manifest-src 'self'; object-src 'none'; base-uri 'none'">
 <meta name="theme-color" content="#0c0d0f">
 <meta name="description" content="人教版高中英语词汇闭环（生词本 · 默写 · 听写 · 错题本）＋ 雅思口语陪练 ＋ 练习场">
 <meta name="mobile-web-app-capable" content="yes">
@@ -270,18 +277,23 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   .chip{padding:8px 14px}
   .btn.small{padding:8px 10px;min-width:38px;min-height:36px}
   .wchip{padding:8px 12px}
-}</style>
+}
+/* AI 长任务浮动条：出题/批改期间悬在底部，可点取消（AbortController 一路传到 fetch） */
+.aitaskbar{position:fixed;left:50%;bottom:18px;transform:translate(-50%,20px);z-index:70;display:flex;align-items:center;gap:10px;padding:8px 8px 8px 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow-drawer);opacity:0;pointer-events:none;transition:.18s;max-width:calc(100vw - 28px)}
+.aitaskbar.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.aitaskbar .lbl{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aitaskbar .spin{color:var(--accent);flex:none}</style>
 </head>
 <body>
 <header class="appbar">
-  <button class="iconbtn" id="btnMenu" title="目录"><span data-ic="menu"></span></button>
-  <div class="brand">英语学习助手<small>高中同步 · 雅思口语</small></div>
+  <button class="iconbtn" id="btnMenu" title="目录" aria-label="打开目录"><span data-ic="menu"></span></button>
+  <h1 class="brand" style="margin:0;font-size:17px">英语学习助手<small>高中同步 · 雅思口语</small></h1>
   <div class="grow"></div>
-  <button class="iconbtn" id="btnQuick" title="快速开始"><span data-ic="bolt"></span></button>
+  <button class="iconbtn" id="btnQuick" title="快速开始" aria-label="快速开始"><span data-ic="bolt"></span></button>
 </header>
 
 <div class="backdrop" id="backdrop"></div>
-<aside class="drawer" id="drawer">
+<aside class="drawer" id="drawer" role="navigation" aria-label="主导航">
   <h3>目录</h3>
   <nav class="navlist">
     <a data-route="home"><span class="icslot" data-ic="chart"></span>学习看板</a>
@@ -298,7 +310,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.24 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.25 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main>
@@ -457,12 +469,18 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b><span data-ic="robot"></span> AI 设置</b>
-    <p class="small muted">用于：生词释义联网查询、练习场出题、作文批改、雅思逐句纠错与评分。密钥仅保存在本机浏览器。</p>
-    <div class="row"><input class="grow" id="aiBase" placeholder="接口地址，如 https://api.openai.com/v1"></div>
-    <div class="row mt8"><input class="grow" id="aiKey" type="password" placeholder="API Key（sk-...）"></div>
+    <p class="small muted">用于：生词释义联网查询、练习场出题、作文批改、雅思逐句纠错与评分。</p>
+    <div class="small muted" style="color:var(--bad)">⚠️ 直连模式下密钥会留在浏览器本地存储里，页面脚本可读；一旦站点被注入或被恶意扩展读取即泄露，且无法吊销感知。<b>请填低额度专用密钥，或改用自建代理</b>（见下方说明）。</div>
+    <div class="row"><input class="grow" id="aiBase" placeholder="接口地址，如 https://api.openai.com/v1 或你的代理地址"></div>
+    <div class="row mt8"><input class="grow" id="aiKey" type="password" placeholder="API Key（sk-...）或代理访问令牌"></div>
     <div class="row mt8"><input class="grow" id="aiModel" placeholder="模型名，如 gpt-4o-mini"></div>
     <div class="row mt8"><label class="small"><input type="checkbox" id="aiDual" style="width:auto"> 启用双 Agent 互检（执行 + 检测）</label></div>
     <div class="row mt8"><button class="btn pri" id="btnAiSave">保存</button><button class="btn" id="btnAiTest">连接测试</button><span class="small muted" id="aiHint"></span></div>
+    <details class="mt8">
+      <summary class="small muted" style="cursor:pointer">自建代理（推荐）：密钥不进浏览器</summary>
+      <p class="small muted mt8">仓库里的 <code>proxy/worker.js</code> 是一个 Cloudflare Worker：真实上游密钥存在 Worker 的环境变量里，浏览器只持有一个可轮换、可限流的访问令牌。部署后把「接口地址」填成 Worker 地址（<code>https://&lt;你的域名&gt;/v1</code>），「API Key」填访问令牌即可，本页其余逻辑不用改。</p>
+      <p class="small muted">注意：本页在 <code>file://</code> 下直接打开时，浏览器发出的 Origin 为 <code>null</code>，多数 OpenAI 兼容网关会拒绝——AI 功能请用在线版或自建代理访问。</p>
+    </details>
   </div>
   <div class="card">
     <b><span data-ic="volume"></span> 发音设置</b>
@@ -477,13 +495,13 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.24 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.25 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。本版加固：本地存储只留用户数据（词表不再重复落盘）、导入备份有结构校验、AI 调用可超时/重试/取消、支持离线缓存（装到桌面后断网可用）、密钥可经 proxy/ 里的自建代理下发。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
 </main>
 
-<div class="modalwrap" id="modalWrap"><div class="modal" id="modalBody"></div></div>
+<div class="modalwrap" id="modalWrap"><div class="modal" id="modalBody" role="dialog" aria-modal="true"></div></div>
 <div class="toast" id="toast"></div>
 <script>
 'use strict';
@@ -1243,18 +1261,33 @@ qixuan:{ title:"七选五 · 示例（5 空 / 7 选项）",
 PD.readFull.sets.splice(2, 0, PD.reading.sets[0]);
 
 const LSKEY='elw.v01';
-const DB = { words:[], wrong:[], book:[], stats:{days:{},checkin:[]}, ielts:[], practice:[], settings:{goal:20, voice:'', rate:0.95, ai:{base:'',key:'',model:'',dual:true}}, seeded:false };
+const BOOKVER='pep2019.2';
+const DB = { words:[], wrong:[], book:[], bookPatch:{}, stats:{days:{},checkin:[]}, ielts:[], practice:[], settings:{goal:20, voice:'', rate:0.95, ai:{base:'',key:'',model:'',dual:true}}, seeded:false };
 const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);
-function save(){ try{ localStorage.setItem(LSKEY, JSON.stringify(DB)); }catch(e){ toast('保存失败：本机存储不可用'); } }
+/* 内置教材词表（2526 词、序列化后约 331KB）是随代码发布的静态数据，不进本地存储：
+   存下来之后 save() 每答一题都要把它跟着全量序列化一遍（24 处调用），
+   备份 JSON 里也会多出 300KB 用不上的死重量。
+   本地只保留两类用户数据：自建词（src==='mine'）与对内置词的手工修订（bookPatch）。 */
+function buildBook(){
+  var mine = (DB.book||[]).filter(function(x){ return x && x.src==='mine'; });
+  var patch = DB.bookPatch || {};
+  var list = PEP_WORDS.map(function(x){ var b=PEP_BOOKS[x[3]]; return { w:x[0], ph:x[1], cn:x[2], bk:b[0], unit:b[1][x[4]], src:'book' }; });
+  list.forEach(function(e){ var p=patch[norm(e.w)]; if(p){ if(p.ph) e.ph=p.ph; if(p.cn) e.cn=p.cn; } });
+  DB.book = list.concat(mine);
+  DB.bookVer = BOOKVER;
+}
+function save(){
+  try{
+    var slim = {};
+    for(var k in DB){ if(k==='book') continue; slim[k]=DB[k]; }
+    slim.book = (DB.book||[]).filter(function(x){ return x && x.src==='mine'; });
+    localStorage.setItem(LSKEY, JSON.stringify(slim));
+  }catch(e){ toast('保存失败：本机存储不可用'); }
+}
 function load(){
   try{ const s=localStorage.getItem(LSKEY); if(s){ const d=JSON.parse(s); Object.assign(DB,d); if(!DB.settings)DB.settings={goal:20,voice:'',rate:0.95,ai:{base:'',key:'',model:'',dual:true}}; } }catch(e){}
   if(DB.stats){ if(DB.stats.wrongAdded==null) DB.stats.wrongAdded = (DB.wrong||[]).length; if(DB.stats.wrongCleared==null) DB.stats.wrongCleared = 0; }
-  var BOOKVER = 'pep2019.2';
-  if(!DB.book || !DB.book.length || DB.bookVer !== BOOKVER){
-    var mine = (DB.book||[]).filter(function(x){ return x.src==='mine'; });
-    DB.book = PEP_WORDS.map(function(x){ var b=PEP_BOOKS[x[3]]; return { w:x[0], ph:x[1], cn:x[2], bk:b[0], unit:b[1][x[4]], src:'book' }; }).concat(mine);
-    DB.bookVer = BOOKVER;
-  }
+  buildBook();
   if(!DB.seeded){ ['harvest','volunteer','confident','opportunity','environment','challenge'].forEach(w=>{ const hit=PEP_WORDS.find(x=>x[0]===w); if(hit) DB.words.push({id:uid(),w:hit[0],ph:hit[1],cn:hit[2],eg:'',src:'示例',ts:Date.now(),mastered:false,wrong:0,right:0,due:Date.now(),last:0}); }); DB.seeded=true; }
   save();
 }
@@ -1300,11 +1333,39 @@ function fillIcons(root){
 let toastTimer=null;
 function toast(msg,ms){ ms=ms||2000; const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),ms); }
 let modalOpenedAt=0;
-function openModal(html){ $('#modalBody').innerHTML=html; $('#modalWrap').classList.add('show'); modalOpenedAt=Date.now(); }
-function closeModal(){ $('#modalWrap').classList.remove('show'); }
+let modalLastFocus=null;
+function openModal(html){
+  modalLastFocus=document.activeElement;                 /* 关闭后把焦点还给触发者 */
+  $('#modalBody').innerHTML=html; $('#modalWrap').classList.add('show'); modalOpenedAt=Date.now();
+  const f=$('#modalBody').querySelector('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');
+  if(f) f.focus();
+}
+function closeModal(){
+  $('#modalWrap').classList.remove('show');
+  if(modalLastFocus && modalLastFocus.focus){ try{ modalLastFocus.focus(); }catch(e){} }
+  modalLastFocus=null;
+}
 /* 双击选词时：第 1 次点击弹出词卡，第 2 次点击会落在刚出现的遮罩上，会把卡片立刻关掉。
    故弹窗刚打开的 350ms 内忽略遮罩点击。 */
 document.getElementById('modalWrap').addEventListener('click',e=>{ if(e.target.id==='modalWrap' && Date.now()-modalOpenedAt>350) closeModal(); });
+/* Esc 关弹窗/抽屉；弹窗开着时 Tab 焦点不出弹窗（焦点陷阱） */
+document.addEventListener('keydown', function(e){
+  const mw=$('#modalWrap'), dr=$('#drawer');
+  if(e.key==='Escape'){
+    if(mw.classList.contains('show')) closeModal();
+    else if(dr && dr.classList.contains('open')) closeDrawer();
+    return;
+  }
+  if(e.key==='Tab' && mw.classList.contains('show')){
+    const nodes=Array.prototype.filter.call(
+      $('#modalBody').querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'),
+      function(n){ return !n.disabled && n.offsetParent!==null; });
+    if(!nodes.length) return;
+    const first=nodes[0], last=nodes[nodes.length-1];
+    if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+  }
+});
 function confirmModal(title,text,onOk,okText){ window.__ok=onOk; openModal('<h3>'+esc(title)+'</h3><p class="small muted">'+esc(text)+'</p><div class="row mt8"><button class="btn" onclick="closeModal()">取消</button><button class="btn pri" onclick="closeModal();window.__ok&&window.__ok()">'+esc(okText||'确定')+'</button></div>'); }
 function download(name,text,mime){ const blob=new Blob([text],{type:mime||'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();},4000); }
 const TTS={ list:[], ready:false, armed:false,
@@ -1327,14 +1388,74 @@ const TTS={ list:[], ready:false, armed:false,
       setTimeout(function(){ parts.forEach(function(pc){ const u=new SpeechSynthesisUtterance(pc); u.lang=(v&&v.lang)||'en-US'; if(v) u.voice=v; u.rate=r; s.speak(u); }); },120);
     }catch(e){ toast('朗读失败：'+e.message); } } };
 function aiReady(){ const a=DB.settings.ai; return !!(a&&a.base&&a.key&&a.model); }
-async function llm(messages,opts){ opts=opts||{}; const a=DB.settings.ai;
+/* 错误映射：上游返回的原文里可能有内部地址/账户信息，不抛给用户；细节留 console 供排查 */
+function llmErrorText(status){
+  if(status===401||status===403) return '密钥无效或已过期（HTTP '+status+'）';
+  if(status===404) return '接口地址不对（404），请检查是否以 /v1 结尾';
+  if(status===429) return '请求太频繁或额度不足（429），稍后再试';
+  if(status>=500) return '上游服务异常（'+status+'），稍后重试';
+  return '请求失败（HTTP '+status+'）';
+}
+/* 全局长任务条：AI 出题/批改动辄 10-20 秒，给一个能点掉的「取消」 */
+let aiTaskCtrl=null;
+function aiTaskStart(label){
+  aiTaskCancel();
+  aiTaskCtrl=new AbortController();
+  let bar=$('#aiTaskBar');
+  if(!bar){
+    bar=document.createElement('div');
+    bar.id='aiTaskBar'; bar.className='aitaskbar';
+    bar.innerHTML='<span class="spin"></span><span class="lbl"></span><button class="btn small" type="button">取消</button>';
+    bar.querySelector('button').onclick=function(){ aiTaskCancel(); };
+    document.body.appendChild(bar);
+  }
+  bar.querySelector('.lbl').textContent=label||'AI 处理中…';
+  bar.classList.add('show');
+  return aiTaskCtrl.signal;
+}
+function aiTaskEnd(){ aiTaskCtrl=null; const bar=$('#aiTaskBar'); if(bar) bar.classList.remove('show'); }
+function aiTaskCancel(){ if(aiTaskCtrl){ aiTaskCtrl.abort(); aiTaskCtrl=null; } const bar=$('#aiTaskBar'); if(bar) bar.classList.remove('show'); }
+async function llm(messages,opts){
+  opts=opts||{}; const a=DB.settings.ai;
   const url=a.base.replace(/\/+$/,'')+'/chat/completions';
   const body={ model:a.model, messages:messages, temperature:(opts.temp==null?0.6:opts.temp) };
   if(opts.json) body.response_format={type:'json_object'};
-  const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+a.key},body:JSON.stringify(body)});
-  if(!res.ok){ let t=''; try{ t=(await res.text()).slice(0,180); }catch(e){} throw new Error('HTTP '+res.status+' '+t); }
-  const data=await res.json();
-  return ((data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'').trim();
+  const timeoutMs=opts.timeout||60000;
+  /* 重试口径：4xx（除 429）不重试——重试也没用；429/5xx 与网络错误最多再试 2 次，间隔 800ms / 2000ms */
+  let lastErr=null;
+  for(let attempt=0; attempt<3; attempt++){
+    if(attempt>0) await new Promise(function(r){ setTimeout(r, attempt===1?800:2000); });
+    const ctrl=new AbortController();
+    const timer=setTimeout(function(){ ctrl.abort(); }, timeoutMs);
+    if(opts.signal){                       /* 外部取消（浮动条「取消」按钮）一路传到 fetch */
+      if(opts.signal.aborted) ctrl.abort();
+      else opts.signal.addEventListener('abort', function(){ ctrl.abort(); }, {once:true});
+    }
+    try{
+      const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+a.key},body:JSON.stringify(body),signal:ctrl.signal});
+      clearTimeout(timer);
+      if(!res.ok){
+        const status=res.status;
+        let detail=''; try{ detail=(await res.text()).slice(0,300); }catch(e){}
+        console.warn('[llm] HTTP '+status, detail);
+        const err=new Error(llmErrorText(status)); err.status=status;
+        if(status!==429 && status<500) throw err;          /* 4xx 直接抛，不重试 */
+        lastErr=err; continue;                              /* 429/5xx 进重试 */
+      }
+      const data=await res.json();
+      return ((data.choices&&data.choices[0]&&data.choices[0].message&&data.choices[0].message.content)||'').trim();
+    }catch(e){
+      clearTimeout(timer);
+      if(e.name==='AbortError'){
+        if(opts.signal && opts.signal.aborted) throw new Error('已取消');
+        throw new Error('请求超时（'+Math.round(timeoutMs/1000)+' 秒无响应）');
+      }
+      if(e && e.status!=null) throw e;                      /* 上面构造好的 HTTP 错误直接抛 */
+      console.warn('[llm] network error', e);
+      lastErr=new Error('网络不通或接口不可达');             /* fetch 网络层错误：可重试 */
+    }
+  }
+  throw lastErr||new Error('请求失败');
 }
 function parseJson(t){ const m=String(t).match(/\{[\s\S]*\}/); return JSON.parse(m?m[0]:t); }
 /* ================= 本地知识库（RAG：先检索，再连同问题一起给模型；不训练模型） =================
@@ -1427,15 +1548,18 @@ function kbRef(q, k){
 
 async function dualLLM(execMsgs,opts){ opts=opts||{};
   if(!aiReady()) throw new Error('未配置 AI（请到「数据与设置」填写接口与密钥）');
-  let out=opts.json?parseJson(await llm(execMsgs,{json:true})):await llm(execMsgs);
+  let out=opts.json?parseJson(await llm(execMsgs,{json:true,timeout:opts.timeout,signal:opts.signal})):await llm(execMsgs,{timeout:opts.timeout,signal:opts.signal});
   if(!DB.settings.ai.dual) return out;
   try{
     const chk=parseJson(await llm([
       {role:'system',content:'你是质检Agent。检查【执行结果】是否准确、合规、无事实错误、符合要求。只输出JSON：{"ok":true或false,"issues":"问题说明","fixed":"修改后的完整结果，若无需修改则为空字符串"}'},
       {role:'user',content:'执行结果：\n'+(opts.json?JSON.stringify(out):String(out))+(opts.note?('\n\n要求：'+opts.note):'')}
-    ],{json:true,temp:0.2}));
+    ],{json:true,temp:0.2,timeout:opts.timeout,signal:opts.signal}));
     if(chk && chk.ok===false && chk.fixed){ try{ return opts.json?parseJson(chk.fixed):chk.fixed; }catch(e){} }
-  }catch(e){}
+  }catch(e){
+    /* 用户点了「取消」要一路抛上去终止任务；质检自身超时/失败则降级为未互检结果，不影响主流程 */
+    if(e && e.message==='已取消') throw e;
+  }
   return out;
 }
 function aiHint(){ toast('未配置 AI：到「数据与设置」填写接口与密钥后可用此功能'); }
@@ -1751,7 +1875,10 @@ function doImportWords(){
     var w = (parts[0]||'').trim(); if(!w) return;
     var ph = (parts[1]||'').trim(); var cn = (parts.slice(2).join('；')||'').trim();
     var exist = DB.book.find(function(x){ return norm(x.w)===norm(w); });
-    if(exist){ exist.ph = ph||exist.ph; exist.cn = cn||exist.cn; sk++; }
+    if(exist){ /* 改的是内置词：写进 bookPatch，否则下次启动 buildBook() 重建时会把修订冲掉 */
+      if(!DB.bookPatch) DB.bookPatch = {};
+      DB.bookPatch[norm(w)] = { ph: ph||exist.ph, cn: cn||exist.cn };
+      exist.ph = ph||exist.ph; exist.cn = cn||exist.cn; sk++; }
     else { DB.book.push({ w:w, ph:ph, cn:cn, unit:'我的词表', src:'mine' }); n++; }
   });
   save(); renderBook();
@@ -2236,7 +2363,7 @@ function mockSteps(sc){
   sc.p3.forEach(function(q){ a.push({k:'p3', q:q, sec:60}); });
   return a;
 }
-function aiMockScript(L){
+function aiMockScript(L, signal){
   var recent = (DB.ielts||[]).slice(0,4).map(function(x){ return x.topic; }).filter(Boolean);
   var sys = '你是雅思口语考官。请为 '+L.name+'（band '+L.range+'）级别的考生出一套完整口语模考题目。'
     + '只输出 JSON：{"p1":["","","",""],"p2":{"topic":"","bullets":["","","",""]},"p3":["","","",""]}。'
@@ -2244,7 +2371,7 @@ function aiMockScript(L){
     + 'p3 是 4 个与 p2 话题相关的深入讨论问题；难度贴合该档位；问题之间不得重复。'
     + (recent.length ? ('也不要重复这些已用过的话题：'+recent.join('；')+'。') : '');
   return dualLLM([{role:'system',content:sys},{role:'user',content:'请出题。'}],
-      {json:true, note:'必须是自然、地道的英文问题，四个 p3 问题要层层递进'})
+      {json:true, signal:signal, note:'必须是自然、地道的英文问题，四个 p3 问题要层层递进'})
     .then(function(r){
       if(!r || !r.p1 || !r.p1.length || !r.p2 || !r.p3 || !r.p3.length) throw new Error('返回格式不完整');
       return r;
@@ -2266,10 +2393,12 @@ function startIeltsMock(){
     });
   }
   var token = ++mockToken;
+  var sig = aiReady() ? aiTaskStart('AI 出题中（约 10-20 秒）…') : null;
   var p = aiReady()
-    ? aiMockScript(L).catch(function(e){ toast('AI 出题失败，改用内置题目：'+e.message); return null; })
+    ? aiMockScript(L, sig).catch(function(e){ aiTaskEnd(); if(e.message==='已取消'){ toast('已取消出题'); return null; } toast('AI 出题失败，改用内置题目：'+e.message); return null; })
     : Promise.resolve(null);
   p.then(function(sc){
+    aiTaskEnd();
     if(token !== mockToken) return;                      /* 期间已退出或重开 */
     beginMock(sc || IELTS_MOCK[ieltsSel] || IELTS_MOCK.beginner, L);
   });
@@ -2574,12 +2703,14 @@ async function ieltsEnd(){
     var transcript = s.msgs.filter(function(m){ return !m.pending; }).map(function(m){ return (m.role==='a'?'Examiner: ':'Student: ')+m.text; }).join('\n');
     try{
       var kr = kbRef('雅思口语 四项评分 流利与连贯 词汇 语法 发音 评分标准 中国学生常见错误', 3);
+      var sig = aiTaskStart('AI 正在生成逐句纠错与评分…');
       var rep = await dualLLM([
         {role:'system', content:'你是雅思口语考官与教练。根据对话记录输出：四项评分（流利与连贯、词汇、语法、发音，1-9 分；发音按文本可推断程度给出近似值）、逐句纠错（orig=学生原句, fix=更自然/正确的表达, why=中文说明）、提升建议。只输出JSON：{"scores":{"fluency":0,"vocabulary":0,"grammar":0,"pronunciation":0},"errors":[{"orig":"","fix":"","why":""}],"advice":""}' + kr.text},
         {role:'user', content:transcript.slice(0,6000)}
-      ],{json:true, note:'评分与纠错必须基于对话记录本身'});
+      ],{json:true, signal:sig, note:'评分与纠错必须基于对话记录本身'});
+      aiTaskEnd();
       s.report = buildIeltsReportHTML(rep, false) + (kr.titles.length ? ('<p class="small muted">'+icon('book')+' 已参考知识库：'+esc(kr.titles.join('、'))+'</p>') : '');
-    }catch(e){ s.report = buildIeltsReportHTML(null, true, e.message); }
+    }catch(e){ aiTaskEnd(); s.report = buildIeltsReportHTML(null, true, e.message==='已取消' ? '已取消评分' : e.message); }
   } else {
     s.report = buildIeltsReportHTML(null, true);
   }
@@ -3039,14 +3170,17 @@ async function pracWriting(btn){
         : '你是高中英语作文老师。请按“内容要点完成度 / 词汇与语法 / 连贯性”三个维度批改，指出错误、给出升级表达与总体建议。用中文讲评，条理清晰。';
       var task = isCont ? ('故事材料：\n'+d.story+'\n段首句：\n'+d.starts.join('\n')) : d.prompt;
       var kr = kbRef(sys + ' ' + task, 3);
+      var sig = aiTaskStart('AI 批改中…');
       var r = await dualLLM([
         {role:'system', content:sys + kr.text},
         {role:'user', content:'题目/材料：\n'+task+'\n\n学生作文：\n'+t}
-      ], {note:'必须基于学生原文批改，指出真实存在的问题'});
+      ], {note:'必须基于学生原文批改，指出真实存在的问题', signal:sig});
+      aiTaskEnd();
       out += '<div class="small" style="white-space:pre-wrap">'+esc(r)+'</div>';
       if(kr.titles.length) out += '<p class="small muted">'+icon('book')+' 已参考知识库：'+esc(kr.titles.join('、'))+'</p>';
     }catch(e){
-      out += '<p class="small muted">AI 批改失败（'+esc(e.message)+'）。</p>' + basicWritingFeedback(n, found, isCont);
+      aiTaskEnd();
+      out += '<p class="small muted">'+(e.message==='已取消'?'已取消批改。':'AI 批改失败（'+esc(e.message)+'）。')+'</p>' + basicWritingFeedback(n, found, isCont);
     }
   } else {
     out += basicWritingFeedback(n, found, isCont);
@@ -3145,17 +3279,19 @@ async function pracGen(btn){
   var g = P[(pracSel === 'reading' && readMode === 'full') ? 'readingFull' : pracSel];
   if(!g){ doneSpin(); toast('该题型的 AI 生成将于正式版接入；当前请使用示例题'); return; }
   toast('AI 出题中（双侧互检）…');
+  var sig = aiTaskStart('AI 出题中（双侧互检，约 10-20 秒）');
   try{
     var usr = g.usr + (pracPoint ? ('本套题请集中考查考点：'+pracPoint+'（题目和解析都要体现）。') : '');
     var kr = kbRef(g.sys + ' ' + usr + ' ' + pracPoint, 3);
-    var r = await dualLLM([{role:'system',content:g.sys + kr.text},{role:'user',content:usr}], {json:true, note:'题目必须无误、答案正确、无超纲生词、符合高考风格、每道题都要给出 point 考点标签；'
+    var r = await dualLLM([{role:'system',content:g.sys + kr.text},{role:'user',content:usr}], {json:true, signal:sig, note:'题目必须无误、答案正确、无超纲生词、符合高考风格、每道题都要给出 point 考点标签；'
       +'正文若引用真实人物事迹、真实事件或他人文章，src 必须写明具体出处；若为完全自编，src 写「自编」；严禁编造出处'});
     doneSpin();   /* 校验完就还原按钮，后面的渲染不算等待 */
+    aiTaskEnd();
     var bad = pracCheck(pracSel, r);
     if(bad){ toast('AI 出的题结构不对（'+bad+'），已保留原题，可再点一次重试'); return; }
     g.ap(r); pracData = { answers:{}, inputs:{} }; renderPracticeBody();
     toast('新题已生成 ✓ 已互检，参考知识库 '+kr.titles.length+' 条');
-  }catch(e){ doneSpin(); toast('生成失败：'+e.message); }
+  }catch(e){ doneSpin(); aiTaskEnd(); if(e.message==='已取消'){ toast('已取消出题'); return; } toast('生成失败：'+e.message); }
 }
 function renderPracticeHistory(){
   var el = $('#practiceHistory');
@@ -3205,10 +3341,93 @@ function renderData(){
   $('#rateRange').value = DB.settings.rate||0.95;
   $('#rateVal').textContent = String(DB.settings.rate||0.95);
 }
+/* 导入校验：备份文件可能被手改过或来自别处，不能盲信。
+   白名单字段 + 类型纠正；形状不对的条目丢弃并计数，导入前把丢弃数亮给用户。 */
+function sanitizeBackup(d){
+  if(!d || typeof d !== 'object' || Array.isArray(d)) return null;
+  var out = { dropped: 0 };
+  var str = function(v){ return typeof v === 'string' ? v : (v == null ? '' : String(v)); };
+  var num = function(v, def){ v = +v; return isFinite(v) ? v : def; };
+  var arrOfObj = function(x){
+    if(x == null) return null;
+    if(!Array.isArray(x)){ out.dropped++; return []; }
+    return x.filter(function(o){ if(!o || typeof o !== 'object'){ out.dropped++; return false; } return true; });
+  };
+  var ws = arrOfObj(d.words);
+  if(ws) out.words = ws.filter(function(w){ if(!str(w.w).trim()){ out.dropped++; return false; } return true; }).map(function(w){
+    return { id: str(w.id) || uid(), w: str(w.w).trim(), ph: str(w.ph), cn: str(w.cn), eg: str(w.eg), eg2: str(w.eg2),
+      coll: str(w.coll), tip: str(w.tip), src: str(w.src) || '导入', ts: num(w.ts, Date.now()),
+      mastered: !!w.mastered, wrong: num(w.wrong, 0), right: num(w.right, 0), due: num(w.due, Date.now()), last: num(w.last, 0) };
+  });
+  var wr = arrOfObj(d.wrong);
+  if(wr) out.wrong = wr.filter(function(x){ if(!str(x.w).trim()){ out.dropped++; return false; } return true; }).map(function(x){
+    return { id: str(x.id) || uid(), w: str(x.w).trim(), ph: str(x.ph), cn: str(x.cn),
+      type: str(x.type) || 'write', count: num(x.count, 1), streak: num(x.streak, 0), ts: num(x.ts, Date.now()), last: num(x.last, Date.now()) };
+  });
+  /* 备份里的 book 只收自建词：内置词表以代码为准，导入的 'book' 条目一律丢弃 */
+  var bk = arrOfObj(d.book);
+  if(bk) out.book = bk.filter(function(x){
+    if(!(x.src === 'mine' && str(x.w).trim())){ if(x.src !== 'mine') out.dropped++; return false; }
+    return true;
+  }).map(function(x){ return { w: str(x.w).trim(), ph: str(x.ph), cn: str(x.cn), unit: str(x.unit) || '我的词表', src: 'mine' }; });
+  if(d.bookPatch != null){
+    if(typeof d.bookPatch !== 'object' || Array.isArray(d.bookPatch)){ out.dropped++; }
+    else{
+      out.bookPatch = {};
+      Object.keys(d.bookPatch).forEach(function(k){
+        var p = d.bookPatch[k];
+        if(k && typeof k === 'string' && p && typeof p === 'object') out.bookPatch[k] = { ph: str(p.ph), cn: str(p.cn) };
+        else out.dropped++;
+      });
+    }
+  }
+  var il = arrOfObj(d.ielts);
+  if(il) out.ielts = il.filter(function(x){ if(!Array.isArray(x.msgs)){ out.dropped++; return false; } return true; }).map(function(x){
+    return { id: str(x.id) || uid(), level: str(x.level), topic: str(x.topic), ts: num(x.ts, Date.now()),
+      msgs: x.msgs.filter(function(m){ return m && typeof m === 'object'; })
+                  .map(function(m){ return { role: str(m.role), text: str(m.text) }; }),
+      /* 历史报告是按 HTML 存的：剥掉 script 与内联事件，防止备份被篡改后注入 */
+      reportHTML: str(x.reportHTML).replace(/<script[\s\S]*?<\/script>/gi, '').replace(/\son\w+\s*=/gi, ' ') };
+  });
+  var pr = arrOfObj(d.practice);
+  if(pr) out.practice = pr.map(function(x){
+    return { id: str(x.id) || uid(), type: str(x.type), ts: num(x.ts, Date.now()),
+      score: x.score == null ? null : num(x.score, null), total: x.total == null ? null : num(x.total, null),
+      words: x.words == null ? null : num(x.words, null),
+      wrong: Array.isArray(x.wrong) ? x.wrong.filter(function(w){ return w && typeof w === 'object'; }) : [] };
+  });
+  if(d.stats != null){
+    if(typeof d.stats !== 'object' || Array.isArray(d.stats)){ out.dropped++; }
+    else out.stats = {
+      days: (d.stats.days && typeof d.stats.days === 'object' && !Array.isArray(d.stats.days)) ? d.stats.days : {},
+      checkin: Array.isArray(d.stats.checkin) ? d.stats.checkin.map(str) : [],
+      wrongAdded: num(d.stats.wrongAdded, 0), wrongCleared: num(d.stats.wrongCleared, 0),
+      pointWrong: (d.stats.pointWrong && typeof d.stats.pointWrong === 'object' && !Array.isArray(d.stats.pointWrong)) ? d.stats.pointWrong : {}
+    };
+  }
+  if(d.settings != null){
+    if(typeof d.settings !== 'object' || Array.isArray(d.settings)){ out.dropped++; }
+    else{
+      var s = {};
+      if(d.settings.goal != null) s.goal = Math.max(5, Math.min(200, num(d.settings.goal, 20)));
+      if(typeof d.settings.voice === 'string') s.voice = d.settings.voice;
+      if(d.settings.rate != null) s.rate = Math.max(0.6, Math.min(1.2, num(d.settings.rate, 0.95)));
+      if(d.settings.bookSel && typeof d.settings.bookSel === 'object' && !Array.isArray(d.settings.bookSel)) s.bookSel = d.settings.bookSel;
+      if(d.settings.ai && typeof d.settings.ai === 'object'){
+        s.ai = { base: str(d.settings.ai.base), key: str(d.settings.ai.key), model: str(d.settings.ai.model), dual: d.settings.ai.dual !== false };
+      }
+      out.settings = s;
+    }
+  }
+  return out;
+}
 function exportJsonAll(){
   /* 备份文件里不带 API 密钥：整个 DB 直接落盘会把密钥明文写进文件，转发备份就等于泄露 */
   var pack = JSON.parse(JSON.stringify(DB));
   if(pack.settings && pack.settings.ai) pack.settings.ai.key = '';
+  /* 内置词表同理不进备份：还原时 buildBook() 会按代码里的词表重建，存进去只是让文件大 300KB */
+  if(pack.book) pack.book = pack.book.filter(function(x){ return x && x.src==='mine'; });
+  pack.meta = { app:'english-study', schema:2, exportedAt: new Date().toISOString() };
   download('英语学习数据-'+todayStr()+'.json', JSON.stringify(pack,null,2));
   toast('已导出（含生词本/错题本/记录；本地文件里不含 API 密钥）');
 }
@@ -3226,6 +3445,7 @@ function clearAllData(){
          这里写入一份空数据并显式置 seeded=true，内置词表（教材词表）会自动重建，不算用户数据。 */
       localStorage.setItem(LSKEY, JSON.stringify({
         words:[], wrong:[], ielts:[], practice:[],
+        book:[], bookPatch:{},               /* 自建词与内置词修订同样算用户数据，一并清掉 */
         stats:{ days:{}, checkin:[] },
         settings: DB.settings,
         seeded: true
@@ -3238,7 +3458,7 @@ async function aiTest(){
   var btn = $('#btnAiTest'); var old = btn.textContent;
   btn.disabled = true; btn.textContent = '测试中…';
   try{
-    var t = await llm([{role:'user',content:'Reply with the single word: pong'}],{temp:0});
+    var t = await llm([{role:'user',content:'Reply with the single word: pong'}],{temp:0, timeout:15000});
     toast('连接成功：'+String(t).slice(0,40));
   }catch(e){ toast('连接失败：'+e.message, 4200); }
   btn.disabled = false; btn.textContent = old;
@@ -3305,13 +3525,22 @@ function init(){
     reader.onload = function(){
       try{
         var d = JSON.parse(reader.result);
-        confirmModal('导入数据','导入将覆盖当前数据（生词本/错题本/记录/设置）。确定导入吗？', function(){
+        var clean = sanitizeBackup(d);
+        if(!clean){ toast('这不是本应用的备份文件（格式不对）', 3200); return; }
+        var droppedNote = clean.dropped ? ('；另有 '+clean.dropped+' 条无效/不可识别数据会被跳过') : '';
+        var verNote = (d.meta && typeof d.meta.schema === 'number' && d.meta.schema > 2)
+          ? '该备份来自更新版本，部分新字段可能被忽略。' : '';
+        confirmModal('导入数据','导入将覆盖当前数据（生词本/错题本/记录/设置）'+droppedNote+'。'+verNote+'确定导入吗？', function(){
           try{
             var prevKey = (DB.settings && DB.settings.ai && DB.settings.ai.key) || '';
-            ['words','wrong','book','stats','ielts','practice','settings'].forEach(function(k){ if(d[k]!=null) DB[k] = d[k]; });
+            ['words','wrong','book','stats','ielts','practice','settings','bookPatch'].forEach(function(k){ if(clean[k]!=null) DB[k] = clean[k]; });
             /* 备份文件不带密钥，导入后沿用本机原来的密钥，免得被空值覆盖 */
             if(DB.settings && DB.settings.ai && !DB.settings.ai.key && prevKey) DB.settings.ai.key = prevKey;
-            save(); renderData(); go('home'); toast('导入成功 ✓');
+            /* 备份里只有用户自建词，内置教材词表要按代码重建，否则「高中英语」整页空白 */
+            if(!DB.bookPatch) DB.bookPatch = {};
+            buildBook();
+            save(); renderData(); go('home');
+            toast('导入成功 ✓' + (clean.dropped ? ('（跳过 '+clean.dropped+' 条无效数据）') : ''));
           }catch(err){ toast('导入失败：'+err.message); }
         });
       }catch(err){ toast('文件解析失败：'+err.message); }
@@ -3331,6 +3560,13 @@ function init(){
   setTimeout(function(){ if(!DB.stats.checkin.length){ toast('欢迎使用！示例数据已就绪，可从「默写」或「听写」开始', 3400); } }, 600);
   var r = (location.hash||'').replace(/^#\/?/,'') || 'home';
   go(ROUTES.indexOf(r)>=0 ? r : 'home');
+}
+/* PWA 离线缓存：注册 Service Worker（同源外壳 stale-while-revalidate）。
+   file:// 直开不支持 SW，守卫掉；AI 接口的跨域请求 SW 不拦截。 */
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){});
+  });
 }
 init();
 </script>
