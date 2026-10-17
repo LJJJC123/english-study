@@ -8,7 +8,7 @@
 
    发版注意：改完 index.html 后把下面的 CACHE 版本号 +1，
    否则老用户会一直命中旧缓存，看不到新版。 */
-const CACHE = 'es-shell-v2';
+const CACHE = 'es-shell-v3';
 const SHELL = [
   './',
   './index.html',
