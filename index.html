@@ -27,6 +27,7 @@
      上一版把中性灰全部往暖黄轴偏，结果整页成了棕泥地——底色要中性，重色才能当焦点。 */
   --bg:oklch(16% 0.004 250);                /* 桌面 */
   --card:oklch(20% 0.005 250);              /* 抬一层：卡片 */
+  --card-hi:oklch(22% 0.006 250);           /* 卡片受光面：渐变顶，去平涂感 */
   --panel:oklch(24% 0.006 250);             /* 再抬一层：输入框、次级面 */
   --ink:oklch(94% 0.003 250);               /* 近白，不是纯白 */
   --muted:oklch(71% 0.006 250);
@@ -49,18 +50,30 @@
   --bad:oklch(71% 0.160 25); --badbg:oklch(71% 0.160 25 / .14); --bad-line:oklch(71% 0.160 25 / .40);
   --shadow-modal:0 24px 70px oklch(8% 0.005 250 / .66);
   --shadow-drawer:12px 0 40px oklch(8% 0.005 250 / .55);
+  /* 卡片阴影 = 内顶受光发丝 + 外下沉，两层都要极轻，重了就成了"浮起来的贴纸" */
+  --shadow-card:0 1px 0 oklch(94% 0.003 250 / .045) inset, 0 10px 26px oklch(8% 0.005 250 / .22);
+  /* 琥珀主按钮：顶光 + 同色投影，深底上比白块干净 */
+  --shadow-pri:0 1px 0 oklch(96% 0.01 90 / .5) inset, 0 6px 18px oklch(79% 0.145 78 / .20);
   --scrim:oklch(8% 0.005 250 / .68);
   --radius:14px;
 }
 /* finesse · register=product · A=indigo+slate-tinted · B=type 12-40 · C=card+grid
- * D=CSS-only(no lib) · E=neutral-graphite+amber · SOUL=6 SPECTACLE=2 DENSITY=7 */
+ * D=CSS-only(no lib) · E=neutral-graphite+amber · SOUL=6 SPECTACLE=2 DENSITY=7
+ * v2 精修：受光渐变面 / 琥珀实心主按钮 / 毛玻璃顶栏 / 静态环境光 / 细滚动条——识别度不变，只去平涂感 */
 
 *{box-sizing:border-box}
 ::selection{background:oklch(79% 0.145 78 / .32);color:var(--ink)}
-html,body{margin:0;padding:0}
-body{font-family:"Segoe UI","Microsoft YaHei",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;overflow-x:clip}
+/* 顶部一角极轻的琥珀环境光：静态、不耗电，但整页立刻不平 */
+body{font-family:"Segoe UI","Microsoft YaHei",system-ui,-apple-system,sans-serif;color:var(--ink);font-size:15px;line-height:1.6;-webkit-tap-highlight-color:transparent;
+  background:radial-gradient(1100px 460px at 72% -12%,oklch(79% 0.145 78 / .055),transparent 62%),var(--bg)}
+/* 细滚动条：深色页面里默认粗滚动条很出戏 */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:oklch(94% 0.003 250 / .14);border:3px solid transparent;border-radius:999px;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:oklch(94% 0.003 250 / .22);background-clip:padding-box;border:3px solid transparent}
 button{font-family:inherit}
-.appbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;padding:8px 14px;background:var(--bg);border-bottom:1px solid var(--line)}
+/* 顶栏半透明 + 毛玻璃：滚动时内容从下方掠过，多一层纵深 */
+.appbar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:10px;padding:8px 14px;background:oklch(16% 0.004 250 / .82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .brand{font-weight:700;font-size:17px;letter-spacing:.2px}
 .brand small{color:var(--muted);font-weight:400;margin-left:8px;font-size:12px}
 .iconbtn{width:40px;height:40px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--muted);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
@@ -76,8 +89,8 @@ main{max-width:1080px;margin:0 auto;padding:14px 14px 96px}
 .view.active>.grid:nth-of-type(n+4),.view.active>.card:nth-of-type(n+4){animation-delay:.15s}
 @keyframes riseIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-/* 描边与阴影二选一：常驻内容用描边（阴影留给弹窗、抽屉这类浮层），避免"框套框" */
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin:12px 0}
+/* 描边 + 受光渐变 + 极轻投影：常驻内容靠这三层做出"纸"的厚度，重阴影只留弹窗/抽屉 */
+.card{background:linear-gradient(180deg,var(--card-hi),var(--card) 70%);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin:12px 0;box-shadow:var(--shadow-card)}
 .grid>.card{margin:0}
 /* 卡片内 CTA 底部对齐：文案长短不同时按钮不再高低不齐 */
 .card>.btn.wide{margin-top:auto}
@@ -89,7 +102,7 @@ main{max-width:1080px;margin:0 auto;padding:14px 14px 96px}
 .picker>summary::-webkit-details-marker{display:none}
 .picker>summary::before{content:'▸';font-size:12px;transition:transform .15s}
 .picker[open]>summary::before{content:'▾'}
-h2.page{font-size:20px;margin:4px 0 2px;text-wrap:balance;letter-spacing:-.01em}
+h2.page{font-size:22px;font-weight:700;margin:4px 0 2px;text-wrap:balance;letter-spacing:-.02em}
 h2.page::before{content:'';display:inline-block;width:6px;height:6px;background:var(--accent);border-radius:1.5px;margin-right:9px;vertical-align:3px}
 /* 标题断行不出现孤字；正文断行更均匀 */
 .card>b,.li-title,.qa-center,.qcn,.qword{text-wrap:balance}
@@ -112,17 +125,19 @@ p,.psg,.bub{text-wrap:pretty}
 @media(min-width:641px){#view-home .g2>.card>.btn.wide{width:auto;align-self:flex-start;min-width:132px}}
 @media(max-width:820px){.g3{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:640px){.g2{grid-template-columns:minmax(0,1fr)}}
+/* 看板首卡：右上角一抹琥珀环境光，点出"这是今天的主任务"，其余卡片保持安静 */
+#todayCard{background:radial-gradient(560px 190px at 100% 0%,oklch(79% 0.145 78 / .08),transparent 62%),linear-gradient(180deg,var(--card-hi),var(--card) 70%)}
 /* KPI 卡：图标片 + 标签 + 数字（数字用等宽数位，避免跳动） */
 .stat{text-align:center;padding:12px 8px}
 .stat .stat-ic{color:var(--muted);display:inline-flex;align-items:center;justify-content:center;margin-bottom:2px}
 .stat .stat-ic .ic{width:16px;height:16px;vertical-align:0}
-.stat b{font-size:24px;display:block;line-height:1.25;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.stat b{font-size:26px;display:block;line-height:1.25;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .stat span{color:var(--muted);font-size:12.5px;display:block;margin-top:2px}
 .stat.accent .stat-ic{color:var(--accent)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 14px;font-size:15px;cursor:pointer;transition:.15s;color:var(--ink)}
 .btn:hover{border-color:var(--hairline);background:var(--hover)}
-.btn.pri{background:var(--pri);border-color:var(--pri);color:var(--pri-ink)}
-.btn.pri:hover{background:var(--ink-strong)}
+.btn.pri{background:linear-gradient(180deg,oklch(83% 0.150 80),var(--accent));border-color:oklch(79% 0.145 78 / .55);color:oklch(21% 0.020 78);font-weight:600;box-shadow:var(--shadow-pri)}
+.btn.pri:hover{background:linear-gradient(180deg,oklch(86% 0.145 80),oklch(81.5% 0.145 78));border-color:oklch(79% 0.145 78 / .75)}
 .btn.big{padding:12px 18px;font-size:15px;border-radius:10px}
 .btn.wide{width:100%}
 .btn.ghost{border-color:transparent;background:transparent;color:var(--accent)}
@@ -138,7 +153,7 @@ input:focus,textarea:focus,select:focus{outline:2px solid var(--focus-line);bord
 textarea{resize:vertical;min-height:90px;line-height:1.7}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .grow{flex:1 1 auto;min-width:0}
-.drawer{position:fixed;top:0;bottom:0;left:0;width:276px;max-width:84vw;background:var(--card);border-right:1px solid var(--line);transform:translateX(-103%);transition:transform .25s ease;z-index:60;padding:14px 12px;overflow:auto}
+.drawer{position:fixed;top:0;bottom:0;left:0;width:276px;max-width:84vw;background:linear-gradient(180deg,var(--card-hi),var(--card) 30%);border-right:1px solid var(--line);transform:translateX(-103%);transition:transform .25s ease;z-index:60;padding:14px 12px;overflow:auto}
 .drawer.open{transform:none;box-shadow:var(--shadow-drawer)}
 .backdrop{position:fixed;inset:0;background:var(--scrim);opacity:0;pointer-events:none;transition:.2s;z-index:55}
 .backdrop.show{opacity:1;pointer-events:auto}
@@ -146,14 +161,14 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 .navlist{display:flex;flex-direction:column;gap:2px}
 .navlist a{display:flex;gap:10px;align-items:center;padding:12px 10px;border-radius:10px;color:var(--ink);text-decoration:none;font-size:15px;cursor:pointer}
 .navlist a:hover{background:var(--hover)}
-.navlist a.on{background:var(--hover);color:var(--accent);font-weight:600}
+.navlist a.on{background:var(--hover);color:var(--accent);font-weight:600;box-shadow:inset 2px 0 0 var(--accent)}
 .navlist .icslot{width:22px;text-align:center;font-size:17px}
 .nav-sec{margin-top:14px}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink-strong);color:var(--pri-ink);padding:10px 16px;border-radius:12px;font-size:13px;opacity:0;transition:.25s;z-index:90;max-width:88vw;text-align:center;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%)}
 .modalwrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:80;padding:16px;background:var(--scrim)}
 .modalwrap.show{display:flex}
-.modal{background:var(--card);border-radius:14px;max-width:560px;width:100%;max-height:86vh;overflow:auto;padding:18px 18px 16px;box-shadow:var(--shadow-modal)}
+.modal{background:linear-gradient(180deg,var(--card-hi),var(--card) 40%);border:1px solid var(--hairline);border-radius:14px;max-width:560px;width:100%;max-height:86vh;overflow:auto;padding:18px 18px 16px;box-shadow:var(--shadow-modal)}
 .modal h3{margin:0 0 4px;font-size:17px}
 .opts{display:grid;gap:8px}
 .opt{border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;background:var(--card);transition:.12s;font-size:15px}
@@ -161,7 +176,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.7}
 .opt.sel{border-color:var(--accent);background:var(--pri-weak)}
 .opt.ok{border-color:var(--ok-line);background:var(--okbg)}
 .opt.bad{border-color:var(--bad-line);background:var(--badbg)}
-.qword{font-size:32px;font-weight:700;letter-spacing:-.015em;text-align:center;margin:8px 0 2px}
+.qword{font-size:36px;font-weight:700;letter-spacing:-.02em;text-align:center;margin:8px 0 2px}
 .qcn{font-size:24px;font-weight:600;text-align:center;margin:10px 0 4px}
 .qph{text-align:center;color:var(--muted);font-size:15px}
 .qa-center{text-align:center;color:var(--muted);font-size:13px;margin-bottom:8px}
@@ -310,7 +325,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.25 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.26 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main>
@@ -495,7 +510,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.25 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。本版加固：本地存储只留用户数据（词表不再重复落盘）、导入备份有结构校验、AI 调用可超时/重试/取消、支持离线缓存（装到桌面后断网可用）、密钥可经 proxy/ 里的自建代理下发。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.26 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。本版加固：本地存储只留用户数据（词表不再重复落盘）、导入备份有结构校验、AI 调用可超时/重试/取消、支持离线缓存（装到桌面后断网可用）、密钥可经 proxy/ 里的自建代理下发。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -811,7 +826,7 @@ const PEP_WORDS=[
 ['institute','/ˈɪnstəˌtut/','n.(教育、专业等)机构 机构建筑',3,0],['consequence','/ˈkɑnsəkwəns/','n.结果;后果',3,0],['take up a position','','担任;任职',3,0],['moustache US mustache','','n.上唇的胡子;髭',3,0],
 ['peculiarity','/pɪˌkjuliˈerəti/','n.个性;特点 怪异的性质',3,0],['encounter','/ɪnˈkaʊnər/','vt.偶然碰到;遇到 n.邂逅;遭遇',3,0],['professor','/prəˈfesər/','n.教授',3,0],['mourn','/ˈmɔrn/','vt.&.vi.哀悼;忧伤',3,0],
 ['remarkable','/riˈmɑrkəbəl/','adj.非凡的;显著的',3,0],['device','/dɪˈvaɪs/','n.方法;技巧;装置;仪器',3,0],['sum','/ˈsəm/','vi.总结;概括',3,0],['sum up','','总结;概括',3,0],
-['draft','/ˈdræft/','n.草稿;草案',3,0],['draft','/ˈdræft/','起草;草拟',3,0],['Nobel Prize','','诺贝尔奖',3,0],['Alexander Fleming','','亚历山大；弗莱明',3,0],
+['draft','/ˈdræft/','n.草稿;草案 vt.& vi.起草;草拟',3,0],['Nobel Prize','','诺贝尔奖',3,0],['Alexander Fleming','','亚历山大·弗莱明',3,0],
 ['Albert Einstein','','阿尔伯特；爱因斯坦',3,0],['Hitler','/ˈhɪtlər/','希特勒',3,0],['Elon Musk','','埃隆；马斯克',3,0],['Florence Nightingale','','弗洛伦斯；南丁格尔',3,0],
 ['SARS','/ˈsɑrz/','严重急性呼吸综合征',3,0],['Switzerland','/ˈswɪtsərlənd/','瑞士(国家名)',3,0],['Swiss','/ˈswɪs/','adj.瑞士的n.(pl.Swiss)瑞士人',3,0],['Isaac Newton','','艾萨克；牛顿',3,0],
 ['Jewish','/ˈdʒuɪʃ/','adj.犹太人的:犹太教的',3,0],['Princeton','/ˈprɪnstən/','普林斯顿(美国城市)',3,0],['phrase','/ˈfreɪz/','n.短语;词组',3,1],['persuade','/pərˈsweɪd/','vt.劝说;说服',3,1],
@@ -842,7 +857,7 @@ const PEP_WORDS=[
 ['journalist','/ˈdʒərnələst/','n.新闻记者;新闻工作者',3,2],['sneeze','/ˈsniz/','vi.打喷嚏 n.喷嚏;喷嚏声',3,2],['teapot','/ˈtiˌpɑt/','n.茶壶',3,2],['label','/ˈleɪbəl/','vt.用标签标明;贴标签 n.标签;标记',3,2],
 ['cream','/ˈkrim/','n.奶油;乳脂;护肤霜 adj.奶油色的;淡黃色的',3,2],['leopard','/ˈlepərd/','n.豹',3,2],['stretch','/ˈstretʃ/','vi.延伸;延续 vi. & vt.伸展;舒展',3,2],['rewarding','/riˈwɔrdɪŋ/','adj.值得做的:有益的',3,2],
 ['bush','/ˈbʊʃ/','n.灌木',3,2],['lung','/ˈləŋ/','n.肺',3,2],['cycle','/ˈsaɪkəl/','n.自行车;摩托车;循环 vi.骑自行车',3,2],['corridor','/ˈkɔrədər/','n.狭长地带;走廊;过道;通道',3,2],
-['pedal','/ˈpedəl/','n.自行车等的)脚蹬子;踏板 vi. & vi.骑自行车;踩踏板',3,2],['fountain','/ˈfaʊntən/','n.喷泉;人工喷泉:喷水池',3,2],['route','/ˈraʊt/','n.路线;路途;途径',3,2],['ahead','/əˈhed/','adv.向前;在前面;提前',3,2],
+['pedal','/ˈpedəl/','n.(自行车等的)脚蹬子;踏板 vt.& vi.骑自行车;踩踏板',3,2],['fountain','/ˈfaʊntən/','n.喷泉;人工喷泉:喷水池',3,2],['route','/ˈraʊt/','n.路线;路途;途径',3,2],['ahead','/əˈhed/','adv.向前;在前面;提前',3,2],
 ['theme','/ˈθim/','adj.有特定主题的 n.主题;主题思想',3,2],['theme park','','主题公园;主题乐园',3,2],['roller coaster','','n.过山车',3,2],['incredible','/ˌɪnˈkredəbəl/','adj.极好的;极大的 难以置信的',3,2],
 ['appeal','/əˈpil/','vi.有吸引力:呼吁:恳求;上诉 n.吸引力;呼吁;上诉;请求',3,2],['appeal to','','有吸引力;有感染力;呼吁;上诉;打动',3,2],['pirate','/ˈpaɪrət/','n.海盗;盗版者 vt.盗印;窃用',3,2],['adorable','/əˈdɔrəbəl/','adj.可爱的;讨人喜爱的',3,2],
 ['wander','/ˈwɑndər/','n.游荡;闲逛;流浪 vt. & vi.闲逛;漫游 vi.走失;离散;走神',3,2],['amusement','/əˈmjuzmənt/','n.娱乐(活动);愉悦',3,2],['amuse','/əˈmjuz/','vt.(提供)消遺;(使)娱乐',3,2],['enormous','/iˈnɔrməs/','adj.巨大的;极大的',3,2],
@@ -862,15 +877,15 @@ const PEP_WORDS=[
 ['assess','/əˈses/','vt.评估;评价',3,3],['internal','/ˌɪnˈtərnəl/','adj.内部的;里面的',3,3],['straighten up','','直起来;整理;收拾整齐',3,3],['slump','/ˈsləmp/','vi.垂头弯腰地走(或坐等)',3,3],
 ['pose','/ˈpoʊz/','n.故作姿态;(为画像、拍照等摆的)姿势 vi.摆好姿势 vt.造成(威胁、问题等)',3,3],['bend','/ˈbend/','vt. & vi.(使)弯曲 倾斜;偏向',3,3],['reveal','/riˈvil/','vt.揭示;显示;露出',3,3],['clarify','/ˈklerəˌfaɪ/','vt.使更清晰易懂;阐明;澄清',3,3],
 ['in other words','','换句话说;也就是说',3,3],['educator','/ˈedʒəˌkeɪtər/','n.教师:教育工作者;教育家',3,3],['tick','/ˈtɪk/','vt.给(试卷、问题等)打钩号 vi.(钟表)发出嘀嗒声 n.钩号',3,3],['tendency','/ˈtendənsi/','n.趋势;倾向',3,3],
-['lower','/ˈloʊər/','vt.把…低:降低;减少 adj.下面的;下方的;较小的',3,3],['imply','/ˌɪmˈplaɪ/','vt.意味着;暗示',3,3],['barely','/ˈberli/','adv.几乎不;勉强才能;刚刚',3,3],['chin','/ˈtʃɪn/','n.下巴',3,3],
+['lower','/ˈloʊər/','vt.把…放低;降低;减少 adj.下面的;下方的;较小的',3,3],['imply','/ˌɪmˈplaɪ/','vt.意味着;暗示',3,3],['barely','/ˈberli/','adv.几乎不;勉强才能;刚刚',3,3],['chin','/ˈtʃɪn/','n.下巴',3,3],
 ['occupy','/ˈɑkjəˌpaɪ/','vt.占据;占用',3,3],['stare','/ˈster/','vi.盯着看;凝视 n.凝视',3,3],['ceiling','/ˈsilɪŋ/','n.天花板;上限',3,3],['distract','/dɪˈstrækt/','vt.分散(注意力);使分心',3,3],
 ['perceive','/pərˈsiv/','vt.察觉;看待;理解',3,3],['distinguish','/dɪˈstɪŋɡwɪʃ/','vi. & vi.区分;辨别',3,3],['anxiety','/æŋˈzaɪəti/','n.焦虑;担心;害怕',3,3],['chest','/ˈtʃest/','n.胸部;胸膛',3,3],
 ['embarrassed','/ɪmˈberəst/','adj.难堪的:尴尬的',3,3],['ashamed','/əˈʃeɪmd/','adj.羞愧;惭愧',3,3],['merely','/ˈmɪrli/','adv.只是:仅仅;只不过',3,3],['call on','','(短暂地)访问;要求(某人讲话等) 正式邀请',3,3],
-['bother','/ˈbɑðər/','vi. & vi.费心:麻烦;…心 n.麻烦;不便',3,3],['weep','/ˈwip/','vi. & vt.哭泣;流泪',3,3],['at work','','有某种影响:在T作',3,3],['conflict','/ˈkɑnflɪkt/','n. & vi.矛盾;冲突',3,3],
+['bother','/ˈbɑðər/','vt. & vi.费心;麻烦;烦心 n.麻烦;不便',3,3],['weep','/ˈwip/','vi. & vt.哭泣;流泪',3,3],['at work','','有某种影响;在工作',3,3],['conflict','/ˈkɑnflɪkt/','n. & vi.矛盾;冲突',3,3],
 ['inquire','/ˌɪnˈkwaɪr/','vi. & vt.询问;打听',3,3],['ultimately','/ˈəltəmətli/','adv.最终;最后',3,3],['adjust','/əˈdʒəst/','vt.调整;调节 vi. & vt.适应;(使)习惯',3,3],['intervene','/ˌɪntərˈvin/','vi.干预;介入',3,3],
-['react','/riˈækt/','vi.(对…起反应;回应 (对食物等)有不良反应',3,3],['component','/kəmˈpoʊnənt/','n.组成部分;零件',3,3],['tone','/ˈtoʊn/','n.语气;腔调;口吻',3,3],['Brazil','/brəˈzɪl/','巴西(国家名)',3,3],
+['react','/riˈækt/','vi.(对…)起反应;回应;(对食物等)有不良反应',3,3],['component','/kəmˈpoʊnənt/','n.组成部分;零件',3,3],['tone','/ˈtoʊn/','n.语气;腔调;口吻',3,3],['Brazil','/brəˈzɪl/','巴西(国家名)',3,3],
 ['Bulgaria','/bəlɡˈeriə/','保加利亚(国家名)',3,3],['Albania','/ælˈbeɪniə/','阿尔巴尼亚(国家名)',3,3],['hybrid','/ˈhaɪbrəd/','n.杂交植(动)物;合成物 混合动力车',3,4],['devote','/dɪˈvoʊt/','vt.把…-.献(给);把…专用于 专心于',3,4],
-['devote to','','把…用于;:献身;致力;专心',3,4],['shortage','/ˈʃɔrtədʒ/','n.不足;缺少;短缺',3,4],['tackle','/ˈtækəl/','vt.解决(难题);应付(局面);处理',3,4],['crisis','/ˈkraɪsəs/','n.危机 危急关头',3,4],
+['devote to','','把…用于;献身;致力;专心',3,4],['shortage','/ˈʃɔrtədʒ/','n.不足;缺少;短缺',3,4],['tackle','/ˈtækəl/','vt.解决(难题);应付(局面);处理',3,4],['crisis','/ˈkraɪsəs/','n.危机;危急关头',3,4],
 ['boost','/ˈbust/','vt.使增长;使兴旺 n.增长;提高;激励',3,4],['yield','/ˈjild/','n.产量;产出 vt.出产(作物);产生(收益、效益等) vi.屈服;让步',3,4],['convince','/kənˈvɪns/','vt.使相信;使确信;说服',3,4],['characteristic','/ˌkerəktəˈrɪstɪk/','n.特征;特点;品质 adj.典型的;独特的',3,4],
 ['attain','/əˈteɪn/','vt.(通常经过努力)获得;得到',3,4],['conventional','/kənˈvenʃənəl/','adj.传统的:习惯的',3,4],['pollinate','/ˈpɑləˌneɪt/','vt.授粉;传粉',3,4],['assumption','/əˈsəmpʃən/','n.假定;设定;(责任的) 承担;(权利的)获得',3,4],
 ['intense','/ˌɪnˈtens/','adj.热切的;十分强烈的;激烈的',3,4],['overcome','/ˈoʊvərˌkəm/','vt.克服;解决;战胜',3,4],['expand','/ɪkˈspænd/','vt. & vi.扩大;增加 vt.扩展;发展(业务)',3,4],['output','/ˈaʊtˌpʊt/','n.产量;输出;输出量 vt.输出',3,4],
@@ -884,8 +899,8 @@ const PEP_WORDS=[
 ['nutrition','/nuˈtrɪʃən/','n.营养;滋养',3,4],['alleviate','/əˈliviˌeɪt/','vt.减轻;缓解',3,4],['poverty','/ˈpɑvərti/','n.贫穷;贫困',3,4],['organic','/ɔrɡˈænɪk/','adj.有机的;不使用化肥的 有机物的',3,4],
 ['pesticide','/ˈpestəˌsaɪd/','n.杀虫剂:除害药物',3,4],['widespread','/ˌwaɪdsprˈed/','adj.分布广的;普遍的 广泛的',3,4],['bacterium','/bækˈtɪriəm/','n.细菌',3,4],['in turn','','相应地;转而;依次;轮流',3,4],
 ['digest','/ˈdaɪdʒest/','vt. & vi.消化 vt.领会;领悟',3,4],['essential','/eˈsenʃəl/','adj.完全必要的;极其重要的',3,4],['mineral','/ˈmɪnərəl/','n.矿物;矿物质',3,4],['alternative','/ɔlˈtərnətɪv/','n.可供选择的事物 adj.可供替代的;非传统的',3,4],
-['grocery','/ɡˈroʊsəri/','n.食品杂货店:[pl]食品杂货',3,4],['instance','/ˈɪnstəns/','n.例子;实例;事例',3,4],['for instance','','例如;比如',3,4],['depth','/ˈdepθ/','n.向下(或向里)的距离;深(度)',3,4],
-['root','/ˈrut/','n.根;根茎;根部;根源',3,4],['entirely','/ɪnˈtaɪərli/','adv.全部地;完整地;完全地',3,4],['aspect','/ˈæˌspekt/','n.方面;层面',3,4],['Vietnam','/viˌetˈnɑm/','越南(国家名]',3,4],
+['grocery','/ɡˈroʊsəri/','n.食品杂货店;[pl.]食品杂货',3,4],['instance','/ˈɪnstəns/','n.例子;实例;事例',3,4],['for instance','','例如;比如',3,4],['depth','/ˈdepθ/','n.向下(或向里)的距离;深(度)',3,4],
+['root','/ˈrut/','n.根;根茎;根部;根源',3,4],['entirely','/ɪnˈtaɪərli/','adv.全部地;完整地;完全地',3,4],['aspect','/ˈæˌspekt/','n.方面;层面',3,4],['Vietnam','/viˌetˈnɑm/','越南(国家名)',3,4],
 ['LED','/ˈled/','发光二极管',3,4],['DDT','/ˌdidˌiˈti/','n.滴滴涕(旧时尤用作农业杀虫剂)',3,4],['cholera','/ˈkɑlərə/','n.霍乱',4,0],['severe','/səˈvɪr/','adj.极为恶劣的',4,0],
 ['diarrhoea','/ˌdaɪəˈriə/','n.腹泻',4,0],['dehydration','/ˌdihaɪˈdreɪʃən/','n.脱水',4,0],['frustrated','/ˈfrəˌstreɪtəd/','adj.懊悔的',4,0],['once and for all','','最终地；彻底地',4,0],
 ['contradictory','/ˌkɑntrəˈdɪktəri/','adj.相互矛盾的；对立的',4,0],['infection','/ˌɪnˈfekʃən/','n.感染',4,0],['infect','/ˌɪnˈfekt/','vt.使感染',4,0],['germ','/ˈdʒərm/','n.微生物',4,0],
@@ -971,8 +986,8 @@ const PEP_WORDS=[
 ['tight','/ˈtaɪt/','adj.牢固的adv.紧紧地',4,4],['tightly','/ˈtaɪtli/','adv.紧紧地',4,4],['motion','/ˈmoʊʃən/','n.运动',4,4],['justify','/ˈdʒəstəˌfaɪ/','vt.证明…的道理',4,4],
 ['welfare','/ˈwelˌfer/','n.幸福',4,4],['collapse','/kəˈlæps/','vi.（突然）倒塌，（因病等）昏倒',4,4],['manual','/ˈmænjuəl/','n.使用手册 adj.用手的',4,4],['foggy','/ˈfɑɡi/','adj.有雾的',4,4],
 ['membership','/ˈmembərˌʃɪp/','n.会员身份',4,4],['suburb','/ˈsəbərb/','n.郊区',4,4],['precise','/priˈsaɪs/','adj.准确的:精确的',5,0],['precisely','/priˈsaɪsli/','adv.准确地;精确地;的确如此',5,0],
-['Christianity','/ˌkrɪstʃiˈænɪti/','n.基督教',5,0],['realistic','/ˌriəˈlɪstɪk/','adj.现实的:通真的',5,0],['realism','/ˈriəlɪzm/','n.逼真;现实主义;务实作',5,0],['realist','/ˈriəlɪst/','n.现实主义画家(或作家等];现实主义者',5,0],
-['primitive','/ˈprɪmətɪv/','adj.发展水平低的:原始的:远古的 n.文艺复兴前的艺术家(或作品);原始派画家(或作品',5,0],['two-dimensional','/ˌtudɪˈmenʃənəl/','adj.二维的',5,0],['dimension','/dɪˈmenʃən/','n.维;规模;范畴',5,0],['in particular','','尤其:特别',5,0],
+['Christianity','/ˌkrɪstʃiˈænɪti/','n.基督教',5,0],['realistic','/ˌriəˈlɪstɪk/','adj.现实的;逼真的',5,0],['realism','/ˈriəlɪzm/','n.逼真;现实主义;务实作风',5,0],['realist','/ˈriəlɪst/','n.现实主义画家(或作家等);现实主义者',5,0],
+['primitive','/ˈprɪmətɪv/','adj.发展水平低的;原始的;远古的 n.文艺复兴前的艺术家(或作品);原始派画家(或作品)',5,0],['two-dimensional','/ˌtudɪˈmenʃənəl/','adj.二维的',5,0],['dimension','/dɪˈmenʃən/','n.维;规模;范畴',5,0],['in particular','','尤其:特别',5,0],
 ['set apart from','','使与众不同;使突出;使优于…',5,0],['humanistic','/ˌhjuməˈnɪstɪk/','adj.人文主义的',5,0],['humanity','/hjuˈmænɪti/','n.人性;人道;(统称)人类',5,0],['breakthrough','/ˈbreɪkˌθru/','n.重大进展;突破',5,0],
 ['influential','/ˌɪnfluˈenʃəl/','adj.有很大影响力的;有支配力的',5,0],['reputation','/ˌrepjəˈteɪʃən/','n.名誉:名声',5,0],['noble','/ˈnoʊbəl/','n.贵族成员:出身高贵的人 adj.崇高的:宏伟的:高贵的',5,0],['rank','/ˈræŋk/','n.地位;级别;行列 vt. & vi.把--分等级:使排成行',5,0],
 ['purchase','/ˈpərtʃəs/','vt.购买:采购 n.购买:购买的东西',5,0],['mythology','/məˈθɑləˌdʒi/','n.神话:虚幻的想法',5,0],['client','/ˈklaɪənt/','n.委托人:当事人:客户',5,0],['photography','/fəˈtɑɡrəfi/','n.照相术:摄影',5,0],
@@ -1003,14 +1018,14 @@ const PEP_WORDS=[
 ['drug','/ˈdrəɡ/','n.毒品;药物',5,1],['skip','/ˈskɪp/','v.跳过;不参加;悄悄溜走 vi.蹦蹦跳跳地走:跳绳 n.蹦跳',5,1],['dizzy','/ˈdɪzi/','adj.头晕目眩的',5,1],['flu','/ˈflu/','n.流感',5,1],
 ['stimulate','/ˈstɪmjəˌleɪt/','vt.激发;促进:刺激',5,1],['dentist','/ˈdenɪst/','n.牙科医生',5,1],['sugary','/ˈʃʊɡəri/','adj.含糖的;甜的',5,1],['nut','/ˈnət/','n.坚果',5,1],
 ['skateboard','/ˈskeɪtˌbɔrd/','n.滑板 vi.滑滑板',5,1],['dynamic','/daɪˈnæmɪk/','adj.充满活力的;精力充沛的;动态的',5,1],['virus','/ˈvaɪrəs/','n.病毒;病毒性疾病',5,1],['stress out','','焦虑不安;疲惫不堪',5,1],
-['worn out','','筋疲力尽的;疲惫的',5,1],['bowling','/ˈboʊlɪŋ/','n.保龄球运动',5,1],['comedy','/ˈkɑmədi/','n.喜剧;喜剧片;滑稽节目',5,1],['monthly','/ˈmənθli/','adv. & adj.每月:每月--次的 n.月刊',5,1],
+['worn out','','筋疲力尽的;疲惫的',5,1],['bowling','/ˈboʊlɪŋ/','n.保龄球运动',5,1],['comedy','/ˈkɑmədi/','n.喜剧;喜剧片;滑稽节目',5,1],['monthly','/ˈmənθli/','adv. & adj.每月的;每月一次的 n.月刊',5,1],
 ['enhance','/enˈhæns/','vt.提高;增强;增进',5,1],['refresh','/rɪˈfreʃ/','v.使恢复精力;使凉爽;刷新',5,1],['absorb','/əbˈzɔrb/','vt.吸引全部注意力;吸收',5,1],['Aristotle','/ˈerəˌstɑtəl/','亚里土多德(古希腊哲学家)',5,1],
 ['People\'s Liberation Army','','中国人民解放军',5,1],['Lao Zi','','老子(中国古代哲学家)',5,1],['graph','/ɡˈræf/','n.图;图表;曲线图',5,2],['emission','/ɪˈmɪʃən/','n.排放物;散发物;排放',5,2],
 ['melt','/ˈmelt/','vi. & vt.(使)融化;熔化;软化',5,2],['starve','/ˈstɑrv/','vi. & vt.(使)挨饿;饿死',5,2],['seal','/ˈsil/','n.海豹',5,2],['ecology','/iˈkɑlədʒi/','n.生态;生态学',5,2],
 ['release','/riˈlis/','vt. & n.排放;释放;发布',5,2],['methane','/ˈmeˌθeɪn/','n.甲烷;沼气',5,2],['carbon','/ˈkɑrbən/','n.碳',5,2],['dioxide','/daɪˈɑkˌsaɪd/','n.二氧化物',5,2],
 ['carbon dioxide','','二氧化碳',5,2],['habitable','/ˈhæbətəbəl/','adj.适合居住的',5,2],['sustain','/səˈsteɪn/','vt.维持;遺受;承受住',5,2],['sustainable','/səˈsteɪnəbəl/','adj.可持续的:合理利用的',5,2],
 ['fossil','/ˈfɑsəl/','n.化石',5,2],['fuel','/ˈfjuəl/','n.燃料;刺激性言行',5,2],['fossil fuel','','化石燃料(如煤或石油)',5,2],['comprehensive','/ˌkɑmpriˈhensɪv/','adj.全部的;所有的;详尽的',5,2],
-['worldwide','/ˌwərldwˈaɪd/','adv.遍及全球地 adj.世界各地的;影响全世界的',5,2],['trend','/ˈtrend/','n.趋势;趋向;动向',5,2],['frequently','/ˈfrikwəntli/','adv.频繁地;经常',5,2],['broadcast','/ˈbrɔdˌkæst/','vt. & vi.lbroadcast,broadcast/broadcasted)播送;广播;传播 n.广播节目;电视节目',5,2],
+['worldwide','/ˌwərldwˈaɪd/','adv.遍及全球地 adj.世界各地的;影响全世界的',5,2],['trend','/ˈtrend/','n.趋势;趋向;动向',5,2],['frequently','/ˈfrikwəntli/','adv.频繁地;经常',5,2],['broadcast','/ˈbrɔdˌkæst/','vt. & vi.(broadcast,broadcast/broadcasted)播送;广播;传播 n.广播节目;电视节目',5,2],
 ['policy','/ˈpɑləsi/','n.政策;方针;原则',5,2],['footprint','/ˈfʊtˌprɪnt/','n.足迹;(某物所占的)空间量;面积',5,2],['restrict','/riˈstrɪkt/','vt.限制;限定;束缚',5,2],['restriction','/riˈstrɪkʃən/','n.限制规定;限制法规;约束',5,2],
 ['seize','/ˈsiz/','vt.抓住;夺取;控制',5,2],['basin','/ˈbeɪsən/','n.流域;盆地;盆',5,2],['penguin','/ˈpeŋɡwən/','n.企鹅',5,2],['reform','/rəˈfɔrm/','v.吃& vt.改革;(使)改正;改造 n.改革;变革;改良',5,2],
 ['undergo','/ˌəndərɡˈoʊ/','v.经历;经受(变化、不快等)',5,2],['implement','/ˈɪmpləmənt/','v.使生效;贯彻;执行',5,2],['harmonious','/hɑrˈmoʊniəs/','adj.和谐的',5,2],['moderate','/ˈmɑdəˌreɪt/','adj.适度的;中等的;温和的 vi. & vt.缓和;使适中',5,2],
@@ -1042,7 +1057,7 @@ const PEP_WORDS=[
 ['Lionel Greenstreet','','莱昂内尔；格林斯特里特',5,3],['drama','/ˈdrɑmə/','n.戏;剧;戏剧艺术',5,4],['sorrow','/ˈsɑroʊ/','n.悲伤;悲痛;伤心事 vi.感到悲伤',5,4],['imagery','/ˈɪmədʒri/','n.形象的;意象',5,4],
 ['literary','/ˈlɪtəˌreri/','adj.文学的;爱好文学的;有文学作品特征的;虚拟的，虚构的',5,4],['rhyme','/ˈraɪm/','n.押韵词;押韵的短诗 vi. & vt.(使)押韵 adj.rhythmic有节奏的，有规律的',5,4],['rhythm','/ˈrɪðəm/','n.节奏;韵律;规律',5,4],['folk','/ˈfoʊk/','adj.民间的;民俗的;普通百姓的',5,4],
 ['mockingbird','/ˈmɑkɪŋˌbərd/','n.嘲鸫(美洲鸣禽,能模仿别种鸟的鸣叫)',5,4],['diamond','/ˈdaɪmənd/','n.钻石;金刚石;菱形',5,4],['brass','/ˈbræs/','n.黄铜;黄铜制品;铜管乐器',5,4],['billy goat','','n.公山羊',5,4],
-['bull','/ˈbʊl/','n.公牛',5,4],['recite','/rəˈsaɪt/','vt.背诵;吟诵;列举',5,4],['bee','/ˈbi/','n.蜜蜂:',5,4],['dewdrop','','n.露珠;水珠',5,4],
+['bull','/ˈbʊl/','n.公牛',5,4],['recite','/rəˈsaɪt/','vt.背诵;吟诵;列举',5,4],['bee','/ˈbi/','n.蜜蜂',5,4],['dewdrop','','n.露珠;水珠',5,4],
 ['dawn','/ˈdɔn/','n.黎明;开端;萌芽',5,4],['clover','/ˈkloʊvər/','n.三叶草',5,4],['butterfly','/ˈbətərˌflaɪ/','n.蝴蝶',5,4],['lawn','/ˈlɔn/','n.草坪，草地',5,4],
 ['amateur','/ˈæməˌtər/','n.业余爱好者 adj.业余的;业余爱好的',5,4],['cinquain','','n.五行诗',5,4],['be made up of','','组成(构成)',5,4],['mood','/ˈmud/','n.情绪;心情;语气. adj.moody情绪低落的，闷闷不乐地',5,4],
 ['tease','/ˈtiz/','vi. & vt.取笑(某人);揶揄;逗弄',5,4],['haiku','/ˈhaɪku/','n.俳句',5,4],['syllable','/ˈsɪləbəl/','n.音节',5,4],['format','/ˈfɔrˌmæt/','n.格式;总体安排;(出版物的)版式 vt.格式化',5,4],
@@ -1068,13 +1083,13 @@ const PEP_WORDS=[
 ['flour','/ˈflaʊər/','n.面粉;(谷物磨成的)粉',6,0],['venue','/ˈvenju/','n.活动场地(如音乐厅、会场等)',6,0],['salesman','/ˈseɪlzmən/','n.售货员;推销员',6,0],['alien','/ˈeɪliən/','n.外星人(生物);外国人 adj.陌生的:外星的:外国的',6,0],
 ['pros and cons','','事物的利与弊;支持与反对',6,0],['blurred','/ˈblərd/','adj.模糊不清的:难以区分的',6,0],['superior','/suˈpɪriər/','adj.更好的;占优势的;(在级别或重要性上)更高的',6,0],['take over','','占上风;取而代之;接管:接手',6,0],
 ['inaction','/ˌɪˈnækʃən/','n.无行动;不采取措施',6,0],['conflict with','','冲突或抵触',6,0],['labour','/ˈleɪbər/','n.劳动(者);体力劳动vi.奋斗;努力工作',6,0],['leather','/ˈleðər/','n.皮革;[pl]皮衣;皮外',6,0],
-['lever','/ˈlevər/','n.操纵杆;杠杆',6,0],['panel','/ˈpænəl/','n.控制板;仪表盘;专家咨询组',6,0],['inch','/ˈɪntʃ/','n.英寸(长度单位，等于2.54厘米):',6,0],['backwards','/ˈbækwərdz/','adv.向后;倒着;往回',6,0],
+['lever','/ˈlevər/','n.操纵杆;杠杆',6,0],['panel','/ˈpænəl/','n.控制板;仪表盘;专家咨询组',6,0],['inch','/ˈɪntʃ/','n.英寸(长度单位，等于2.54厘米)',6,0],['backwards','/ˈbækwərdz/','adv.向后;倒着;往回',6,0],
 ['grip','/ɡˈrɪp/','vt. & vi.紧握;抓紧(gripped,gripped)',6,0],['hazy','/ˈheɪzi/','adj.模糊的;朦胧的;困惑的',6,0],['niece','/ˈnis/','n.侄女:外甥女',6,0],['fetch','/ˈfetʃ/','vt.(去)拿过来;(去)请来',6,0],
 ['handkerchief','/ˈhæŋkərtʃif/','n.手帕;纸巾（-s/-ves）',6,0],['lamp','/ˈlæmp/','n.灯;台灯',6,0],['turn out','','关掉;熄灭;在场:使朝外;结果是',6,0],['pace','/ˈpeɪs/','n.速度;步伐:节奏 vt. & vi.确定速度;调整节奏',6,0],
 ['fall away','','(逐渐)减少;消失',6,0],['division','/dɪˈvɪʒən/','n.分开;分隔;差异:除(法)',6,0],['puff','/ˈpəf/','n.(烟、气等的)一缕;少量;喘息',6,0],['urge','/ˈərdʒ/','n.强烈的欲望;冲动v.催促;力劝;大力推荐',6,0],
 ['have an urge to','','有强烈的欲望做某事',6,0],['random','/ˈrændəm/','adj.随机的;不可思议的',6,0],['maximum','/ˈmæksəməm/','adj.最大极限的 n.最大量;最大限度',6,0],['explode','/ɪkˈsploʊd/','vi. & vt.爆炸;爆破',6,0],
 ['jolt','/ˈdʒoʊlt/','n.震动;摇晃;颠簸vt.& vi.(使)震动:摇晃',6,0],['flip','/ˈflɪp/','vt. & vi.(使)快速翻转;(用手指)轻抛',6,0],['stun','/ˈstən/','vt.使震惊，使昏迷(stunned-stunned)',6,0],['mud','/ˈməd/','n.泥;泥浆（muddy adj.泥泞的）',6,0],
-['overstatement','/ˈoʊvərˌsteɪtmənt/','n.夸大:奇张',6,0],['Isaac Asimov','','艾萨克；阿西黄夫',6,0],['Larry Delmont','','拉尘；贝尔象特',6,0],['Claire','/ˈkler/','克莱尔',6,0],
+['overstatement','/ˈoʊvərˌsteɪtmənt/','n.夸大;夸张',6,0],['Isaac Asimov','','艾萨克·阿西莫夫',6,0],['Larry Belmont','','拉里·贝尔蒙特',6,0],['Claire','/ˈkler/','克莱尔',6,0],
 ['Gladys Claffern','','格拉迪丝；克拉芬.',6,0],['Braille','/ˈbreɪl/','布拉耶盲文(凸点符号)',6,0],['The Three-Body Problem','','《三体》',6,0],['Hugo Award','','雨果奖',6,0],
 ['iconic','/ˌaɪˈkɑnɪk/','adj.符号的;图标的',6,1],['foundation','/faʊnˈdeɪʃən/','n.创建;基础;地基',6,1],['political','/pəˈlɪtəkəl/','adj.政治的',6,1],['didgeridoo','','n.迪吉里杜管',6,1],
 ['located','/ˈloʊˌkeɪd/','adj.位于',6,1],['equator','/ɪˈkweɪtər/','n.赤道',6,1],['koala','/koʊˈɑlə/','n.考拉:树袋熊',6,1],['barbecue','/ˈbɑrbɪˌkju/','n.[abbr.BBQ]户外烧烤;烤架',6,1],
@@ -1092,7 +1107,7 @@ const PEP_WORDS=[
 ['frequency','/ˈfrikwənsi/','n.发生率;重复率;(声波或电磁波振动的)频率',6,1],['violent','/ˈvaɪələnt/','adj.暴力的;猛烈的',6,1],['violence','/ˈvaɪələns/','n.暴力;暴行',6,1],['nest','/ˈnest/','n.巢穴;鸟窝;秘密窝点',6,1],
 ['mammal','/ˈmæməl/','n.哺乳动物',6,1],['biology','/baɪˈɑlədʒi/','n.生理;生物学',6,1],['hatch','/ˈhætʃ/','vi.孵出;破壳vt.使孵出;策划;(尤指)密谋',6,1],['capacity','/kəˈpæsəti/','n.能力;容量',6,1],
 ['a handful of','','少数人(或物);一把(的量)',6,1],['fence','/ˈfens/','n.栅栏:围栏',6,1],['prison','/ˈprɪzən/','n.监狱;监禁',6,1],['grand','/ɡˈrænd/','adj.大;宏大的',6,1],
-['Aborigine','/ˌæbəˈrɪdʒəni/','澳大利亚土著',6,1],['Sydney','/ˈsɪdni/','悉尼(澳大利亚城市)',6,1],['Bondi Beach','','邦迪海滩',6,1],['Chiang Mai','','清迈l泰国城市)',6,1],
+['Aborigine','/ˌæbəˈrɪdʒəni/','澳大利亚土著',6,1],['Sydney','/ˈsɪdni/','悉尼(澳大利亚城市)',6,1],['Bondi Beach','','邦迪海滩',6,1],['Chiang Mai','','清迈(泰国城市)',6,1],
 ['the Bay of Islands','','岛屿湾',6,1],['the haka','','哈卡舞(传统毛利伴歌战舞)',6,1],['Edmonds','/ˈedməndz/','埃德蒙兹',6,1],['Felicity','/fɪˈlɪsəti/','费利西蒂',6,1],
 ['Tasmanian devil','','塔斯马尼亚恶魔;袋獾',6,1],['Tasmania','/ˌtæzˈmeɪniə/','塔斯马尼亚(澳大利亚州名)',6,1],['duck-billed platypus','','鸭嘴兽',6,1],['tale','/ˈteɪl/','n.故事;叙述',6,2],
 ['merchant','/ˈmərtʃənt/','n.商人;批发商adj.海上货运的',6,2],['set sail','','起航;开航',6,2],['extend','/ɪkˈstend/','vt.扩展;使伸长;延长',6,2],['negotiate','/nəɡˈoʊʃiˌeɪt/','vt.商定;达成(协议) vi.谈判:磋商;协商',6,2],
@@ -1104,14 +1119,14 @@ const PEP_WORDS=[
 ['tax','/ˈtæks/','vt.-对---征税;使纳税n.税;税款',6,2],['manned','/ˈmænd/','adj.有人控制的;需人操纵的',6,2],['submersible','/səbˈmərsɪbəl/','n.潜水器;可潜船',6,2],['underwater','/ˈəndərˌwɔtər/','adv.在水下adj.水下的',6,2],
 ['coral','/ˈkɔrəl/','n.珊瑚',6,2],['migration','/maɪɡˈreɪʃən/','n.迁移;迁徙;移居',6,2],['directory','/daɪˈrektəri/','n.名录;电话号码簿;(计算机文件或程序的目录)',6,2],['meanwhile','/ˈminˌwaɪl/','adv.与此同时;(比较两方面)对比之下',6,2],
 ['exploit','/ˈekˌsplɔɪt/','vt.以；开发;利用;剥削',6,2],['gallon','/ɡˈælən/','n.加仑(容积单位，1英制加仑约等于4.5升)',6,2],['murder','/ˈmərdər/','vt.谋杀;凶杀;毁坏n.谋杀;凶杀',6,2],['mercy','/ˈmərsi/','n.仁慈;宽恕;恩惠',6,2],
-['possession','/pəˈzeʃən/','n.(usuallypl]个人财产;拥有:控制',6,2],['opponent','/əˈpoʊnənt/','n.反对者;对手;竞争者',6,2],['log','/ˈlɔɡ/','vt…载入正式记录;记录n.正式记录;日志;原木',6,2],['marine','/məˈrin/','adj.海的;海产的;海生的',6,2],
+['possession','/pəˈzeʃən/','n.(usually pl.)个人财产;拥有;控制',6,2],['opponent','/əˈpoʊnənt/','n.反对者;对手;竞争者',6,2],['log','/ˈlɔɡ/','vt.把…载入正式记录;记录 n.正式记录;日志;原木',6,2],['marine','/məˈrin/','adj.海的;海产的;海生的',6,2],
 ['arrest','/əˈrest/','n.逮捕;拘留;中止vt.逮捕;拘留;阻止',6,2],['Marco Polo','','马可●波罗',6,2],['Columbus','/kəˈləmbəs/','哥伦布',6,2],['Ceylon','/siˈlɑn/','锡兰(斯里兰卡的旧称)',6,2],
-['Churchill','/ˈtʃərtʃhɪl/','丘吉尔',6,2],['Ferdinand Magellan','','费迪南德●麦哲伦',6,2],['Zac Sunderland','','扎克；桑德兰',6,2],['Robin Lee Graham','','罗宾；李；格雷厄姆',6,2],
-['parcel','/ˈpɑrsəl/','n.包裹vt.裹好:打包',6,3],['jam','/ˈdʒæm/','n.果酱:堵塞',6,3],['mail','/ˈmeɪl/','n.邮件;信件;邮政vt.邮寄:发电邮给',6,3],['secondary','/ˈsekənˌderi/','adj.中学的;次要的',6,3],
+['Churchill','/ˈtʃərtʃhɪl/','丘吉尔',6,2],['Ferdinand Magellan','','费迪南德·麦哲伦',6,2],['Zac Sunderland','','扎克·桑德兰',6,2],['Robin Lee Graham','','罗宾·李·格雷厄姆',6,2],
+['parcel','/ˈpɑrsəl/','n.包裹 vt.裹好;打包',6,3],['jam','/ˈdʒæm/','n.果酱;堵塞',6,3],['mail','/ˈmeɪl/','n.邮件;信件;邮政 vt.邮寄;发电邮给',6,3],['secondary','/ˈsekənˌderi/','adj.中学的;次要的',6,3],
 ['clay','/ˈkleɪ/','n.黏土;陶土',6,3],['dust','/ˈdəst/','n.沙土;灰尘vi.& vt.擦灰',6,3],['dusty','/ˈdəsti/','adj.布满灰尘的',6,3],['weed','/ˈwid/','n.杂草;野草vt.& vi.除杂草',6,3],
 ['chorus','/ˈkɔrəs/','n.合唱曲;合唱团vt.合唱;齐声说',6,3],['a chorus of','','齐声;异口同声',6,3],['cotton','/ˈkɑtən/','n.棉布;棉花',6,3],['uniform','/ˈjunəˌfɔrm/','n.校服;制服adj.一致的:统--的',6,3],
 ['not to mention','','更不用说;且不说',6,3],['tablet','/ˈtæblət/','n.平板电脑:便笺本;药片',6,3],['rubber','/ˈrəbər/','n.橡皮;黑板擦;橡胶',6,3],['washroom','/ˈwɑˌʃrum/','n.洗手间;厕所',6,3],
-['rigid','/ˈrɪdʒəd/','adj.死板的;固执的',6,3],['bubble','/ˈbəbəl/','vi.起泡;沸腾',6,3],['tube','/tˈjub/','n.管子:管状物!',6,3],['circus','/ˈsərkəs/','n.马戏团',6,3],
+['rigid','/ˈrɪdʒəd/','adj.死板的;固执的',6,3],['bubble','/ˈbəbəl/','vi.起泡;沸腾',6,3],['tube','/tˈjub/','n.管子;管状物',6,3],['circus','/ˈsərkəs/','n.马戏团',6,3],
 ['chemist','/ˈkemɪst/','n.化学家;药剂师;药房',6,3],['shade','/ˈʃeɪd/','vt.给…遮挡(光线);加灯罩;把--涂暗n.阴凉处;灯罩;阴影部分',6,3],['jaw','/ˈdʒɔ/','n.頜;下巴',6,3],['wrinkle','/ˈrɪŋkəl/','vt. & vi.(使脸上)起皱纹;皱起n.皱纹',6,3],
 ['forehead','/ˈfɔrhed/','n.额;前额',6,3],['hut','/ˈhət/','n.简陋的小房子(或棚、合)',6,3],['housing','/ˈhaʊzɪŋ/','n.住房;住宅',6,3],['platform','/ˈplætˌfɔrm/','n.平台;站台;舞台',6,3],
 ['fireplace','/ˈfaɪərˌpleɪs/','n.壁炉',6,3],['saucer','/ˈsɔsər/','n.茶碟;杯托',6,3],['kettle','/ˈketəl/','n.(烧水用的)壶;水壶',6,3],['pan','/ˈpæn/','n.平底锅;烤盘',6,3],
@@ -1127,7 +1142,7 @@ const PEP_WORDS=[
 ['aptitude','/ˈæptəˌtud/','n.天资;天赋',6,4],['head start','','起步前的优势',6,4],['scenario','/sɪˈnerioʊ/','n.设想;方案;预测',6,4],['lawyer','/ˈlɔɪər/','n.律师',6,4],
 ['assemble','/əˈsembəl/','vt.组装;装配vi.& vt.收集;聚集;集合',6,4],['drawer','/ˈdrɔr/','n.抽屉',6,4],['a chest of drawers','','抽屉柜',6,4],['breast','/ˈbrest/','n.乳房;胸部',6,4],
 ['hydrogen','/ˈhaɪdrədʒən/','n.氢;氢气',6,4],['radium','/ˈreɪdiəm/','n.镭',6,4],['wrist','/ˈrɪst/','n.手腕;腕关节',6,4],['bridegroom','/ˈbraɪdɡˌrum/','n.新郎',6,4],
-['geometry','/dʒiˈɑmətri/','n.几何学;几何图形',6,4],['debt','/ˈdet/','n.债务;欠款',6,4],['categorise','/ˈkætəɡəˌraɪz/','vt…分类(加以归类)',6,4],['profile','/ˈproʊˌfaɪl/','n.简介;概述;侧面轮廓vt.扼要介绍:概述;写简介',6,4],
+['geometry','/dʒiˈɑmətri/','n.几何学;几何图形',6,4],['debt','/ˈdet/','n.债务;欠款',6,4],['categorise','/ˈkætəɡəˌraɪz/','vt.把…分类(加以归类)',6,4],['profile','/ˈproʊˌfaɪl/','n.简介;概述;侧面轮廓 vt.扼要介绍;概述;写简介',6,4],
 ['participant','/pɑrˈtɪsəpənt/','n.参与者;参加者',6,4],['code','/ˈkoʊd/','n.代码;密码vt.编码;把…译成密码',6,4],['orient','/ˈɔriˌent/','vt.使适应;使面对:确定方向',6,4],['detective','/dɪˈtektɪv/','n.侦探;警探',6,4],
 ['graphic','/ɡˈræfɪk/','n.图表;图形;图画adj.绘画的;图案的',6,4],['estate','/ɪˈsteɪt/','n.庄园;住宅区:工业区',6,4],['estate agent','','房地产经纪人',6,4],['accountant','/əˈkaʊntənt/','n.会计:会计师',6,4],
 ['spy','/ˈspaɪ/','n.密探;间谍vi.从事间谋活动vt,突然看见;发现',6,4],['justice','/ˈdʒəstəs/','n.公平;公正;合理',6,4],['accuse','/əˈkjuz/','vt.控告;控诉;谴责',6,4],['come to a conclusion','','得出结论',6,4],
