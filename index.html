@@ -325,7 +325,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <a data-route="data"><span class="icslot" data-ic="sliders"></span>数据与设置</a>
     </nav>
   </div>
-  <div class="footer-note">v0.26 原型 · 数据保存在本机浏览器</div>
+  <div class="footer-note">v0.27 原型 · 数据保存在本机浏览器</div>
 </aside>
 
 <main>
@@ -379,7 +379,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
       <input class="grow" id="addWordInput" placeholder="输入英文单词，如 harvest（回车添加）">
       <button class="btn pri" id="btnAddWord">添加</button>
     </div>
-    <div class="small muted mt8" id="addWordHint">词库：人教版（2019）高中英语全 7 册词表，共 2526 词。配置 AI 后可联网查询任意单词。</div>
+    <div class="small muted mt8" id="addWordHint">词库：人教版（2019）高中英语全 7 册词表，共 2396 词（已剔除人名地名等专有名词）。配置 AI 后可联网查询任意单词。</div>
   </div>
   <div class="row mt8">
     <button class="btn pri" id="btnVocabWrite"><span data-ic="pencil"></span> 默写（随机生词）</button>
@@ -510,7 +510,7 @@ button:focus-visible,a:focus-visible,[tabindex]:focus-visible,.chip:focus-visibl
   </div>
   <div class="card">
     <b>ℹ️ 关于本原型</b>
-    <p class="small muted">v0.26 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2526 词，含美式音标；词典级音频、双 Agent 服务将在后续阶段接入。本版加固：本地存储只留用户数据（词表不再重复落盘）、导入备份有结构校验、AI 调用可超时/重试/取消、支持离线缓存（装到桌面后断网可用）、密钥可经 proxy/ 里的自建代理下发。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
+    <p class="small muted">v0.27 原型：词库已内置人教版（2019）高中英语全 7 册（必修 3 册 + 选择性必修 4 册）共 36 单元 2396 词，含美式音标（已剔除人名、地名、作品名等专有名词 129 条）；词典级音频、双 Agent 服务将在后续阶段接入。本版加固：本地存储只留用户数据（词表不再重复落盘）、导入备份有结构校验、AI 调用可超时/重试/取消、支持离线缓存（装到桌面后断网可用）、密钥可经 proxy/ 里的自建代理下发。手机使用：打开本文件夹里的 index.html，或直接访问在线版 https://ljjjc123.github.io/english-study/ 。</p>
   </div>
 </section>
 
@@ -550,7 +550,7 @@ const PEP_WORDS=[
 ['expert','/ˈekspərt/','n.专家；行家 adj.熟练的；内行的；专家的',0,1],['youth','/ˈjuθ/','n.青年时期；青春',0,1],['behaviour','/bɪˈheɪvjər/','n.行为；举止',0,1],['generation','/ˌdʒenəˈreɪʃən/','n.一代（人）',0,1],
 ['attract','/əˈtrækt/','vt.吸引；引起……的注意（或兴趣）',0,1],['be attracted to','','喜爱',0,1],['focus','/ˈfoʊkəs/','vi. & vt.集中（精力、注意力等）；（使）调节焦距 n.中心；重点；焦点',0,1],['focus on','','集中；特别关注',0,1],
 ['addicted','/əˈdɪktɪd/','adj.有瘾的；上瘾的；入迷的',0,1],['addict','/ˈæˌdɪkt/','n.对……入迷的人；吸毒成瘾的人',0,1],['addicted to','','对……很入迷',0,1],['adult','/ˈædəlt/','n.成年人 adj.成年的；成熟的',0,1],
-['Chicago','/ʃəˈkɑɡˌoʊ/','芝加哥（美国城市）',0,1],['Seoul','/ˈsoʊl/','首尔（韩国首都）',0,1],['castle','/ˈkæsəl/','n.城堡；堡垒',0,2],['apply','/əˈplaɪ/','vi. & vt.申请；请求 vt.应用；涂（油漆、乳剂）',0,2],
+['castle','/ˈkæsəl/','n.城堡；堡垒',0,2],['apply','/əˈplaɪ/','vi. & vt.申请；请求 vt.应用；涂（油漆、乳剂）',0,2],
 ['apply for','','申请',0,2],['visa','/ˈvizə/','n.签证',0,2],['rent','/ˈrent/','vt.租用；出租 vi.租用；租金为 n.租金',0,2],['pack','/ˈpæk/','vi. & vt.收拾（行李） vt.包装 n.（商品的）纸包；纸袋；大包',0,2],
 ['amazing','/əˈmeɪzɪŋ/','adj.令人惊奇的；令人惊喜的',0,2],['amazed','/əˈmeɪzd/','adj.惊奇的；惊喜的',0,2],['arrangement','/əˈreɪndʒmənt/','n.安排；筹备',0,2],['extremely','/ekˈstrimli/','adv.极其；非常',0,2],
 ['source','/ˈsɔrs/','n.来源；出处',0,2],['narrow','/ˈnæroʊ/','adj.狭窄的 vi. & vt.（使）变窄',0,2],['flat','/ˈflæt/','adj.平坦的；扁平的 n.公寓；单元房',0,2],['powerful','/ˈpaʊərfəl/','adj.强有力的；有权势的；有影响力的',0,2],
@@ -625,10 +625,10 @@ const PEP_WORDS=[
 ['throughout','/θruˈaʊt/','prep.各处；遍及；自始至终',1,0],['quality','/ˈkwɑləti/','n.质量；品质；素质；特征 adj.优质的；高质量的',1,0],['all over the world','','在世界各地',1,0],['tradition','/trəˈdɪʃən/','n.传统；传统的信仰或风俗',1,0],
 ['further','/ˈfərðər/','adv.更远；进一步',1,0],['historic','/hɪˈstɔrɪk/','adj.历史上著名（或重要）的；有史时期的',1,0],['opinion','/əˈpɪnjən/','n.意见；想法；看法',1,0],['quote','/ˈkwoʊt/','vt.引用',1,0],
 ['paraphrase','/ˈperəˌfreɪz/','n./vi.&vt.（用更容易理解的文字）解释',1,0],['comparison','/kəmˈperəsən/','n.比较；相比',1,0],['contrast','/ˈkɑntræst/','n.对比；对照 vt.对比；对照',1,0],['identify','/aɪˈdentəˌfaɪ/','vt.确认；认出；找到',1,0],
-['forever','/fəˈrevər/','adv.永远；长久地',1,0],['Aswan Dam','','阿斯旺大坝',1,0],['the Nile','','尼罗河',1,0],['Egypt','/ˈidʒəpt/','埃及',1,0],
-['Egyptian','/ɪˈdʒɪpʃən/','adj.埃及的',1,0],['UNESCO','/juˈneˌskoʊ/','联合国教科文组织',1,0],['Cairo','/ˈkaɪroʊ/','开罗',1,0],['Tanzania','/ˌtænˈzeɪnjə/','坦桑尼亚',1,0],
-['the Kremlin','','克里姆林（宫）',1,0],['Moscow','/ˈmɑˌskoʊ/','莫斯科',1,0],['Saint Basil\'s Cathedral','','圣瓦希里大教堂',1,0],['the Forbidden City','','紫禁城',1,0],
-['Los Angeles','','洛杉矶',1,0],['poster','/ˈpoʊstər/','n.海报',1,1],['illegal','/ˌɪˈliɡəl/','adj.不合法的；非法的',1,1],['illegally','/ˌɪˈliɡəli/','adv.不合法地；非法的',1,1],
+['forever','/fəˈrevər/','adv.永远；长久地',1,0],['the Nile','','尼罗河',1,0],
+['Egyptian','/ɪˈdʒɪpʃən/','adj.埃及的',1,0],
+['the Kremlin','','克里姆林（宫）',1,0],['the Forbidden City','','紫禁城',1,0],
+['poster','/ˈpoʊstər/','n.海报',1,1],['illegal','/ˌɪˈliɡəl/','adj.不合法的；非法的',1,1],['illegally','/ˌɪˈliɡəli/','adv.不合法地；非法的',1,1],
 ['hunt','/ˈhənt/','vt. & vi.打猎；搜索；追捕',1,1],['hunter','/ˈhəntər/','n.猎人',1,1],['immediately','/ˌɪˈmidˌiətli/','adv.立刻',1,1],['species','/ˈspiʃiz/','n.物种',1,1],
 ['shark','/ˈʃɑrk/','n.鲨鱼',1,1],['fin','/ˈfɪn/','n.（鱼的）鳍',1,1],['on earth','','究竟；到底',1,1],['die out','','灭亡；逐渐消失',1,1],
 ['alarming','/əˈlɑrmɪŋ/','adj.惊人的；使人惊恐的',1,1],['alarm','/əˈlɑrm/','vt.使惊恐；使害怕；使担心 n.恐慌；警报；警报器',1,1],['rate','/ˈreɪt/','n.速度；（比）率 vt.划分等级',1,1],['rating','/ˈreɪtɪŋ/','n.等级；级别',1,1],
@@ -649,7 +649,7 @@ const PEP_WORDS=[
 ['neighbourhood','/ˈneɪbərˌhʊd/','n.临近的地方；街区',1,1],['binoculars','/bəˈnɑkjələrz/','n.双筒望远镜',1,1],['bird field guide','','鸟类图鉴',1,1],['search for','','搜索；查找',1,1],
 ['dolphin','/ˈdɑlfən/','n.海豚',1,1],['Yangtze River dolphin','','白鳍豚',1,1],['koala','/koʊˈɑlə/','n.树袋熊；考拉',1,1],['stir','/ˈstər/','vt.激发；搅动',1,1],
 ['stir up','','激起',1,1],['emotion','/ˈiˌmoʊʃən/','n.感情；情感；情绪',1,1],['skin','/ˈskɪn/','n.皮；皮肤',1,1],['unusual','/əˈnjuˌʒuəl/','adj.特别的；不寻常的',1,1],
-['Tibetan','/tɪˈbetən/','adj.西藏的；藏语的；藏族（人）的 n.西藏人；藏族人；藏语',1,1],['Tibet','/təˈbet/','n.西藏',1,1],['blog','/ˈblɔɡ/','n.博客 vi.写博客',1,2],['blog post','','博文；博客帖子',1,2],
+['Tibetan','/tɪˈbetən/','adj.西藏的；藏语的；藏族（人）的 n.西藏人；藏族人；藏语',1,1],['blog','/ˈblɔɡ/','n.博客 vi.写博客',1,2],['blog post','','博文；博客帖子',1,2],
 ['blogger','/ˈblɔɡər/','n.博客作者；博主',1,2],['engine','/ˈendʒən/','n.引擎；发动机；火车头',1,2],['search engine','','(互联网上的)搜说引擎',1,2],['chat','/ˈtʃæt/','vi.聊天；闲聊',1,2],
 ['stream','/ˈstrim/','vt.流播（不用下载直接在互联网上播放音视频）；流出 vi.流动 n.小河；溪流',1,2],['identity','/aɪˈdentɪˌti/','n.身份；个性',1,2],['identity card','','身份证',1,2],['convenient','/kənˈvinjənt/','adj.方便的；近便的',1,2],
 ['cash','/ˈkæʃ/','n.现金；金钱',1,2],['update','/ˈəpˌdeɪt/','vt.更新；向……提供最新信息 n.更新；最新消息',1,2],['database','/ˈdætəˌbeɪs/','n.数据库',1,2],['software','/ˈsɔfˌwer/','n.软件',1,2],
@@ -664,7 +664,7 @@ const PEP_WORDS=[
 ['troll','/ˈtroʊl/','n.发挑衅帖子的人；恶意挑衅的帖子',1,2],['cyberbully','','n.网霸 vi./vt.网络欺凌',1,2],['false','/ˈfɔls/','adj.假的；错误的',1,2],['particular','/ˌpɑˈtɪkjələr/','adj.特定的；特别的；讲究的',1,2],
 ['embarrassing','/ɪmˈberəsɪŋ/','adj.让人难堪（尴尬；害羞）的',1,2],['make fun of','','取笑；戏弄',1,2],['upset','/ˈəpˌset/','adj.心烦的；苦恼的；沮丧的 vt.使烦恼；使生气；搅乱',1,2],['guideline','/ɡˈaɪdˌlaɪn/','n.准则；指导原则',1,2],
 ['author','/ˈɔθər/','n.作者；作家',1,2],['tip','/ˈtɪp/','n.忠告；诀窍；实用的提示',1,2],['familiar','/fəˈmɪljər/','adj.熟悉；熟知',1,2],['keep in mind','','牢记',1,2],
-['define','/dɪˈfaɪn/','vt.给……下定义；界定；解释',1,2],['case','/ˈkeɪs/','n.盒；箱；情况；案件',1,2],['the World Wide Web','','万维网；环球信息网',1,2],['Confucius','/kənˈfjuʃəs/','n.孔子',1,3],
+['define','/dɪˈfaɪn/','vt.给……下定义；界定；解释',1,2],['case','/ˈkeɪs/','n.盒；箱；情况；案件',1,2],['the World Wide Web','','万维网；环球信息网',1,2],
 ['mansion','/ˈmænʃən/','n.公馆；宅地',1,3],['cemetery','/ˈseməˌteri/','n.墓地；公墓',1,3],['philosophy','/fəˈlɑsəfi/','n.哲学',1,3],['descendant','/dɪˈsendənt/','n.后裔；后代；子孙',1,3],
 ['individual','/ˌɪndəˈvɪdʒəwəl/','adj.单独的；个别的 n.个人',1,3],['heel','/ˈhil/','n.足跟；（脚、袜子、鞋等的）后跟',1,3],['Achilles\' heel','','（喻）（希腊神话）阿克琉斯的脚跟，致命的弱点',1,3],['kingdom','/ˈkɪŋdəm/','n.王国；领域',1,3],
 ['chief','/ˈtʃif/','adj.最重要的；最高级别的 n.(公司或机构的)首领；酋长',1,3],['puzzle','/ˈpəzəl/','n.谜；智力游戏；疑问 vt.迷惑；使困惑',1,3],['nearby','/ˌnɪrbˈaɪ/','adj.附近的；临近的 adv.在附近',1,3],['join to','','把……和……连接或联结起来',1,3],
@@ -720,9 +720,9 @@ const PEP_WORDS=[
 ['robe','/ˈroʊb/','n.袍服；礼袍',2,0],['eagle','/ˈiɡəl/','n.雕',2,0],['grace','/ɡˈreɪs/','n.优美；优雅；高雅',2,0],['absolutely','/ˌæbsəˈlutli/','adv.绝对的；完全的',2,0],
 ['moment','/ˈmoʊmənt/','n.片刻；瞬间',2,0],['tent','/ˈtent/','n.帐篷',2,0],['pot','/ˈpɑt/','n.罐；壶；锅',2,0],['brief','/ˈbrif/','adj.简洁的；简单的；短暂的',2,0],
 ['branch','/ˈbræntʃ/','n.树枝；分支；支流',2,0],['wedding','/ˈwedɪŋ/','n.婚礼；结婚庆典',2,0],['clap','/ˈklæp/','vt.鼓掌；拍手；击掌n.鼓掌；拍手；掌声',2,0],['respect','/riˈspekt/','n. & vt.尊敬；尊重',2,0],
-['horrible','/ˈhɔrəbəl/','adj.令人震惊的；恐怖的；极坏的',2,0],['Coming-of-Age Day','','成人节',2,0],['Rio','/ˈrioʊ/','（全称RiodeJaneiro）里约热内卢（巴西首都）',2,0],['Carla','/ˈkɑrlɑ/','卡拉',2,0],
-['Halloween','/ˌhæləˈwin/','n.万圣节前夕',2,0],['Thanksgiving','/ˌθæŋksɡˈɪvɪŋ/','感恩节',2,0],['La Tomatina','','番茄大战',2,0],['Bunol','/ˈbjunoʊl/','布尼奥尔（西班牙小镇）',2,0],
-['the Naadam Festival','','那达慕大会',2,0],['Inner Mongolia Autonomous Region','','内蒙古自治区',2,0],['Mongolian','/mɑŋɡˈoʊliən/','adj.蒙古人的；蒙古的；蒙古语的n.蒙古语；蒙古人',2,0],['moral','/ˈmɔrəl/','adj.道德的；道义上的 n.品行；道德；寓意',2,1],
+['horrible','/ˈhɔrəbəl/','adj.令人震惊的；恐怖的；极坏的',2,0],['Coming-of-Age Day','','成人节',2,0],
+['Halloween','/ˌhæləˈwin/','n.万圣节前夕',2,0],['Thanksgiving','/ˌθæŋksɡˈɪvɪŋ/','感恩节',2,0],
+['the Naadam Festival','','那达慕大会',2,0],['Mongolian','/mɑŋɡˈoʊliən/','adj.蒙古人的；蒙古的；蒙古语的n.蒙古语；蒙古人',2,0],['moral','/ˈmɔrəl/','adj.道德的；道义上的 n.品行；道德；寓意',2,1],
 ['virtue','/ˈvərtʃu/','n.高尚的道德；没的；优秀品质',2,1],['dilemma','/dɪˈlemə/','n.进退两难的境地；困境',2,1],['moral dilemma','','道德困境',2,1],['faint','/ˈfeɪnt/','vi.混到；晕厥adj.不清楚的；微弱的',2,1],
 ['illustrate','/ˈɪləˌstreɪt/','vt.（举例）说明；阐明；给（书或文章）加插图',2,1],['precious','/ˈpreʃəs/','adj.珍稀的；宝贵的',2,1],['entrust','/enˈtrəst/','vt.委托；交付',2,1],['carry sb through sth','','帮助某人渡过难关',2,1],
 ['marriage','/ˈmerɪdʒ/','n.结婚；婚姻',2,1],['majority','/məˈdʒɔrəti/','n.大部分；大多数',2,1],['complain','/kəmˈpleɪn/','vi. & vt.抱怨；发牢骚',2,1],['tuition','/tjuˈɪʃən/','n.（小组）教学；讲课',2,1],
@@ -744,9 +744,9 @@ const PEP_WORDS=[
 ['tear','/ˈter/','n.眼泪；泪水',2,1],['in tears','','流着泪；含着泪',2,1],['harm','/ˈhɑrm/','n. & vt.伤害；损害',2,1],['despair','/dɪˈsper/','n.绝望vi.绝望，感到无望',2,1],
 ['in despair','','处于绝望中',2,1],['might','/ˈmaɪt/','n.力量；威力',2,1],['a great deal','','大量',2,1],['fable','/ˈfeɪbəl/','n.寓言；寓言故事',2,1],
 ['court','/ˈkɔrt/','n.（网球等的）球场；法院；法庭',2,1],['flexible','/ˈfleksəbəl/','adj.灵活的；可变通的',2,1],['income','/ˈɪnˌkəm/','n.收入；收益',2,1],['per','/ˈpər/','prep.每；每一',2,1],
-['therefore','/ˈðerˌfɔr/','adv.因此；所以',2,1],['tension','/ˈtenʃən/','n.紧张关系；紧张；焦虑',2,1],['Peking Union Medical College','','北京协和医学院',2,1],['the Wenhai Scholarship','','文海奖学金',2,1],
-['the OB-GYN department','','（全称DepartmentofObstetricsandGynecology）妇产科',2,1],['the People\'s Republic of China','','中华人民共和国',2,1],['the National People\'s Congress','','全国人民代表大会',2,1],['the North/South Pole','','北极/南极',2,1],
-['Henry Norman Bethune','','亨利·诺曼·白求恩',2,1],['diverse','/daɪˈvərs/','adj.不同的；多种多样的',2,2],['diversity','/daɪˈvərsɪti/','n.差异（性）；不同（点）；多样性',2,2],['fortune','/ˈfɔrtʃən/','n.机会；运气',2,2],
+['therefore','/ˈðerˌfɔr/','adv.因此；所以',2,1],['tension','/ˈtenʃən/','n.紧张关系；紧张；焦虑',2,1],['the Wenhai Scholarship','','文海奖学金',2,1],
+['the OB-GYN department','','（全称DepartmentofObstetricsandGynecology）妇产科',2,1],['the National People\'s Congress','','全国人民代表大会',2,1],['the North/South Pole','','北极/南极',2,1],
+['diverse','/daɪˈvərs/','adj.不同的；多种多样的',2,2],['diversity','/daɪˈvərsɪti/','n.差异（性）；不同（点）；多样性',2,2],['fortune','/ˈfɔrtʃən/','n.机会；运气',2,2],
 ['fortune cookie','','幸运曲奇',2,2],['gumbo','/ɡˈəmboʊ/','n.秋葵汤（用秋葵做的浓鸡汤或海鲜汤）',2,2],['nachos','/ˈnæˌtʃoʊz/','n.墨西哥玉米片',2,2],['chip','/ˈtʃɪp/','n.（英）炸土豆条；（美）炸薯片；芯片；碎片',2,2],
 ['cheese','/ˈtʃiz/','n.干酪；奶酪',2,2],['spicy','/ˈspaɪsi/','adj.加有香料的；辛辣的',2,2],['ethnic','/ˈeθnɪk/','adj.具有民族特色的；异国风味的；民族的；种族的',2,2],['admit','/ədˈmɪt/','vi. & vt.成人 vt.准许进入（或加入）',2,2],
 ['definitely','/ˈdefənətli/','adv.肯定；确实',2,2],['occur','/əˈkər/','vi.发生；出现',2,2],['downtown','/ˌdaʊntˈaʊn/','adv.在市中心；往市中心',2,2],['mission','/ˈmɪʃən/','n.传教（区）；重要任务；使命',2,2],
@@ -763,10 +763,10 @@ const PEP_WORDS=[
 ['settle','/ˈsetəl/','vt. & vi.定居；结束(争论)；解决(纠纷)',2,2],['construction','/kənˈstrəkʃən/','n.建筑；建造；建造物；(句子、短语等的)结构',2,2],['material','/məˈtɪriəl/','n.材料；布料；素材 adj.物质的；实际的',2,2],['to name but a few','','仅举几例',2,2],
 ['tai chi','','n.太极拳',2,2],['clothing','/ˈkloʊðɪŋ/','n.衣服；服装',2,2],['herbal','/ˈərbəl/','adj.药草的；香草的',2,2],['suit','/ˈsut/','vt.适合；满足……需要；相配；合身n.西服；套装',2,2],
 ['first hand','','第一手；亲自',2,2],['item','/ˈaɪtəm/','n.项目；一件商品(或物品)；一条(新闻)',2,2],['contain','/kənˈteɪn/','vt.包含；含有；容纳',2,2],['neat','/ˈnit/','adj.极好的；整洁的；整齐的',2,2],
-['San Francisco','','圣弗兰西斯科（旧金山）（美国城市）',2,2],['Napa Valley','','纳帕谷（美国）',2,2],['the Golden Gate Bridge','','金门桥',2,2],['the Mission District','','教会区（旧金山）',2,2],
-['Mexico','/ˈmeksəˌkoʊ/','墨西哥（北美洲国家）',2,2],['California','/ˌkæləˈfɔrnjə/','加利福尼亚（美国州名）',2,2],['Cantonese','/ˌkæntəˈniz/','adj.广东的；粤语的 n.粤语；广东人',2,2],['the Richmond District','','列治文区（旧金山）',2,2],
-['Huangguoshu Waterfall','','黄果树瀑布',2,2],['Journey to the West','','《西游记》',2,2],['Tin How Temple','','天后古庙',2,2],['Bank of Canton','','广东银行',2,2],
-['Portsmouth Square','','花园角广场（旧金山）',2,2],['Robert Louis Stevenson','','罗伯特路易斯蒂文森（英国作家）',2,2],['astronaut','/ˈæstrəˌnɑt/','n…宇航员；太空人',2,3],['procedure','/prəˈsidʒər/','n.程序；步骤；手续',2,3],
+['the Golden Gate Bridge','','金门桥',2,2],['the Mission District','','教会区（旧金山）',2,2],
+['Cantonese','/ˌkæntəˈniz/','adj.广东的；粤语的 n.粤语；广东人',2,2],['the Richmond District','','列治文区（旧金山）',2,2],
+
+['astronaut','/ˈæstrəˌnɑt/','n…宇航员；太空人',2,3],['procedure','/prəˈsidʒər/','n.程序；步骤；手续',2,3],
 ['mental','/ˈmentəl/','adj.精神的；思想的',2,3],['cm','','厘米',2,3],['intelligent','/ˌɪnˈtelədʒənt/','adj.有智慧的；聪明的；有智力的',2,3],['rocket','/ˈrɑkət/','n.火箭；火箭弹',2,3],
 ['gravity','/ɡˈrævəti/','n.重力；引力',2,3],['frontier','/frənˈtɪr/','n.边境；国界；边远地区',2,3],['vehicle','/ˈvihɪkəl/','n.交通工具；车辆',2,3],['universe','/ˈjunəˌvərs/','n.宇宙；天地万物',2,3],
 ['determined','/dɪˈtərmənd/','adj.有决心的；意志坚定的',2,3],['determine','/dəˈtərmən/','vt.查明；确定；决定',2,3],['satellite','/ˈsætəˌlaɪt/','n.人造卫星；卫星',2,3],['launch','/ˈlɔntʃ/','vt. & n.发射；发起；上市',2,3],
@@ -785,11 +785,11 @@ const PEP_WORDS=[
 ['monitor','/ˈmɑnətər/','n.监视器；检测仪vt.监视；监测；监控',2,3],['regularly','/ˈreɡjələrli/','adv.经常；定期地',2,3],['regular','/ˈreɪɡjələr/','adj.定期的；经常的；正常的',2,3],['foam','/ˈfoʊm/','n.泡沫橡胶；泡沫',2,3],
 ['pillow','/ˈpɪloʊ/','n.枕头',2,3],['smartphone','/ˈsmɑrtˌfoʊn/','n.智能手机',2,3],['resource','/ˈrisɔrs/','n.资源；财力；物力',2,3],['limited','/ˈlɪmətəd/','adj.有限的',2,3],
 ['provide for sb','','提供生活所需',2,3],['closing','/ˈkloʊzɪŋ/','adj.结尾的；结束的n.停业；关闭；倒闭',2,3],['in closing','','最后',2,3],['mystery','/ˈmɪstəri/','n.神秘事物；谜',2,3],
-['run out','','用完；耗尽',2,3],['attach','/əˈtætʃ/','vt.系；绑；贴',2,3],['oxygen','/ˈɑksədʒən/','n.氧；氧气',2,3],['Sputnik','/ˈspətnɪk/','旅伴一号”（苏联发射的人类第一颗人造卫星）',2,3],
-['the USSR','','苏联',2,3],['Yuri Gagarin','','尤里加加林（苏联宇航员）',2,3],['Neil Armstrong','','尼尔阿姆斯特朗（美国宇航员）',2,3],['NASA','/ˈnæsə/','（美国）国家航空与航天局',2,3],
-['Voyager 1','','旅行者一号',2,3],['Soyuz 11','','联盟11号',2,3],['Challenger','/ˈtʃæləndʒər/','挑战者”号航天飞机',2,3],['the International Space Station','','国际空间站',2,3],
-['Jade Rabbit','','玉兔”月球车',2,3],['Mars','/ˈmɑrz/','n.火星',2,3],['Jupiter','/ˈdʒupətər/','n.木星',2,3],['Typhoon Goni','','台风天鹅',2,3],
-['GPS','/ɡˌipiˈes/','全球（卫星）定位系统',2,3],['basis','/ˈbeɪsəs/','n.基础；根据；基点',2,4],['on the basis of','','在某时的基础上；根据某事',2,4],['loan','/ˈloʊn/','n.贷款；借款',2,4],
+['run out','','用完；耗尽',2,3],['attach','/əˈtætʃ/','vt.系；绑；贴',2,3],['oxygen','/ˈɑksədʒən/','n.氧；氧气',2,3],
+['the USSR','','苏联',2,3],
+['the International Space Station','','国际空间站',2,3],
+
+['basis','/ˈbeɪsəs/','n.基础；根据；基点',2,4],['on the basis of','','在某时的基础上；根据某事',2,4],['loan','/ˈloʊn/','n.贷款；借款',2,4],
 ['take out a loan','','取得贷款',2,4],['plastic','/ˈplæstɪk/','n.塑料adj.塑料制的；塑料的',2,4],['apologise','/əˈpɑləˌdʒaɪz/','vi.道歉；谢罪',2,4],['ignore','/ˌɪɡˈnɔr/','vt.忽视；对……不予理会',2,4],
 ['in return','','作为回报；作为回应',2,4],['judge','/ˈdʒədʒ/','vt. & vi.评价；评判；判断 n.法官；审判员；裁判员',2,4],['scene','/ˈsin/','n.（戏剧或歌剧的）场；现场；场面',2,4],['narrator','/ˈnereɪtər/','n.（书、戏剧或电影中的）叙述者；讲述着；（电视节目中的）幕后解说员',2,4],
 ['narration','/neˈreɪʃən/','n.叙述；讲述；解说',2,4],['bet','/ˈbet/','n.打赌；堵住vi& vt.下赌注；用……打赌 vt.敢说',2,4],['make a bet','','打个赌',2,4],['servant','/ˈsərvənt/','n.仆人；用人',2,4],
@@ -807,8 +807,8 @@ const PEP_WORDS=[
 ['willing','/ˈwɪlɪŋ/','adj.愿意；乐意',2,4],['be willing to do sth','','愿意或乐意做某事',2,4],['element','/ˈeləmənt/','n.要素；基本部分',2,4],['plot','/ˈplɑt/','n.故事情节；布局；阴谋',2,4],
 ['ambassador','/æmˈbæsədər/','n.大使；使节；代表',2,4],['upper-class','/ˈəpərˌklæs/','adj.上流社会的；上等阶层的',2,4],['upper','/ˈəpər/','adj.上流的；上层的；靠上部的',2,4],['the upper class','','上流社会；上等阶层',2,4],
 ['maintain','/meɪnˈteɪn/','vt.维持；保持；维修；保养',2,4],['permission','/pərˈmɪʃən/','n.准许；续课；批准；许可证',2,4],['permit','/ˈpərˌmɪt/','vt. & vi.允许；准许；使有可能',2,4],['saying','/ˈseɪɪŋ/','n.谚语；格言；警句',2,4],
-['external','/ɪkˈstərnəl/','adj.外部的；外面的；外来的',2,4],['Roderick','/ˈrɑdrɪk/','罗德里克',2,4],['Oliver','/ˈɑləvər/','奥利弗',2,4],['Henry Adams','','亨利亚当斯',2,4],
-['The Phantom of the Opera','','《歌剧魅影》（音乐剧）',2,4],['Reid','/ˈrid/','里德',2,4],['Todd','/ˈtɑd/','托德',2,4],['Portia Langham','','波西亚兰厄姆',2,4],
+['external','/ɪkˈstərnəl/','adj.外部的；外面的；外来的',2,4],
+
 ['physiology','/ˌfɪziˈɑlədʒi/','n.生理学:生理机能',3,0],['artemisinin','','n.[药]青蒿素',3,0],['crucial','/ˈkruʃəl/','adj.至关重要的:关键性的',3,0],['malaria','/məˈleriə/','n.疟疾',3,0],
 ['vital','/ˈvaɪtəl/','adj.必不可少的;极其重要的;充满生机的',3,0],['committed','/kəˈmɪtɪd/','adj.尽心尽力的;坚定的 坚信的',3,0],['commit','/kəˈmɪt/','vt.承诺;保证(某个人、机构等) vi.忠于;全心全意投入(工作、活动等)',3,0],['commit oneself to do','','承诺;保证(做某事、遵守协议或安排等)',3,0],
 ['academy','/əˈkædəmi/','n.(艺术、文学、科学等的) 研究院;学会;专科院校',3,0],['academic','/ˌækəˈdemɪk/','adj.学业的;学术的',3,0],['objective','/əbˈdʒektɪv/','n.目标;目的 adj.客观的',3,0],['botanical','/bəˈtænɪkəl/','植物学的',3,0],
@@ -826,10 +826,10 @@ const PEP_WORDS=[
 ['institute','/ˈɪnstəˌtut/','n.(教育、专业等)机构 机构建筑',3,0],['consequence','/ˈkɑnsəkwəns/','n.结果;后果',3,0],['take up a position','','担任;任职',3,0],['moustache US mustache','','n.上唇的胡子;髭',3,0],
 ['peculiarity','/pɪˌkjuliˈerəti/','n.个性;特点 怪异的性质',3,0],['encounter','/ɪnˈkaʊnər/','vt.偶然碰到;遇到 n.邂逅;遭遇',3,0],['professor','/prəˈfesər/','n.教授',3,0],['mourn','/ˈmɔrn/','vt.&.vi.哀悼;忧伤',3,0],
 ['remarkable','/riˈmɑrkəbəl/','adj.非凡的;显著的',3,0],['device','/dɪˈvaɪs/','n.方法;技巧;装置;仪器',3,0],['sum','/ˈsəm/','vi.总结;概括',3,0],['sum up','','总结;概括',3,0],
-['draft','/ˈdræft/','n.草稿;草案 vt.& vi.起草;草拟',3,0],['Nobel Prize','','诺贝尔奖',3,0],['Alexander Fleming','','亚历山大·弗莱明',3,0],
-['Albert Einstein','','阿尔伯特；爱因斯坦',3,0],['Hitler','/ˈhɪtlər/','希特勒',3,0],['Elon Musk','','埃隆；马斯克',3,0],['Florence Nightingale','','弗洛伦斯；南丁格尔',3,0],
-['SARS','/ˈsɑrz/','严重急性呼吸综合征',3,0],['Switzerland','/ˈswɪtsərlənd/','瑞士(国家名)',3,0],['Swiss','/ˈswɪs/','adj.瑞士的n.(pl.Swiss)瑞士人',3,0],['Isaac Newton','','艾萨克；牛顿',3,0],
-['Jewish','/ˈdʒuɪʃ/','adj.犹太人的:犹太教的',3,0],['Princeton','/ˈprɪnstən/','普林斯顿(美国城市)',3,0],['phrase','/ˈfreɪz/','n.短语;词组',3,1],['persuade','/pərˈsweɪd/','vt.劝说;说服',3,1],
+['draft','/ˈdræft/','n.草稿;草案 vt.& vi.起草;草拟',3,0],
+
+['SARS','/ˈsɑrz/','严重急性呼吸综合征',3,0],['Swiss','/ˈswɪs/','adj.瑞士的n.(pl.Swiss)瑞士人',3,0],
+['Jewish','/ˈdʒuɪʃ/','adj.犹太人的:犹太教的',3,0],['phrase','/ˈfreɪz/','n.短语;词组',3,1],['persuade','/pərˈsweɪd/','vt.劝说;说服',3,1],
 ['switch','/ˈswɪtʃ/','vt.转换;交换 vi. & vt.(使)改变;转变 n.开关;转换器;改变',3,1],['switch off/on','','关/开(电灯、机器等)',3,1],['distant','/ˈdɪstənt/','adj.遥远的:远处的;疏远的 心不在焉的',3,1],['secure','/sɪˈkjʊr/','adj.安全的;安心的;可靠的;牢固的 vt.获得;拴牢;保护',3,1],
 ['knob','/ˈnɑb/','n.旋钮;球形把手',3,1],['appliance','/əˈplaɪəns/','n.电器;器具',3,1],['remote','/riˈmoʊt/','adj.远程的;偏远的',3,1],['remote control','','遥控器;遥控',3,1],
 ['air conditioner','','空调机 空调设备',3,1],['automatic','/ˌɔtəˈmætɪk/','adj.自动的',3,1],['integrated','/ˈɪnəɡˌreɪtəd/','adj.各部分密切协调的 综合的',3,1],['integrate','/ˈɪnəɡˌreɪt/','vi. & vt.(使)合并 成为一体',3,1],
@@ -848,7 +848,7 @@ const PEP_WORDS=[
 ['emphasis','/ˈemfəsəs/','n.强调;重视;重要性',3,1],['luxury','/ˈləɡʒəri/','n.奢华',3,1],['keep in touch','','保持联系 了解(某课题或领域的情况)',3,1],['career','/kəˈrɪr/','n.职业;事业',3,1],
 ['prospect','/ˈprɑspekt/','n.可能性;前景',3,1],['resist','/riˈzɪst/','vi. & vt.抵制;反抗;抵挡',3,1],['resistance','/riˈzɪstəns/','n.抵制;反对;抗拒',3,1],['paragraph','/ˈpærəɡˌræf/','n.段;段落',3,1],
 ['signpost','/ˈsaɪnˌpoʊst/','n.路标',3,1],['essay','/ˈeˌseɪ/','n.文章',3,1],['accurate','/ˈækjərət/','adj.精确的;准确的',3,1],['librarian','/laɪˈbreˌriən/','图书管理员;图书馆馆长',3,1],
-['Melbourne','/ˈmelbərn/','墨尔本(澳大利亚城市)',3,1],['Christian','/ˈkrɪstʃən/','n.基督教徒 adj.基督教的',3,1],['the Amish','','n.阿曼门诺派',3,1],['buffet','/ˈbəfət/','vi.连续猛击;打来打去 n.自助餐',3,2],
+['Christian','/ˈkrɪstʃən/','n.基督教徒 adj.基督教的',3,1],['the Amish','','n.阿曼门诺派',3,1],['buffet','/ˈbəfət/','vi.连续猛击;打来打去 n.自助餐',3,2],
 ['cloth','/ˈklɔθ/','n.(一块)布;织物;布料',3,2],['edge','/ˈedʒ/','n.边;边缘;边线;刀刃 vt. & vi.(使)徐徐移动;…加边',3,2],['valley','/ˈvæli/','n.谷;山谷:溪谷',3,2],['vast','/ˈvæst/','adj.辽阔的:巨大的;庞大的',3,2],
 ['glacier','/ɡˈleɪʃər/','n.冰川',3,2],['reindeer','/ˈreɪnˌdɪr/','n.驯鹿',3,2],['territory','/ˈterɪˌtɔri/','n.领土;版图;领域;地盘',3,2],['ban','/ˈbæn/','vt.明令禁止;取缔 n.禁令',3,2],
 ['boundary','/ˈbaʊndəri/','n.边界;界限;分界线',3,2],['cottage','/ˈkɑtədʒ/','n.小屋;(尤指)村舍;小别墅',3,2],['visible','/ˈvɪzəbəl/','adj.看得见的;可见的',3,2],['on the move','','在行进中;在移动中',3,2],
@@ -865,8 +865,8 @@ const PEP_WORDS=[
 ['steam','/ˈstim/','n.蒸汽;水蒸气;蒸汽动力 vi.蒸发;散发蒸汽;冒水汽',3,2],['superb','/sʊˈpərb/','adj.极佳的;卓越的',3,2],['aquarium','/əˈkweriəm/','n.水族馆;水族玻璃槽;养鱼缸',3,2],['up to','','达到(某数量、程度等);直到;不多于: (体力或智力上)能胜任',3,2],
 ['polar','/ˈpoʊlər/','adj.(近)极地的;南极(或北极)的: 磁极的',3,2],['upside down','','顛倒;倒转;翻转',3,2],['splendid','/ˈsplendɪd/','adj.壮丽的;雄伟的;极佳的: 非常好的',3,2],['display','/dɪˈspleɪ/','n.展览;陈列;展览品 vt.显示;陈列',3,2],
 ['appetite','/ˈæpəˌtaɪt/','n.食欲;胃口;强烈欲望',3,2],['entertainment','/ˌenərˈteɪnmənt/','n.娱乐;招待: 娱乐活动:文娱节目',3,2],['column','/ˈkɑləm/','n.(书、报纸印刷页上的)栏 专栏;柱(形物)',3,2],['Sami','/ˈsæmi/','萨米人 (居住在斯堪的纳维亚北部的拉普人)',3,2],
-['Sarek National Park','','萨利克国家公园',3,2],['Sweden','/ˈswidən/','瑞典(国家名)',3,2],['the Arctic Circle','','北极圈',3,2],['Rapa River','','拉帕河',3,2],
-['Siberian','/saɪˈbɪriən/','adj.西伯利亚(人)的 n.西伯利亚人',3,2],['Dollywood','','多莉山主题公园',3,2],['interaction','/ˌɪnəˈrækʃən/','n.交流;相互影响',3,3],['vary','/ˈveri/','vi.(根据情况)变化;改变',3,3],
+['the Arctic Circle','','北极圈',3,2],
+['Siberian','/saɪˈbɪriən/','adj.西伯利亚(人)的 n.西伯利亚人',3,2],['interaction','/ˌɪnəˈrækʃən/','n.交流;相互影响',3,3],['vary','/ˈveri/','vi.(根据情况)变化;改变',3,3],
 ['appropriate','/əˈproʊpriˌeɪt/','adj.合适的;恰当的',3,3],['by contrast','','相比之下',3,3],['approve','/əˈpruv/','vi.赞成;同意 vt.批准;通过',3,3],['demonstrate','/ˈdemənˌstreɪt/','vt.表现;表达;说明;证明',3,3],
 ['gesture','/ˈdʒestʃər/','n.手势;姿势;姿态',3,3],['witness','/ˈwɪtnəs/','vt.当场看到;目击;见证 n.目击者;证人',3,3],['employ','/emˈplɔɪ/','vt.使用:应用;雇用',3,3],['identical','/aɪˈdentɪkəl/','adj.相同的',3,3],
 ['interpret','/ˌɪnˈtərprət/','vt.把…理解(解释)为 vi. & vt.口译',3,3],['differ','/ˈdɪfər/','vi.相异;不同于',3,3],['by comparison','','(与…).相比较',3,3],['cheek','/ˈtʃik/','n.面颊;脸颊',3,3],
@@ -883,8 +883,8 @@ const PEP_WORDS=[
 ['embarrassed','/ɪmˈberəst/','adj.难堪的:尴尬的',3,3],['ashamed','/əˈʃeɪmd/','adj.羞愧;惭愧',3,3],['merely','/ˈmɪrli/','adv.只是:仅仅;只不过',3,3],['call on','','(短暂地)访问;要求(某人讲话等) 正式邀请',3,3],
 ['bother','/ˈbɑðər/','vt. & vi.费心;麻烦;烦心 n.麻烦;不便',3,3],['weep','/ˈwip/','vi. & vt.哭泣;流泪',3,3],['at work','','有某种影响;在工作',3,3],['conflict','/ˈkɑnflɪkt/','n. & vi.矛盾;冲突',3,3],
 ['inquire','/ˌɪnˈkwaɪr/','vi. & vt.询问;打听',3,3],['ultimately','/ˈəltəmətli/','adv.最终;最后',3,3],['adjust','/əˈdʒəst/','vt.调整;调节 vi. & vt.适应;(使)习惯',3,3],['intervene','/ˌɪntərˈvin/','vi.干预;介入',3,3],
-['react','/riˈækt/','vi.(对…)起反应;回应;(对食物等)有不良反应',3,3],['component','/kəmˈpoʊnənt/','n.组成部分;零件',3,3],['tone','/ˈtoʊn/','n.语气;腔调;口吻',3,3],['Brazil','/brəˈzɪl/','巴西(国家名)',3,3],
-['Bulgaria','/bəlɡˈeriə/','保加利亚(国家名)',3,3],['Albania','/ælˈbeɪniə/','阿尔巴尼亚(国家名)',3,3],['hybrid','/ˈhaɪbrəd/','n.杂交植(动)物;合成物 混合动力车',3,4],['devote','/dɪˈvoʊt/','vt.把…-.献(给);把…专用于 专心于',3,4],
+['react','/riˈækt/','vi.(对…)起反应;回应;(对食物等)有不良反应',3,3],['component','/kəmˈpoʊnənt/','n.组成部分;零件',3,3],['tone','/ˈtoʊn/','n.语气;腔调;口吻',3,3],
+['hybrid','/ˈhaɪbrəd/','n.杂交植(动)物;合成物 混合动力车',3,4],['devote','/dɪˈvoʊt/','vt.把…-.献(给);把…专用于 专心于',3,4],
 ['devote to','','把…用于;献身;致力;专心',3,4],['shortage','/ˈʃɔrtədʒ/','n.不足;缺少;短缺',3,4],['tackle','/ˈtækəl/','vt.解决(难题);应付(局面);处理',3,4],['crisis','/ˈkraɪsəs/','n.危机;危急关头',3,4],
 ['boost','/ˈbust/','vt.使增长;使兴旺 n.增长;提高;激励',3,4],['yield','/ˈjild/','n.产量;产出 vt.出产(作物);产生(收益、效益等) vi.屈服;让步',3,4],['convince','/kənˈvɪns/','vt.使相信;使确信;说服',3,4],['characteristic','/ˌkerəktəˈrɪstɪk/','n.特征;特点;品质 adj.典型的;独特的',3,4],
 ['attain','/əˈteɪn/','vt.(通常经过努力)获得;得到',3,4],['conventional','/kənˈvenʃənəl/','adj.传统的:习惯的',3,4],['pollinate','/ˈpɑləˌneɪt/','vt.授粉;传粉',3,4],['assumption','/əˈsəmpʃən/','n.假定;设定;(责任的) 承担;(权利的)获得',3,4],
@@ -900,7 +900,7 @@ const PEP_WORDS=[
 ['pesticide','/ˈpestəˌsaɪd/','n.杀虫剂:除害药物',3,4],['widespread','/ˌwaɪdsprˈed/','adj.分布广的;普遍的 广泛的',3,4],['bacterium','/bækˈtɪriəm/','n.细菌',3,4],['in turn','','相应地;转而;依次;轮流',3,4],
 ['digest','/ˈdaɪdʒest/','vt. & vi.消化 vt.领会;领悟',3,4],['essential','/eˈsenʃəl/','adj.完全必要的;极其重要的',3,4],['mineral','/ˈmɪnərəl/','n.矿物;矿物质',3,4],['alternative','/ɔlˈtərnətɪv/','n.可供选择的事物 adj.可供替代的;非传统的',3,4],
 ['grocery','/ɡˈroʊsəri/','n.食品杂货店;[pl.]食品杂货',3,4],['instance','/ˈɪnstəns/','n.例子;实例;事例',3,4],['for instance','','例如;比如',3,4],['depth','/ˈdepθ/','n.向下(或向里)的距离;深(度)',3,4],
-['root','/ˈrut/','n.根;根茎;根部;根源',3,4],['entirely','/ɪnˈtaɪərli/','adv.全部地;完整地;完全地',3,4],['aspect','/ˈæˌspekt/','n.方面;层面',3,4],['Vietnam','/viˌetˈnɑm/','越南(国家名)',3,4],
+['root','/ˈrut/','n.根;根茎;根部;根源',3,4],['entirely','/ɪnˈtaɪərli/','adv.全部地;完整地;完全地',3,4],['aspect','/ˈæˌspekt/','n.方面;层面',3,4],
 ['LED','/ˈled/','发光二极管',3,4],['DDT','/ˌdidˌiˈti/','n.滴滴涕(旧时尤用作农业杀虫剂)',3,4],['cholera','/ˈkɑlərə/','n.霍乱',4,0],['severe','/səˈvɪr/','adj.极为恶劣的',4,0],
 ['diarrhoea','/ˌdaɪəˈriə/','n.腹泻',4,0],['dehydration','/ˌdihaɪˈdreɪʃən/','n.脱水',4,0],['frustrated','/ˈfrəˌstreɪtəd/','adj.懊悔的',4,0],['once and for all','','最终地；彻底地',4,0],
 ['contradictory','/ˌkɑntrəˈdɪktəri/','adj.相互矛盾的；对立的',4,0],['infection','/ˌɪnˈfekʃən/','n.感染',4,0],['infect','/ˌɪnˈfekt/','vt.使感染',4,0],['germ','/ˈdʒərm/','n.微生物',4,0],
@@ -1002,11 +1002,11 @@ const PEP_WORDS=[
 ['vase','/ˈvɑz/','n.花瓶;装饰瓶',5,0],['artistic','/ɑrˈtɪstɪk/','adj.艺术的:艺术家的',5,0],['entry','/ˈentri/','n.加入;进入;参与',5,0],['civil','/ˈsɪvəl/','adj.国民的;民用的:民事的',5,0],
 ['recognition','/ˌrekəɡˈnɪʃən/','n.承认;认出;赞誉',5,0],['Buddhist','/ˈbudəst/','adj.佛教的 n.佛教徒',5,0],['Buddhism','/ˈbudɪzəm/','n.佛教',5,0],['expansion','/ɪkˈspænʃən/','n.扩张;扩展;扩大',5,0],
 ['bring to life','','赋…生命:…鲜活起来',5,0],['guarantee','/ɡˌerənˈti/','vt.保证;确保;.肯定…必然发生 n.保证;保修单;担保物',5,0],['contemporary','/kənˈtempəˌreri/','adj.当代的;现代的;属同时期的 n.同代人;同辈人，',5,0],['worthy','/ˈwərði/','adj.值…的:有价值的',5,0],
-['be worthy of','','值得',5,0],['The Middle Ages','','中世纪',5,0],['Giotto di Bondone','','乔托·迪；邦多纳(意大利画家、雕刻家、建筑师)',5,0],['the Renaissance','','文艺复兴(时期)',5,0],
-['Masaccio','','马萨乔(意大利现实主义画家)',5,0],['Leonardo da Vinci','','莱昂纳多；达；芬奇(意大利艺术家、学者、发明家)',5,0],['Michelangelo','/ˌmaɪkəˈlændʒəlˌoʊ/','米开朗基罗(意大利雕塑家、画家、建筑师、诗人)',5,0],['Raphael','/ˈreɪfiəl/','拉斐尔(意大利画家)',5,0],
-['Rembrandt','/ˈremˌbrænt/','伦勃朗(荷兰画家)',5,0],['Impressionism','/ˌɪmˈpreʃənˌɪzəm/','n.印象主义;印象派(绘画风格)',5,0],['Claude Monet','','克劳德·莫奈(法国印象派画家)',5,0],['Renoir','/renˈwɑr/','雷诺阿(法国印象派画家)',5,0],
-['Picasso','/pɪˈkɑsoʊ/','毕加索(西班牙画家、雕塑家)',5,0],['Cubism','/ˈkjubɪzəm/','立体主义;立体派',5,0],['Giverny','','吉维尼(法国小镇)',5,0],['Tadpoles Searching for Mother','','《小蝌蚪找妈妈》',5,0],
-['The Cowboy\'s Flute','','《牧笛》',5,0],['Feeling from Mountain and Water','','《山水情》',5,0],['tobacco','/təˈbæˌkoʊ/','n.烟草;烟叶',5,1],['alcohol','/ˈælkəˌhɑl/','n.酒;酒精',5,1],
+['be worthy of','','值得',5,0],['The Middle Ages','','中世纪',5,0],['the Renaissance','','文艺复兴(时期)',5,0],
+
+['Impressionism','/ˌɪmˈpreʃənˌɪzəm/','n.印象主义;印象派(绘画风格)',5,0],
+['Cubism','/ˈkjubɪzəm/','立体主义;立体派',5,0],
+['tobacco','/təˈbæˌkoʊ/','n.烟草;烟叶',5,1],['alcohol','/ˈælkəˌhɑl/','n.酒;酒精',5,1],
 ['abuse','/əˈbjus/','n.滥用;虐待;辱骂 vt.滥用;虐待;辱骂',5,1],['physical','/ˈfɪzɪkəl/','adj.身体的:客观存在的;物理学的',5,1],['dominate','/ˈdɑməˌneɪt/','vt. & vi.支配;控制;占有优势',5,1],['repeatedly','/rɪˈpitɪdli/','adv.重复地',5,1],
 ['psychology','/saɪˈkɑlədʒi/','n.心理学;心理;心理影响',5,1],['cue','/ˈkju/','n.提示;暗示;信号 vt.给(某人)暗示(或提示)',5,1],['in response to','','回答;答复',5,1],['reward','/riˈwɔrd/','n.回报;奖励:报酬 vt.奖励;奖赏;给以报酬',5,1],
 ['rely','/riˈlaɪ/','vi.依赖;依靠;信赖',5,1],['rely on','','依赖;依靠;信赖',5,1],['facilitate','/fəˈsɪləˌteɪt/','vt.促进:促使;使便利',5,1],['examine','/ɪɡˈzæmɪn/','vt.(仔细)检查;审查;測验',5,1],
@@ -1019,8 +1019,8 @@ const PEP_WORDS=[
 ['stimulate','/ˈstɪmjəˌleɪt/','vt.激发;促进:刺激',5,1],['dentist','/ˈdenɪst/','n.牙科医生',5,1],['sugary','/ˈʃʊɡəri/','adj.含糖的;甜的',5,1],['nut','/ˈnət/','n.坚果',5,1],
 ['skateboard','/ˈskeɪtˌbɔrd/','n.滑板 vi.滑滑板',5,1],['dynamic','/daɪˈnæmɪk/','adj.充满活力的;精力充沛的;动态的',5,1],['virus','/ˈvaɪrəs/','n.病毒;病毒性疾病',5,1],['stress out','','焦虑不安;疲惫不堪',5,1],
 ['worn out','','筋疲力尽的;疲惫的',5,1],['bowling','/ˈboʊlɪŋ/','n.保龄球运动',5,1],['comedy','/ˈkɑmədi/','n.喜剧;喜剧片;滑稽节目',5,1],['monthly','/ˈmənθli/','adv. & adj.每月的;每月一次的 n.月刊',5,1],
-['enhance','/enˈhæns/','vt.提高;增强;增进',5,1],['refresh','/rɪˈfreʃ/','v.使恢复精力;使凉爽;刷新',5,1],['absorb','/əbˈzɔrb/','vt.吸引全部注意力;吸收',5,1],['Aristotle','/ˈerəˌstɑtəl/','亚里土多德(古希腊哲学家)',5,1],
-['People\'s Liberation Army','','中国人民解放军',5,1],['Lao Zi','','老子(中国古代哲学家)',5,1],['graph','/ɡˈræf/','n.图;图表;曲线图',5,2],['emission','/ɪˈmɪʃən/','n.排放物;散发物;排放',5,2],
+['enhance','/enˈhæns/','vt.提高;增强;增进',5,1],['refresh','/rɪˈfreʃ/','v.使恢复精力;使凉爽;刷新',5,1],['absorb','/əbˈzɔrb/','vt.吸引全部注意力;吸收',5,1],
+['graph','/ɡˈræf/','n.图;图表;曲线图',5,2],['emission','/ɪˈmɪʃən/','n.排放物;散发物;排放',5,2],
 ['melt','/ˈmelt/','vi. & vt.(使)融化;熔化;软化',5,2],['starve','/ˈstɑrv/','vi. & vt.(使)挨饿;饿死',5,2],['seal','/ˈsil/','n.海豹',5,2],['ecology','/iˈkɑlədʒi/','n.生态;生态学',5,2],
 ['release','/riˈlis/','vt. & n.排放;释放;发布',5,2],['methane','/ˈmeˌθeɪn/','n.甲烷;沼气',5,2],['carbon','/ˈkɑrbən/','n.碳',5,2],['dioxide','/daɪˈɑkˌsaɪd/','n.二氧化物',5,2],
 ['carbon dioxide','','二氧化碳',5,2],['habitable','/ˈhæbətəbəl/','adj.适合居住的',5,2],['sustain','/səˈsteɪn/','vt.维持;遺受;承受住',5,2],['sustainable','/səˈsteɪnəbəl/','adj.可持续的:合理利用的',5,2],
@@ -1035,7 +1035,7 @@ const PEP_WORDS=[
 ['enterprise','/ˈenərˌpraɪz/','n.公司;企业;事业',5,2],['restore','/rɪˈstɔr/','vt.恢复;使复原;修复',5,2],['conservation','/ˌkɑnsərˈveɪʃən/','n.对(环境、文物等)保护;保持',5,2],['dozen','/ˈdəzən/','n.打;十二个',5,2],
 ['dozens of','','许多;很多',5,2],['regulation','/ˌreɡjəˈleɪʃən/','n.章程;规章制度',5,2],['disposal','/dɪˈspoʊzəl/','n.去掉;清除;处理',5,2],['inspection','/ˌɪnˈspekʃən/','n.检查;查看;视察',5,2],
 ['fine','/ˈfaɪn/','vt…对…处以罚款',5,2],['campaign','/kæmˈpeɪn/','n.运动;战役 vi.&vr.参加运动;领导运动',5,2],['waterway','/ˈwɔtərˌweɪ/','n.水道;航道',5,2],['tolerate','/ˈtɑləˌreɪt/','vt.忍受;包容;容许',5,2],
-['agenda','/əˈdʒendə/','n.议程表;议事日程',5,2],['Norway','/ˈnɔrˌweɪ/','挪威(北欧国家)',5,2],['Svalbard','','斯瓦尔巴群岛(挪威)',5,2],['Hurricane Katrina','','飓风卡特里娜',5,2],
+['agenda','/əˈdʒendə/','n.议程表;议事日程',5,2],
 ['adversity','/ædˈvərsɪˌti/','n.困境;逆境',5,3],['wage','/ˈweɪdʒ/','n.工资',5,3],['bitter','/ˈbɪtər/','adj.严寒的;激烈而不愉快的;味苦的',5,3],['expedition','/ˌekspəˈdɪʃən/','n.探险;远征;探险队、',5,3],
 ['endurance','/ˈendərəns/','n.忍耐力;耐久力',5,3],['vigour','/ˈvɪɡər/','n.精力;力量;活动',5,3],['turn sb down','','拒绝(某人)',5,3],['qualified','/ˈkwɑləˌfaɪd/','明adj.符合资格;具…的知识(或技能、学历等)',5,3],
 ['enthusiastic','/ɪnˌθuziˈæstɪk/','adj.热情的;热心的',5,3],['aboard','/əˈbɔrd/','adv. & prep.上(船、飞机、公共汽车等)',5,3],['cupboard','/ˈkəbərd/','n.橱柜;壁橱;衣柜',5,3],['assign','/əˈsaɪn/','以分派;布置;分配',5,3],
@@ -1051,10 +1051,10 @@ const PEP_WORDS=[
 ['advertise','/ˈædvərˌtaɪz/','vt. & vi.公布;宣传;做广告',5,3],['corporate','/ˈkɔrpərət/','adj.公司的;法人的;社团的',5,3],['rough','/ˈrəf/','adj.汹涌的;粗糙的;粗略的',5,3],['navigator','/ˈnævəɡˌeɪtər/','n.领航员;(飞机、船舶等上的)航行者',5,3],
 ['loyal','/ˈlɔɪəl/','adj.忠诚的;忠实的',5,3],['motor','/ˈmoʊtər/','n.发动机;马达 adj.有引擎的:机动车的',5,3],['candidate','/ˈkændədeɪt/','n.候选人:应试者',5,3],['make fire','','生火',5,3],
 ['give off','','放出(热、光、气味或气体)',5,3],['episode','/ˈepəˌsoʊd/','n.(人生的)-段经历;(小说的)片段;插曲',5,3],['commitment','/kəˈmɪtmənt/','n.承诺;保证;奉献',5,3],['motive','/ˈmoʊtɪv/','n.动机;原因:目的',5,3],
-['Confucianism','/kənˈfjuʃəˌnɪzəm/','n.孔子学说;儒家(学说)',5,3],['Ernest Shackleton','','欧内斯特；沙克尔顿(英国探险家)',5,3],['Perce Blackborow','','珀西·布莱克博罗(“坚忍”号服务员)',5,3],['Antarctica','/ˌæˈnɑrtɪkə/','南极洲',5,3],
-['the Antarctic','','南极地区',5,3],['the South Pole','','南极',5,3],['South Georgia Island','','南乔治亚岛(南极洲)',5,3],['Frank Wild','','弗兰克·怀尔德',5,3],
-['Thomas Orde-Lees','','托马斯·奧德利斯',5,3],['Frank Worsley','','弗兰克；沃斯利',5,3],['Tom Crean','','汤姆；克林',5,3],['Hubert Hudson','','休伯特·赫德森',5,3],
-['Lionel Greenstreet','','莱昂内尔；格林斯特里特',5,3],['drama','/ˈdrɑmə/','n.戏;剧;戏剧艺术',5,4],['sorrow','/ˈsɑroʊ/','n.悲伤;悲痛;伤心事 vi.感到悲伤',5,4],['imagery','/ˈɪmədʒri/','n.形象的;意象',5,4],
+['Confucianism','/kənˈfjuʃəˌnɪzəm/','n.孔子学说;儒家(学说)',5,3],
+['the Antarctic','','南极地区',5,3],['the South Pole','','南极',5,3],
+
+['drama','/ˈdrɑmə/','n.戏;剧;戏剧艺术',5,4],['sorrow','/ˈsɑroʊ/','n.悲伤;悲痛;伤心事 vi.感到悲伤',5,4],['imagery','/ˈɪmədʒri/','n.形象的;意象',5,4],
 ['literary','/ˈlɪtəˌreri/','adj.文学的;爱好文学的;有文学作品特征的;虚拟的，虚构的',5,4],['rhyme','/ˈraɪm/','n.押韵词;押韵的短诗 vi. & vt.(使)押韵 adj.rhythmic有节奏的，有规律的',5,4],['rhythm','/ˈrɪðəm/','n.节奏;韵律;规律',5,4],['folk','/ˈfoʊk/','adj.民间的;民俗的;普通百姓的',5,4],
 ['mockingbird','/ˈmɑkɪŋˌbərd/','n.嘲鸫(美洲鸣禽,能模仿别种鸟的鸣叫)',5,4],['diamond','/ˈdaɪmənd/','n.钻石;金刚石;菱形',5,4],['brass','/ˈbræs/','n.黄铜;黄铜制品;铜管乐器',5,4],['billy goat','','n.公山羊',5,4],
 ['bull','/ˈbʊl/','n.公牛',5,4],['recite','/rəˈsaɪt/','vt.背诵;吟诵;列举',5,4],['bee','/ˈbi/','n.蜜蜂',5,4],['dewdrop','','n.露珠;水珠',5,4],
@@ -1071,9 +1071,9 @@ const PEP_WORDS=[
 ['domination','/ˌdɑməˈneɪʃən/','n.主导，支配',5,4],['sonnet','/ˈsɑnɪt/','n.十四行诗',5,4],['deadline','/ˈdedˌlaɪn/','n.最后期限;截止日期 应用文：通知，建议信',5,4],['contest','/ˈkɑntest/','n.比赛;竞赛;竞争 vt.争取赢得(比赛、选举等);争辩 n.contestant参赛者',5,4],
 ['polish','/ˈpɑlɪʃ/','vt.修改;润色;抛光;改善（=improve）',5,4],['string','/ˈstrɪŋ/','n.细绳;线;-串 vt.悬挂;系 adj.弦乐器的:线织的',5,4],['wherever','/hweˈrevər/','conj.在任何地方;在所有…的情况下 adv.(用于问句)究竟在(到)哪里',5,4],['barren','/ˈbærən/','adj.贫瘠的;不结果实的',5,4],
 ['grief','/ɡˈrif/','n.悲伤;悲痛;伤心事',5,4],['complicated','/ˈkɑmpləˌkeɪtəd/','adj.复杂的;难懂的',5,4],['variation','/ˌveriˈeɪʃən/','n.变化;变体;变奏曲',5,4],['racial','/ˈreɪʃəl/','adj.种族的;人种的',5,4],
-['race','/ˈreɪs/','n.种族；赛跑',5,4],['prejudice','/ˈpredʒədɪs/','n.偏见;成见（against） vt.使怀有(或形成)偏见',5,4],['Shakespeare','/ˈʃeɪkˌspir/','莎士比亚(英国剧作家、诗人)',5,4],['The Crescent Moon','','《新月集》',5,4],
-['Tagore','','泰戈尔(印度诗人、文学家)',5,4],['Elizabeth Barrett Browning','','伊丽莎白·巴雷特；布朗宁(英国诗人)',5,4],['Robert Browning','','罗伯特；布朗宁(英国诗人)',5,4],['the Victorian era','','维多利亚时代',5,4],
-['Sonnets from the Portuguese','','《葡萄牙人的十四行诗集》',5,4],['Langston Hughes','','兰斯顿·休斯',5,4],['fiction','/ˈfɪkʃən/','n.小说;虚构的事',6,0],['science fiction','','科幻小说(或影片等)',6,0],
+['race','/ˈreɪs/','n.种族；赛跑',5,4],['prejudice','/ˈpredʒədɪs/','n.偏见;成见（against） vt.使怀有(或形成)偏见',5,4],
+['the Victorian era','','维多利亚时代',5,4],
+['fiction','/ˈfɪkʃən/','n.小说;虚构的事',6,0],['science fiction','','科幻小说(或影片等)',6,0],
 ['test out','','检验;测试',6,0],['bonus','/ˈboʊnəs/','n.意外收获:奖金;红利',6,0],['more like','','更像是;更接近',6,0],['ridiculous','/rɪˈdɪkjələs/','adj.愚蠢的:荒谬的;荒唐的;（不具有娱乐性）',6,0],
 ['integrity','/ˌɪnˈteɡrəti/','n.诚实正直;完整;完好=honesty',6,0],['dignity','/ˈdɪɡnəti/','n.庄重;庄严:尊严',6,0],['salary','/ˈsæləri/','n.薪水;薪金（月薪）inahigh/lowsalaryfamily',6,0],['absurd','/əbˈsərd/','adj.荒谬的;荒唐的(=ridiculous)',6,0],
 ['appointment','/əˈpɔɪntmənt/','n.预约;约会;委任',6,0],['nail','/ˈneɪl/','n.指甲;趾甲;钉子 vt.(用钉子)钉牢;固定',6,0],['saleswoman','/ˈseɪlzˌwʊmən/','n.女售货员;女推销员',6,0],['guilty','/ɡˈɪlti/','adj.内疚的;有罪的:有过失的 n.guilt内疚，有罪 adv.guiltily',6,0],
@@ -1089,8 +1089,8 @@ const PEP_WORDS=[
 ['fall away','','(逐渐)减少;消失',6,0],['division','/dɪˈvɪʒən/','n.分开;分隔;差异:除(法)',6,0],['puff','/ˈpəf/','n.(烟、气等的)一缕;少量;喘息',6,0],['urge','/ˈərdʒ/','n.强烈的欲望;冲动v.催促;力劝;大力推荐',6,0],
 ['have an urge to','','有强烈的欲望做某事',6,0],['random','/ˈrændəm/','adj.随机的;不可思议的',6,0],['maximum','/ˈmæksəməm/','adj.最大极限的 n.最大量;最大限度',6,0],['explode','/ɪkˈsploʊd/','vi. & vt.爆炸;爆破',6,0],
 ['jolt','/ˈdʒoʊlt/','n.震动;摇晃;颠簸vt.& vi.(使)震动:摇晃',6,0],['flip','/ˈflɪp/','vt. & vi.(使)快速翻转;(用手指)轻抛',6,0],['stun','/ˈstən/','vt.使震惊，使昏迷(stunned-stunned)',6,0],['mud','/ˈməd/','n.泥;泥浆（muddy adj.泥泞的）',6,0],
-['overstatement','/ˈoʊvərˌsteɪtmənt/','n.夸大;夸张',6,0],['Isaac Asimov','','艾萨克·阿西莫夫',6,0],['Larry Belmont','','拉里·贝尔蒙特',6,0],['Claire','/ˈkler/','克莱尔',6,0],
-['Gladys Claffern','','格拉迪丝；克拉芬.',6,0],['Braille','/ˈbreɪl/','布拉耶盲文(凸点符号)',6,0],['The Three-Body Problem','','《三体》',6,0],['Hugo Award','','雨果奖',6,0],
+['overstatement','/ˈoʊvərˌsteɪtmənt/','n.夸大;夸张',6,0],
+['Braille','/ˈbreɪl/','布拉耶盲文(凸点符号)',6,0],
 ['iconic','/ˌaɪˈkɑnɪk/','adj.符号的;图标的',6,1],['foundation','/faʊnˈdeɪʃən/','n.创建;基础;地基',6,1],['political','/pəˈlɪtəkəl/','adj.政治的',6,1],['didgeridoo','','n.迪吉里杜管',6,1],
 ['located','/ˈloʊˌkeɪd/','adj.位于',6,1],['equator','/ɪˈkweɪtər/','n.赤道',6,1],['koala','/koʊˈɑlə/','n.考拉:树袋熊',6,1],['barbecue','/ˈbɑrbɪˌkju/','n.[abbr.BBQ]户外烧烤;烤架',6,1],
 ['bakery','/ˈbeɪkəri/','n.面包(糕饼)店;面包厂',6,1],['joint','/ˈdʒɔɪnt/','n.公共场所(尤指价格低廉的饮食和娱乐场所);关节adj.联合的;共同的',6,1],['butcher','/ˈbʊtʃər/','n.肉贩;屠夫:刽子手',6,1],['premier','/preˈmɪr/','adj.最著名的:第一的:首要的n.总理;首相',6,1],
@@ -1107,9 +1107,9 @@ const PEP_WORDS=[
 ['frequency','/ˈfrikwənsi/','n.发生率;重复率;(声波或电磁波振动的)频率',6,1],['violent','/ˈvaɪələnt/','adj.暴力的;猛烈的',6,1],['violence','/ˈvaɪələns/','n.暴力;暴行',6,1],['nest','/ˈnest/','n.巢穴;鸟窝;秘密窝点',6,1],
 ['mammal','/ˈmæməl/','n.哺乳动物',6,1],['biology','/baɪˈɑlədʒi/','n.生理;生物学',6,1],['hatch','/ˈhætʃ/','vi.孵出;破壳vt.使孵出;策划;(尤指)密谋',6,1],['capacity','/kəˈpæsəti/','n.能力;容量',6,1],
 ['a handful of','','少数人(或物);一把(的量)',6,1],['fence','/ˈfens/','n.栅栏:围栏',6,1],['prison','/ˈprɪzən/','n.监狱;监禁',6,1],['grand','/ɡˈrænd/','adj.大;宏大的',6,1],
-['Aborigine','/ˌæbəˈrɪdʒəni/','澳大利亚土著',6,1],['Sydney','/ˈsɪdni/','悉尼(澳大利亚城市)',6,1],['Bondi Beach','','邦迪海滩',6,1],['Chiang Mai','','清迈(泰国城市)',6,1],
-['the Bay of Islands','','岛屿湾',6,1],['the haka','','哈卡舞(传统毛利伴歌战舞)',6,1],['Edmonds','/ˈedməndz/','埃德蒙兹',6,1],['Felicity','/fɪˈlɪsəti/','费利西蒂',6,1],
-['Tasmanian devil','','塔斯马尼亚恶魔;袋獾',6,1],['Tasmania','/ˌtæzˈmeɪniə/','塔斯马尼亚(澳大利亚州名)',6,1],['duck-billed platypus','','鸭嘴兽',6,1],['tale','/ˈteɪl/','n.故事;叙述',6,2],
+['Aborigine','/ˌæbəˈrɪdʒəni/','澳大利亚土著',6,1],
+['the Bay of Islands','','岛屿湾',6,1],['the haka','','哈卡舞(传统毛利伴歌战舞)',6,1],
+['Tasmanian devil','','塔斯马尼亚恶魔;袋獾',6,1],['duck-billed platypus','','鸭嘴兽',6,1],['tale','/ˈteɪl/','n.故事;叙述',6,2],
 ['merchant','/ˈmərtʃənt/','n.商人;批发商adj.海上货运的',6,2],['set sail','','起航;开航',6,2],['extend','/ɪkˈstend/','vt.扩展;使伸长;延长',6,2],['negotiate','/nəɡˈoʊʃiˌeɪt/','vt.商定;达成(协议) vi.谈判:磋商;协商',6,2],
 ['fleet','/ˈflit/','n.舰队;机群;车队',6,2],['behold','/bɪˈhoʊld/','vt.看;看见',6,2],['league','/ˈliɡ/','n.等级;水平;联合会;联赛',6,2],['in a league of one\'s own','','独领风骚',6,2],
 ['royal','/ˈrɔɪəl/','adj.皇家的;王室的;高贵的',6,2],['spice','/ˈspaɪs/','n.(调味)香料',6,2],['withdraw','/wɪðˈdrɔ/','vi. & vt.(使)撤回;撤离',6,2],['withdraw from','','退出;撤回',6,2],
@@ -1120,8 +1120,8 @@ const PEP_WORDS=[
 ['coral','/ˈkɔrəl/','n.珊瑚',6,2],['migration','/maɪɡˈreɪʃən/','n.迁移;迁徙;移居',6,2],['directory','/daɪˈrektəri/','n.名录;电话号码簿;(计算机文件或程序的目录)',6,2],['meanwhile','/ˈminˌwaɪl/','adv.与此同时;(比较两方面)对比之下',6,2],
 ['exploit','/ˈekˌsplɔɪt/','vt.以；开发;利用;剥削',6,2],['gallon','/ɡˈælən/','n.加仑(容积单位，1英制加仑约等于4.5升)',6,2],['murder','/ˈmərdər/','vt.谋杀;凶杀;毁坏n.谋杀;凶杀',6,2],['mercy','/ˈmərsi/','n.仁慈;宽恕;恩惠',6,2],
 ['possession','/pəˈzeʃən/','n.(usually pl.)个人财产;拥有;控制',6,2],['opponent','/əˈpoʊnənt/','n.反对者;对手;竞争者',6,2],['log','/ˈlɔɡ/','vt.把…载入正式记录;记录 n.正式记录;日志;原木',6,2],['marine','/məˈrin/','adj.海的;海产的;海生的',6,2],
-['arrest','/əˈrest/','n.逮捕;拘留;中止vt.逮捕;拘留;阻止',6,2],['Marco Polo','','马可●波罗',6,2],['Columbus','/kəˈləmbəs/','哥伦布',6,2],['Ceylon','/siˈlɑn/','锡兰(斯里兰卡的旧称)',6,2],
-['Churchill','/ˈtʃərtʃhɪl/','丘吉尔',6,2],['Ferdinand Magellan','','费迪南德·麦哲伦',6,2],['Zac Sunderland','','扎克·桑德兰',6,2],['Robin Lee Graham','','罗宾·李·格雷厄姆',6,2],
+['arrest','/əˈrest/','n.逮捕;拘留;中止vt.逮捕;拘留;阻止',6,2],
+
 ['parcel','/ˈpɑrsəl/','n.包裹 vt.裹好;打包',6,3],['jam','/ˈdʒæm/','n.果酱;堵塞',6,3],['mail','/ˈmeɪl/','n.邮件;信件;邮政 vt.邮寄;发电邮给',6,3],['secondary','/ˈsekənˌderi/','adj.中学的;次要的',6,3],
 ['clay','/ˈkleɪ/','n.黏土;陶土',6,3],['dust','/ˈdəst/','n.沙土;灰尘vi.& vt.擦灰',6,3],['dusty','/ˈdəsti/','adj.布满灰尘的',6,3],['weed','/ˈwid/','n.杂草;野草vt.& vi.除杂草',6,3],
 ['chorus','/ˈkɔrəs/','n.合唱曲;合唱团vt.合唱;齐声说',6,3],['a chorus of','','齐声;异口同声',6,3],['cotton','/ˈkɑtən/','n.棉布;棉花',6,3],['uniform','/ˈjunəˌfɔrm/','n.校服;制服adj.一致的:统--的',6,3],
@@ -1137,8 +1137,8 @@ const PEP_WORDS=[
 ['grant','/ɡˈrænt/','vt.同意;准许n.拨款',6,3],['take for granted','','认为…是理所当然;.对.-.不予重视',6,3],['cardiac','/ˈkɑrdiˌæk/','adj.心脏病的:心脏的',6,3],['circuit','/ˈsərkət/','n.巡回;环形线路',6,3],
 ['disability','/ˌdɪsəˈbɪlɪti/','n.缺陷;障碍',6,3],['consultation','/ˌkɑnsəlˈteɪʃən/','n.咨询;咨询会',6,3],['capsule','/ˈkæpsəl/','n.胶囊;太空舱',6,3],['relay','/ˈriˌleɪ/','vt.转发;转播n.接力赛;接班的人',6,3],
 ['relay to','','转达--转发给…',6,3],['criterion','/kraɪˈtɪriən/','n.标准;准则;原则',6,3],['stability','/stəˈbɪlɪti/','n.稳定(性);稳固(性)',6,3],['pray','/ˈpreɪ/','vi.&vr.企盼;祈祷',6,3],
-['pray that','','但愿',6,3],['hypothetical','/ˌhaɪpəˈθetəkəl/','adj.假设的;假定的',6,3],['Papua New Guinea','','巴布亚新几内亚(国家名)',6,3],['Ghana','/ɡˈænə/','加纳(国家名)',6,3],
-['Congo','/ˈkɑŋɡoʊ/','刚果(国家名)',6,3],['Panama','/ˈpænəˌmɑ/','巴拿马(国家名)',6,3],['bounce','/ˈbaʊns/','vi. & vt.(使)弹起;上下晃动n.弹性;弹跳;活力',6,4],['bounce around','','蹦来蹦去:弹来弹去',6,4],
+['pray that','','但愿',6,3],['hypothetical','/ˌhaɪpəˈθetəkəl/','adj.假设的;假定的',6,3],
+['bounce','/ˈbaʊns/','vi. & vt.(使)弹起;上下晃动n.弹性;弹跳;活力',6,4],['bounce around','','蹦来蹦去:弹来弹去',6,4],
 ['aptitude','/ˈæptəˌtud/','n.天资;天赋',6,4],['head start','','起步前的优势',6,4],['scenario','/sɪˈnerioʊ/','n.设想;方案;预测',6,4],['lawyer','/ˈlɔɪər/','n.律师',6,4],
 ['assemble','/əˈsembəl/','vt.组装;装配vi.& vt.收集;聚集;集合',6,4],['drawer','/ˈdrɔr/','n.抽屉',6,4],['a chest of drawers','','抽屉柜',6,4],['breast','/ˈbrest/','n.乳房;胸部',6,4],
 ['hydrogen','/ˈhaɪdrədʒən/','n.氢;氢气',6,4],['radium','/ˈreɪdiəm/','n.镭',6,4],['wrist','/ˈrɪst/','n.手腕;腕关节',6,4],['bridegroom','/ˈbraɪdɡˌrum/','n.新郎',6,4],
@@ -1154,7 +1154,7 @@ const PEP_WORDS=[
 ['wool','/ˈwʊl/','n.毛;毛线;毛料',6,4],['intermediate','/ˌɪnərˈmidiɪt/','adj.中级的;中等的;中间的',6,4],['priority','/praɪˈɔrəti/','n.优先事项;首要的事;优先',6,4],['proficiency','/prəˈfɪʃənsi/','n.熟练;娴熟;精通',6,4],
 ['cage','/ˈkeɪdʒ/','n.笼子vt,关布签子甲',6,4],['collar','/ˈkɑlər/','n.(动物)颈圈;衣领',6,4],['flea collar','','灭蚤颈圈',6,4],['finance','/ˈfaɪˌnæns/','n.资金;财政;金融vt.提供资金',6,4],
 ['receipt','/riˈsit/','n.收据;接收',6,4],['certificate','/sərˈtɪfɪkət/','n.合格证书;证明',6,4],['employer','/emˈplɔɪər/','n.雇主;老板',6,4],['desert','/ˈdezərt/','n.沙漠;荒漠',6,4],
-['acquire','/əˈkwaɪər/','vt.获得;购得',6,4],['Marie Curie','','玛丽；居里(居里夫人)',6,4],['The Communist Manifesto','','《共产党宣言》',6,4],['Olivia','/oʊˈlɪviə/','奧利综娅',6,4],
+['acquire','/əˈkwaɪər/','vt.获得;购得',6,4],
 ['PETS','/ˈpets/','全国英语等级考试',6,4],['CV','/ˌsiˈvi/','n.简历;履历',6,4]
 ];
 const IELTS_TOPICS = {
@@ -1276,10 +1276,10 @@ qixuan:{ title:"七选五 · 示例（5 空 / 7 选项）",
 PD.readFull.sets.splice(2, 0, PD.reading.sets[0]);
 
 const LSKEY='elw.v01';
-const BOOKVER='pep2019.2';
+const BOOKVER='pep2019.3';
 const DB = { words:[], wrong:[], book:[], bookPatch:{}, stats:{days:{},checkin:[]}, ielts:[], practice:[], settings:{goal:20, voice:'', rate:0.95, ai:{base:'',key:'',model:'',dual:true}}, seeded:false };
 const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4);
-/* 内置教材词表（2526 词、序列化后约 331KB）是随代码发布的静态数据，不进本地存储：
+/* 内置教材词表（2396 词、序列化后约 314KB）是随代码发布的静态数据，不进本地存储：
    存下来之后 save() 每答一题都要把它跟着全量序列化一遍（24 处调用），
    备份 JSON 里也会多出 300KB 用不上的死重量。
    本地只保留两类用户数据：自建词（src==='mine'）与对内置词的手工修订（bookPatch）。 */
