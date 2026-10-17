@@ -1622,6 +1622,7 @@ function streak(){ const set={}; DB.stats.checkin.forEach(d=>set[d]=1); let n=0;
 const ROUTES=['home','vocab','book','quiz','listen','wrong','ielts','practice','data'];
 let currentRoute='home';
 function go(route){ if(ROUTES.indexOf(route)<0) route='home'; currentRoute=route;
+  if(route !== 'ielts' && ieltsMicState){ ieltsMicState.cancelled = true; if(ieltsMicState.stop) ieltsMicState.stop(); }
   $$('.view').forEach(v=>v.classList.remove('active'));
   const el=$('#view-'+route); if(el) el.classList.add('active');
   $$('.navlist a').forEach(a=>a.classList.toggle('on',a.getAttribute('data-route')===route));
@@ -2525,7 +2526,7 @@ function renderIeltsHome(){
     + '<button class="btn big" id="btnMockIelts">'+icon('headphone')+' 全真模考（计时）</button>'
     + '<span class="small muted">'+(aiReady()? 'AI 模式：考官由大模型扮演，支持逐句纠错与四项评分' : '离线模式：内置示例考官脚本；配置 AI 后体验完整对练')+'</span></div>'
     + '<p class="small muted mt8">全真模考按 Part 1 → Part 2 → Part 3 连考：每题倒计时，时间到自动进入下一步，结束直接出评分报告。</p>'
-    + '<p class="small muted mt8">支持语音对话：点麦克风按钮说话（需麦克风权限与联网），考官回复会自动朗读（美音）；也可直接打字。</p>';
+    + '<p class="small muted mt8">支持语音对话：点一次开始录音，再点一次停止（需麦克风权限；语音识别需联网），考官回复会自动朗读（美音）；也可直接打字。</p>';
   var el = $('#ieltsHome'); el.innerHTML = h; el.style.display = 'block';
   if(!window.__ieltsHomeBound){
     window.__ieltsHomeBound = true;
@@ -2570,7 +2571,7 @@ function startIelts(){
     renderIeltsChat(); speakAgent(opener);
   }
 }
-function speakAgent(t){ TTS.speak(String(t).replace(/\n/g,' ')); }
+function speakAgent(t){ if(!ieltsMicState) TTS.speak(String(t).replace(/\n/g,' ')); }
 async function ieltsLLM(){
   var first = !(ieltsSess.msgs||[]).some(function(m){ return !m.pending; });
   var recent = (DB.ielts||[]).slice(0,6).map(function(x){ return x.topic; }).filter(Boolean);
@@ -2584,6 +2585,7 @@ async function ieltsLLM(){
   return await llm(msgs,{temp:0.8});
 }
 async function ieltsSend(){
+  if(ieltsMicState){ toast('请先点击停止录音，再发送'); return; }
   if(!ieltsSess || ieltsSess.finished) return;
   var inp = $('#chatInput'); var t = (inp.value||'').trim(); if(!t) return;
   ieltsSess.msgs.push({role:'u', text:t, audio: window.__lastMicUrl||null, secs: window.__lastMicSecs||0});
@@ -2613,38 +2615,101 @@ function offlineNextQuestion(){
   if(i < arr.length) return arr[i];
   return 'Can you add more details or give a specific example?';
 }
+var ieltsMicState = null;
+function updateIeltsMicUI(){
+  var s = ieltsMicState, btn = $('#btnMic');
+  if(btn){
+    btn.disabled = !!(s && (!s.stop || s.stopping));
+    btn.innerHTML = s ? (s.stopping ? '正在停止…' : s.stop ? '■ 停止录音' : '正在请求麦克风…') : icon('mic')+' 开始录音';
+    btn.title = s ? '点击停止录音' : '点击开始录音，再点一次停止';
+    btn.setAttribute('aria-pressed', s ? 'true' : 'false');
+  }
+  ['#btnSendMsg','#btnEndIelts'].forEach(function(id){ var b = $(id); if(b) b.disabled = !!s; });
+  var hint = $('#micHint');
+  if(hint) hint.textContent = s ? (s.note || '正在录音，再点一次停止；停顿不会结束录音。') : '点一次开始，再点一次停止；语音识别需联网，录音仅本次会话有效。';
+}
 async function ieltsMic(){
-  var micT0 = Date.now();
-  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){ toast('当前浏览器不支持语音识别，可直接打字；推荐电脑版 Chrome/Edge'); return; }
-  var btn = $('#btnMic'); if(btn){ btn.disabled = true; btn.innerHTML = icon('mic')+'…'; }
-  var rec = null, stream = null, chunks = [];
+  if(ieltsMicState){ if(ieltsMicState.stop) ieltsMicState.stop(); return; }
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder){
+    toast('当前浏览器无法录音，请使用 HTTPS 下的 Chrome/Edge，或直接打字'); return;
+  }
+  var s = { session:ieltsSess, text:'', interim:'', prefix:($('#chatInput')||{}).value||'' };
+  ieltsMicState = s; updateIeltsMicUI();
+  var stream = null, rec = null, r = null, chunks = [], finish, stopTimer;
+  var stopped = new Promise(function(resolve){ finish = resolve; });
+  function showText(){
+    var inp = $('#chatInput');
+    if(inp && ieltsSess === s.session) inp.value = [s.prefix, s.text, s.interim].filter(Boolean).join(' ');
+  }
+  function recognitionFailed(error){
+    s.blocked = true;
+    s.note = '语音识别不可用（'+error+'），录音继续；停止后可回放并手动填写回答。';
+    updateIeltsMicUI(); toast(s.note);
+  }
   try{
     stream = await navigator.mediaDevices.getUserMedia({audio:true});
-    if(window.MediaRecorder){ rec = new MediaRecorder(stream); rec.ondataavailable = function(e){ chunks.push(e.data); }; rec.start(); }
-  }catch(e){ rec = null; }
-  var text = '';
-  try{
-    text = await new Promise(function(resolve){
-      var r = new SR(); r.lang = 'en-US'; r.interimResults = false; r.maxAlternatives = 1;
-      var done = false;
-      r.onresult = function(e){ done = true; resolve((e.results[0] && e.results[0][0] && e.results[0][0].transcript) || ''); };
-      r.onerror = function(e){ if(!done){ done = true; resolve(''); toast('识别失败：'+(e.error||'')); } };
-      r.onend = function(){ if(!done){ done = true; resolve(''); } };
-      try{ r.start(); }catch(e){ done = true; resolve(''); }
-      setTimeout(function(){ try{ r.stop(); }catch(e){} }, 12000);
-    });
-  }catch(e){}
-  if(rec){ try{ await new Promise(function(res){ rec.onstop = res; rec.stop(); }); }catch(e){} }
-  if(stream){ try{ stream.getTracks().forEach(function(t){ t.stop(); }); }catch(e){} }
-  if(rec && chunks.length){ try{
-    if(window.__lastMicUrl){ URL.revokeObjectURL(window.__lastMicUrl); }   /* 上一条不再用，先释放，避免长会话堆积 */
-    window.__lastMicUrl = URL.createObjectURL(new Blob(chunks,{type:'audio/webm'}));
-  }catch(e){} }
-  window.__lastMicSecs = Math.max(1, Math.round((Date.now() - micT0) / 1000));   /* 这段录音的时长，用来实测语速 */
-  if(btn){ btn.disabled = false; btn.innerHTML = icon('mic'); }
-  if(text){ var inp = $('#chatInput'); if(inp){ inp.value = text; toast('识别完成，可修改后发送'); } }
-  else { toast('没有识别到内容，请再试一次或直接打字'); }
+    if(s.cancelled) return;
+    if(window.speechSynthesis) window.speechSynthesis.cancel();
+    rec = new MediaRecorder(stream);
+    rec.ondataavailable = function(e){ if(e.data && e.data.size) chunks.push(e.data); };
+    rec.start(); s.t0 = Date.now();
+    if(window.__lastMicUrl) URL.revokeObjectURL(window.__lastMicUrl);
+    window.__lastMicUrl = null; window.__lastMicSecs = 0;
+    var playback = $('#micPlayback'); if(playback){ playback.hidden = true; playback.removeAttribute('src'); }
+    s.stop = function(){
+      if(s.stopping) return;
+      s.stopping = true; s.end = Date.now(); clearTimeout(s.restart); updateIeltsMicUI();
+      if(r){
+        stopTimer = setTimeout(finish, 1500);  /* 等最后一段转写，但识别服务失联也不能卡住停止 */
+        try{ r.stop(); }catch(e){ finish(); }
+        if(s.blocked) finish();
+      } else finish();
+    };
+    rec.onerror = function(){ toast('录音设备发生错误，请检查麦克风后重试'); s.stop(); };
+    rec.onstop = function(){ if(!s.stopping){ toast('麦克风录音已中断'); s.stop(); } };
+    updateIeltsMicUI();
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(SR){
+      try{
+        r = new SR(); r.lang = 'en-US'; r.continuous = true; r.interimResults = true; r.maxAlternatives = 1;
+        r.onresult = function(e){
+          s.interim = '';
+          for(var i=e.resultIndex; i<e.results.length; i++){
+            var result = e.results[i], text = result[0] && result[0].transcript || '';
+            if(result.isFinal) s.text += (s.text ? ' ' : '') + text;
+            else s.interim += text;
+          }
+          showText();
+        };
+        r.onerror = function(e){ if(!s.stopping && e.error !== 'no-speech') recognitionFailed(e.error||'未知错误'); };
+        r.onend = function(){
+          if(s.stopping){ finish(); return; }
+          if(s.blocked) return;
+          s.restart = setTimeout(function(){
+            if(!s.stopping){ try{ r.start(); }catch(e){ recognitionFailed('无法重新连接'); } }
+          }, 250);
+        };
+        r.start();
+      }catch(e){ recognitionFailed('无法启动'); }
+    } else recognitionFailed('浏览器不支持');
+    await stopped;
+  }catch(e){
+    toast(e.name === 'NotAllowedError' ? '麦克风权限被拒绝，请在浏览器的网站设置中允许麦克风' : e.name === 'NotFoundError' ? '未找到麦克风，请连接后重试' : '无法启动录音，请检查麦克风：'+(e.message||e.name||'未知错误'));
+  }finally{
+    clearTimeout(stopTimer); clearTimeout(s.restart);
+    if(r){ r.onresult = r.onerror = r.onend = null; try{ r.abort(); }catch(e){} }
+    if(rec && rec.state !== 'inactive'){
+      try{ await new Promise(function(resolve){ rec.onstop = resolve; rec.stop(); }); }catch(e){}
+    }
+    if(stream) stream.getTracks().forEach(function(t){ t.stop(); });
+    if(rec && chunks.length){
+      window.__lastMicUrl = URL.createObjectURL(new Blob(chunks,{type:rec.mimeType || chunks[0].type}));
+      window.__lastMicSecs = Math.max(1, Math.round(((s.end || Date.now()) - s.t0) / 1000));
+      var audio = $('#micPlayback'); if(audio){ audio.src = window.__lastMicUrl; audio.hidden = false; }
+    }
+    ieltsMicState = null; updateIeltsMicUI();
+  }
+  if(rec){ showText(); toast(s.text || s.interim ? '录音已停止，可修改文字后发送' : '录音已保存，可回放；未识别到文字，请手动填写后发送'); }
 }
 function renderIeltsChat(){
   var s = ieltsSess; if(!s) return;
@@ -2663,13 +2728,18 @@ function renderIeltsChat(){
   h += '</div>';
   if(!s.finished){
     h += '<div class="row mt12"><input class="grow" id="chatInput" placeholder="用英文回答（或点麦克风按钮）" autocomplete="off">'
-      + '<button class="btn" id="btnMic" title="语音输入" style="min-width:52px">'+icon('mic')+'</button><button class="btn pri" id="btnSendMsg">发送</button></div>'
-      + '<div class="row mt8"><span class="small muted">语音识别需联网；录音回放仅本次会话有效。</span><div class="grow"></div>'
-      + '<button class="btn" id="btnEndIelts">结束并生成报告</button></div>';
+      + '<button class="btn" id="btnMic" title="点击开始录音，再点一次停止" aria-pressed="false" style="min-width:52px">'+icon('mic')+' 开始录音</button><button class="btn pri" id="btnSendMsg">发送</button></div>'
+      + '<div class="row mt8"><span class="small muted" id="micHint" role="status">点一次开始，再点一次停止；语音识别需联网，录音仅本次会话有效。</span><div class="grow"></div>'
+      + '<button class="btn" id="btnEndIelts">结束并生成报告</button></div>'
+      + '<audio id="micPlayback" controls hidden aria-label="本次录音回放" class="mt8"></audio>';
   } else {
     h += s.report;
   }
+  var draft = $('#chatInput'), draftText = draft ? draft.value : '';
   card.innerHTML = h;
+  var inp = $('#chatInput'); if(inp) inp.value = draftText;
+  var audio = $('#micPlayback'); if(audio && window.__lastMicUrl){ audio.src = window.__lastMicUrl; audio.hidden = false; }
+  updateIeltsMicUI();
   if(!window.__ieltsChatBound){
     window.__ieltsChatBound = true;
     card.addEventListener('click', function(e){
@@ -2736,6 +2806,7 @@ function buildIeltsReportHTML(rep, offline, errmsg){
   return h;
 }
 async function ieltsEnd(){
+  if(ieltsMicState){ toast('请先点击停止录音，再结束训练'); return; }
   var s = ieltsSess; if(!s || s.finished) return;
   var btn = null; s.finished = true;
   if(aiReady()){
